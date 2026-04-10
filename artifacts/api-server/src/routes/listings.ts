@@ -8,8 +8,11 @@ import {
   UpdateListingParams,
   DeleteListingParams,
 } from "@workspace/api-zod";
+import { MOCK_VAULT_LISTINGS, MOCK_VAULT_SUMMARY } from "../lib/mockVault";
 
 const router: IRouter = Router();
+
+const IS_SIMULATION = process.env.DATABASE_MODE === "SIMULATION";
 
 async function getAgencyId(clerkOrgId: string): Promise<number | null> {
   const [agency] = await db.select({ id: agenciesTable.id }).from(agenciesTable).where(eq(agenciesTable.clerkOrgId, clerkOrgId));
@@ -50,46 +53,46 @@ router.post("/listings/sync-vaultre", async (req, res): Promise<void> => {
   const agencyId = await getAgencyId(clerkOrgId);
   if (!agencyId) { res.status(404).json({ error: "Agency not found" }); return; }
 
-  // Mock VaultRE sync — returns sample listings
-  const mockListings = [
+  const sourceListings = IS_SIMULATION ? MOCK_VAULT_LISTINGS : [
+    // Minimal fallback if not simulation and no real VaultRE credentials
     {
-      address: "42 Harbour View Drive", suburb: "Kirribilli", state: "NSW", postcode: "2061",
-      price: "$2,800,000", listingType: "sale" as const, bedrooms: 4, bathrooms: 3,
-      agentName: "Sarah Mitchell", agentMobile: "0412 345 678",
+      vaultreId: "VR001",
+      address: "42 Harbour View Drive", suburb: "Kirribilli", state: "NSW" as const, postcode: "2061",
+      price: "$2,850,000", listingType: "sale" as const, bedrooms: 4, bathrooms: 3,
+      agentName: "Sarah Mitchell", agentMobile: "0412 111 222",
       inspectionTimes: ["Saturday 12:00-12:30pm", "Sunday 1:00-1:30pm"],
-      vaultreId: "VR001", status: "active" as const,
-    },
-    {
-      address: "8/15 Pacific Highway", suburb: "North Sydney", state: "NSW", postcode: "2060",
-      price: "$650/week", listingType: "rental" as const, bedrooms: 2, bathrooms: 1,
-      agentName: "James Chen", agentMobile: "0423 456 789",
-      inspectionTimes: ["Wednesday 5:00-5:30pm", "Saturday 10:00-10:30am"],
-      vaultreId: "VR002", status: "active" as const,
-    },
-    {
-      address: "101 George Street", suburb: "Parramatta", state: "NSW", postcode: "2150",
-      price: "$850/week", listingType: "rental" as const, bedrooms: 3, bathrooms: 2,
-      agentName: "Emma Rodriguez", agentMobile: "0434 567 890",
-      inspectionTimes: ["Thursday 12:00-12:30pm"],
-      vaultreId: "VR003", status: "active" as const,
+      status: "active" as const,
     },
   ];
 
   let added = 0;
   let updated = 0;
-  for (const mock of mockListings) {
+
+  for (const mock of sourceListings) {
+    const { description, carSpaces, ...dbFields } = mock as typeof mock & { description?: string; carSpaces?: number };
     const existing = await db.select({ id: listingsTable.id }).from(listingsTable)
-      .where(and(eq(listingsTable.agencyId, agencyId), eq(listingsTable.vaultreId, mock.vaultreId!)));
+      .where(and(eq(listingsTable.agencyId, agencyId), eq(listingsTable.vaultreId, mock.vaultreId)));
     if (existing.length > 0) {
-      await db.update(listingsTable).set(mock).where(eq(listingsTable.id, existing[0].id));
+      await db.update(listingsTable).set(dbFields).where(eq(listingsTable.id, existing[0].id));
       updated++;
     } else {
-      await db.insert(listingsTable).values({ agencyId, ...mock });
+      await db.insert(listingsTable).values({ agencyId, ...dbFields, inspectionTimes: dbFields.inspectionTimes ?? [] });
       added++;
     }
   }
 
-  res.json({ synced: mockListings.length, added, updated, message: `Synced ${mockListings.length} listings from VaultRE` });
+  const mode = IS_SIMULATION ? "SIMULATION" : "LIVE";
+  res.json({
+    synced: sourceListings.length,
+    added,
+    updated,
+    mode,
+    source: IS_SIMULATION ? MOCK_VAULT_SUMMARY.source : "VaultRE Production API",
+    suburbs: IS_SIMULATION ? MOCK_VAULT_SUMMARY.suburbs : [],
+    message: IS_SIMULATION
+      ? `Synced ${sourceListings.length} listings from VaultRE Simulation Bridge across ${MOCK_VAULT_SUMMARY.suburbs.join(", ")}`
+      : `Synced ${sourceListings.length} listings from VaultRE`,
+  });
 });
 
 router.get("/listings/:id", async (req, res): Promise<void> => {

@@ -8,6 +8,7 @@ import staffRouter from "./staff";
 import billingRouter from "./billing";
 import aiRouter from "./ai";
 import dashboardRouter from "./dashboard";
+import systemRouter from "./system";
 
 const DEMO_ORG_ID = "org_demo_001";
 
@@ -29,5 +30,6 @@ router.use(staffRouter);
 router.use(billingRouter);
 router.use(aiRouter);
 router.use(dashboardRouter);
+router.use(systemRouter);
 
 export default router;
