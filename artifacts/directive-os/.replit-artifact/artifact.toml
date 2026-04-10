@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Directive OS"
+version = "1.0.0"
+id = "artifacts/directive-os"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 25037
+
+[services.development]
+run = "pnpm --filter @workspace/directive-os run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/directive-os", "run", "build" ]
+publicDir = "artifacts/directive-os/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "25037"
+BASE_PATH = "/"
