@@ -6,7 +6,7 @@ import { logger } from "../lib/logger";
 import Stripe from "stripe";
 
 async function reportAiUsage(customerId: string): Promise<void> {
-  const key = process.env.STRIPE_SECRET_KEY;
+  const key = process.env.STRIPE_SK ?? process.env.STRIPE_SECRET_KEY;
   if (!key) return;
   try {
     const stripe = new Stripe(key, { apiVersion: "2025-03-31.basil" });

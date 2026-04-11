@@ -6,6 +6,17 @@ const router: IRouter = Router();
 const IS_SIMULATION = process.env.DATABASE_MODE === "SIMULATION";
 
 router.get("/system/status", (_req, res): void => {
+  const stripeKey = process.env.STRIPE_SK ?? process.env.STRIPE_SECRET_KEY ?? "";
+  const stripeKeyType = !stripeKey
+    ? "NOT_SET"
+    : stripeKey.startsWith("sk_live_")
+    ? "LIVE_SECRET"
+    : stripeKey.startsWith("sk_test_")
+    ? "TEST_SECRET"
+    : stripeKey.startsWith("rk_")
+    ? "RESTRICTED_KEY"
+    : "UNKNOWN";
+
   res.json({
     mode: IS_SIMULATION ? "SIMULATION" : "LIVE",
     status: "ACTIVE",
@@ -16,6 +27,7 @@ router.get("/system/status", (_req, res): void => {
     infrastructure: "Australian Cloud (ap-southeast-2)",
     databaseMode: process.env.DATABASE_MODE ?? "LIVE",
     mockVaultSummary: IS_SIMULATION ? MOCK_VAULT_SUMMARY : null,
+    stripeKeyType,
     timestamp: new Date().toISOString(),
   });
 });

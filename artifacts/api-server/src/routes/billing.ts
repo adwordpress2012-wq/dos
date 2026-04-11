@@ -6,8 +6,8 @@ import Stripe from "stripe";
 const router: IRouter = Router();
 
 function getStripe(): Stripe {
-  const key = process.env.STRIPE_SECRET_KEY;
-  if (!key) throw new Error("STRIPE_SECRET_KEY environment variable is not set");
+  const key = process.env.STRIPE_SK ?? process.env.STRIPE_SECRET_KEY;
+  if (!key) throw new Error("Stripe secret key is not configured");
   return new Stripe(key, { apiVersion: "2025-03-31.basil" });
 }
 
