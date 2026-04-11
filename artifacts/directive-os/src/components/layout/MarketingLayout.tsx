@@ -16,6 +16,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <Link href="/resources" className="hover:text-foreground transition-colors">Resources</Link>
             <Link href="/terms" className="hover:text-foreground transition-colors">Terms</Link>
             <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
+            <Link href="/book" className="hover:text-foreground transition-colors" style={{ color: "#00d1b2" }}>Free Consultation</Link>
           </nav>
           <div className="flex items-center gap-4">
             <Link href="/sign-in" className="text-sm font-medium hover:text-primary transition-colors">Sign In</Link>
@@ -60,8 +61,16 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           <div>
             <h4 className="font-semibold mb-4">Contact</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>Sales</li>
-              <li>Support</li>
+              <li>
+                <Link href="/book" className="hover:text-foreground transition-colors" style={{ color: "#00d1b2" }}>
+                  Book a Free Consultation
+                </Link>
+              </li>
+              <li>
+                <a href="https://calendly.com/adwordpress2012/directive-os-agency-onboarding" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">
+                  Strategy Call
+                </a>
+              </li>
             </ul>
           </div>
         </div>

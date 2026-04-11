@@ -9,6 +9,7 @@ import { SignIn, SignUp } from "@/pages/auth";
 import Terms from "@/pages/terms";
 import Privacy from "@/pages/privacy";
 import Resources from "@/pages/resources";
+import BookConsultation from "@/pages/book";
 import Dashboard from "@/pages/dashboard/index";
 import Leads from "@/pages/dashboard/leads";
 import Transcripts from "@/pages/dashboard/transcripts";
@@ -37,6 +38,7 @@ function Router() {
       <Route path="/terms" component={Terms} />
       <Route path="/privacy" component={Privacy} />
       <Route path="/resources" component={Resources} />
+      <Route path="/book" component={BookConsultation} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/dashboard/leads" component={Leads} />
       <Route path="/dashboard/transcripts" component={Transcripts} />
