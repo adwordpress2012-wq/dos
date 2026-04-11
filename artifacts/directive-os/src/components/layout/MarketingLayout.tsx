@@ -13,9 +13,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <Link href="/" className="font-bold text-xl tracking-tight">Directive OS</Link>
           </div>
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
+            <a href="/#demos" className="hover:text-foreground transition-colors">Live Demos</a>
+            <a href="/#pricing" className="hover:text-foreground transition-colors">Pricing</a>
             <Link href="/resources" className="hover:text-foreground transition-colors">Resources</Link>
-            <Link href="/terms" className="hover:text-foreground transition-colors">Terms</Link>
-            <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
             <Link href="/book" className="hover:text-foreground transition-colors" style={{ color: "#00d1b2" }}>Free Consultation</Link>
           </nav>
           <div className="flex items-center gap-4">

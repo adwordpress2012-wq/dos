@@ -633,6 +633,125 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Live Industry Demos */}
+      <section id="demos" className="py-20 border-t border-border" style={{ background: "rgba(0,209,178,0.02)" }}>
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-14">
+            <div className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: "#00d1b2" }}>Live Demos</div>
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">See Directive OS in the Wild</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
+              Explore live demo sites showing exactly how Directive OS looks and performs inside a real business — by industry.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto mb-12">
+            {/* Real Estate — LIVE */}
+            <a
+              href="/realestate-demo"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group relative rounded-2xl overflow-hidden border transition-all hover:scale-[1.02] hover:shadow-2xl"
+              style={{ borderColor: "rgba(0,209,178,0.25)", background: "rgba(255,255,255,0.03)", backdropFilter: "blur(10px)" }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.boxShadow = "0 0 40px rgba(0,209,178,0.12)"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow = "none"; }}
+            >
+              {/* Live badge */}
+              <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                Live Demo
+              </div>
+              <div className="aspect-video overflow-hidden">
+                <img
+                  src="https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=600&q=80"
+                  alt="Real Estate Demo"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-60"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+              </div>
+              <div className="absolute bottom-0 left-0 right-0 p-5">
+                <div className="text-xs font-semibold uppercase tracking-widest mb-1.5" style={{ color: "#C9A84C" }}>Real Estate</div>
+                <h3 className="font-bold text-white text-lg leading-tight mb-1">Meridian Property Group</h3>
+                <p className="text-white/60 text-xs">Western Sydney boutique agency · Sarah AI Receptionist · 24/7 enquiries & inspections</p>
+                <div className="flex items-center gap-1.5 mt-3 text-xs font-medium" style={{ color: "#00d1b2" }}>
+                  View Live Demo <ArrowRight className="w-3.5 h-3.5" />
+                </div>
+              </div>
+            </a>
+
+            {/* Medical — Coming Soon */}
+            {[
+              {
+                industry: "Medical & Allied Health",
+                agency: "Northside Medical Centre",
+                desc: "GP clinic · Appointment booking · After-hours triage · Medicare queries",
+                img: "https://images.unsplash.com/photo-1538108149393-fbbd81895907?w=600&q=80",
+              },
+              {
+                industry: "Legal",
+                agency: "Whitmore & Associates",
+                desc: "Law firm · Client intake · Matter enquiries · After-hours message capture",
+                img: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=600&q=80",
+              },
+              {
+                industry: "Hospitality",
+                agency: "The Grand Pavilion Hotel",
+                desc: "Hotel · Reservations · Concierge · Event enquiries · Room upgrades",
+                img: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&q=80",
+              },
+              {
+                industry: "General Business",
+                agency: "Apex Trade Services",
+                desc: "Trade business · Job booking · After-hours dispatch · Quote requests",
+                img: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=600&q=80",
+              },
+            ].slice(0, 2).map((d) => (
+              <div
+                key={d.industry}
+                className="group relative rounded-2xl overflow-hidden border"
+                style={{ borderColor: "rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.02)" }}
+              >
+                {/* Coming soon badge */}
+                <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-white/8 border border-white/12 text-white/50">
+                  Coming Soon
+                </div>
+                <div className="aspect-video overflow-hidden">
+                  <img
+                    src={d.img}
+                    alt={d.industry}
+                    className="w-full h-full object-cover opacity-25"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+                </div>
+                <div className="absolute bottom-0 left-0 right-0 p-5">
+                  <div className="text-xs font-semibold uppercase tracking-widest mb-1.5 text-white/40">{d.industry}</div>
+                  <h3 className="font-bold text-white/60 text-lg leading-tight mb-1">{d.agency}</h3>
+                  <p className="text-white/35 text-xs">{d.desc}</p>
+                  <div className="flex items-center gap-1.5 mt-3 text-xs font-medium text-white/30">
+                    Launching Soon
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* CTA */}
+          <div className="text-center">
+            <p className="text-muted-foreground text-sm mb-4">
+              Want to see Directive OS inside your own industry? Get in touch.
+            </p>
+            <a
+              href="https://calendly.com/adwordpress2012/directive-os-agency-onboarding"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all"
+              style={{ background: "rgba(0,209,178,0.1)", border: "1px solid rgba(0,209,178,0.25)", color: "#00d1b2" }}
+            >
+              Book a Discovery Call <ArrowRight className="w-4 h-4" />
+            </a>
+          </div>
+        </div>
+      </section>
+
       {/* Pricing */}
       <section id="pricing" className="py-20 border-t border-border">
         <div className="container mx-auto px-4">
