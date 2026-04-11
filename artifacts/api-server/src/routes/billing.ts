@@ -123,7 +123,7 @@ router.post("/billing/checkout/setup", async (req, res): Promise<void> => {
     mode: "payment",
     payment_method_types: ["card", "klarna"],
     payment_intent_data: {
-      // Saves payment method so subscription checkout pre-fills it
+      // Saves card for subscription billing (card payments only — Klarna not reusable)
       setup_future_usage: "off_session",
       metadata: { clerkOrgId },
     },
@@ -133,9 +133,14 @@ router.post("/billing/checkout/setup", async (req, res): Promise<void> => {
   };
 
   if (agency?.stripeCustomerId) {
+    // Existing customer — attach session to them (no customer_creation needed)
     sessionParams.customer = agency.stripeCustomerId;
-  } else if (agency?.contactEmail) {
-    sessionParams.customer_email = agency.contactEmail;
+  } else {
+    // No existing customer — always create one so create-subscription can find it
+    sessionParams.customer_creation = "always";
+    if (agency?.contactEmail) {
+      sessionParams.customer_email = agency.contactEmail;
+    }
   }
 
   try {
