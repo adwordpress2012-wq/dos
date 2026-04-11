@@ -66,8 +66,8 @@ router.post("/billing/checkout", async (req, res): Promise<void> => {
   const clerkOrgId = req.headers["x-clerk-org-id"] as string | undefined;
   if (!clerkOrgId) { res.status(401).json({ error: "Unauthorized" }); return; }
 
-  const priceOnboarding = process.env.STRIPE_PRICE_ONBOARDING;
-  const priceSubscription = process.env.STRIPE_PRICE_SUBSCRIPTION;
+  const priceOnboarding = process.env.ONBOARDING_PRICE_ID ?? process.env.STRIPE_PRICE_ONBOARDING;
+  const priceSubscription = process.env.SUBSCRIPTION_PRICE_ID ?? process.env.STRIPE_PRICE_SUBSCRIPTION;
   const pricePerSeat = process.env.STRIPE_PRICE_PER_SEAT;
   const priceExcessUsage = process.env.STRIPE_PRICE_EXCESS_USAGE;
 
