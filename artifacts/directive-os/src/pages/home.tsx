@@ -232,44 +232,59 @@ export default function Home() {
         </div>
 
         <div className="container mx-auto px-4 py-28 md:py-40 text-center relative">
-          <div className="inline-flex items-center gap-2 rounded-full mb-8 text-sm px-4 py-1.5 font-medium"
-            style={{ background: "rgba(0,209,178,0.08)", border: "1px solid rgba(0,209,178,0.2)", color: "#00d1b2" }}>
-            <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: "#00d1b2", boxShadow: "0 0 8px #00d1b2" }} />
-            Now live for Australian Real Estate Agencies
+          {/* Urgency badge */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-8">
+            <div className="inline-flex items-center gap-2 rounded-full text-sm px-4 py-1.5 font-medium"
+              style={{ background: "rgba(0,209,178,0.08)", border: "1px solid rgba(0,209,178,0.2)", color: "#00d1b2" }}>
+              <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: "#00d1b2", boxShadow: "0 0 8px #00d1b2" }} />
+              Now live for Australian Real Estate Agencies
+            </div>
+            <div className="inline-flex items-center gap-1.5 rounded-full text-xs px-3 py-1.5 font-bold"
+              style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)", color: "#f87171" }}>
+              <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
+              Limited — 5 spots left in NSW this quarter
+            </div>
           </div>
 
           <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 leading-[1.05]">
-            <span className="text-foreground">The AI Infrastructure for</span><br />
+            <span className="text-foreground">Stop Missing Leads</span><br />
             <span style={{ background: "linear-gradient(135deg, #00d1b2 0%, #00e8c8 50%, #00b89c 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-              Top-Tier Agencies.
+              After Hours.
             </span>
           </h1>
 
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-10 leading-relaxed">
-            Directive OS is the command infrastructure that powers modern real estate agencies.
-            Your AI Receptionist handles every call and chat — 24/7 — qualifying buyers, syncing VaultRE listings,
-            and routing hot leads to your agents in real time.
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-3 leading-relaxed">
+            Your AI Receptionist answers every call 24/7 — qualifies buyers, books inspections,
+            syncs your VaultRE listings, and emails you a full transcript the moment contact details are captured.
+          </p>
+          <p className="text-base text-muted-foreground max-w-2xl mx-auto mb-10">
+            No after-hours voicemail. No missed opportunities. From <span className="font-semibold text-foreground">$299/month.</span>
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
+            <a
+              href="https://calendly.com/adwordpress2012/directive-os-agency-onboarding"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-bold py-3.5 px-8 rounded-xl transition-all hover:scale-105 flex items-center gap-2 justify-center"
+              style={{ background: "linear-gradient(135deg, #00d1b2, #00b89c)", color: "#0a0a0a", boxShadow: "0 4px 32px rgba(0,209,178,0.35)" }}>
+              <CalendarCheck className="w-4 h-4" />
+              Book Free 15-Min Strategy Call
+              <ArrowRight className="w-4 h-4" />
+            </a>
             <Link href="/sign-up">
-              <button className="font-bold py-3.5 px-8 rounded-xl transition-all hover:scale-105 flex items-center gap-2"
-                style={{ background: "linear-gradient(135deg, #00d1b2, #00b89c)", color: "#0a0a0a", boxShadow: "0 4px 32px rgba(0,209,178,0.35)" }}>
+              <button className="font-semibold py-3.5 px-8 rounded-xl transition-all hover:scale-105 flex items-center gap-2 text-foreground w-full justify-center"
+                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.15)" }}>
                 Activate Your Agency
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-4 h-4 opacity-60" />
               </button>
             </Link>
-            <button
-              onClick={() => document.getElementById("demo-section")?.scrollIntoView({ behavior: "smooth" })}
-              className="font-semibold py-3.5 px-8 rounded-xl transition-all hover:scale-105 flex items-center gap-2 text-foreground hover:border-primary/40"
-              style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)" }}>
-              <MessageSquare className="w-4 h-4" style={{ color: "#00d1b2" }} />
-              See Live Demo
-            </button>
           </div>
 
+          <p className="text-xs text-muted-foreground mb-6">No commitment · 15 minutes · Talk directly with Jayson</p>
+
           {/* Live Voice Demo CTA */}
-          <div className="mt-6 mb-2 flex justify-center">
+          <div className="mb-2 flex justify-center">
             <a
               href="tel:0258504038"
               className="inline-flex items-center gap-3 px-6 py-3 rounded-2xl transition-all hover:scale-105 group"
@@ -280,25 +295,13 @@ export default function Home() {
                 <Phone className="w-4 h-4 relative z-10" style={{ color: "#00d1b2" }} />
               </div>
               <div className="text-left">
-                <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Call Our Live AI Receptionist</div>
+                <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Or test the AI right now — call Sarah</div>
                 <div className="font-bold text-foreground tracking-wide">02 5850 4038</div>
               </div>
               <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />
             </a>
           </div>
-
-          <p className="text-sm text-muted-foreground mt-4 mb-16">
-            Want to talk it through first?{" "}
-            <a
-              href="https://calendly.com/adwordpress2012/directive-os-agency-onboarding"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-medium hover:underline"
-              style={{ color: "#00d1b2" }}
-            >
-              Book a free 15-min strategy call
-            </a>
-          </p>
+          <p className="text-xs text-muted-foreground mt-2 mb-16">This is a live AI — not a recording</p>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
             {[
