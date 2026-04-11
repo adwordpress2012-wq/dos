@@ -30,8 +30,11 @@ const server = app.listen(port, (err) => {
 // Twilio will connect to wss://directiveos.com.au/api/voice/media-stream
 const wss = new WebSocketServer({ server, path: "/api/voice/media-stream" });
 
-wss.on("connection", (ws) => {
-  logger.info("New Twilio media stream WebSocket connection");
+wss.on("connection", (ws, req) => {
+  const origin = req.headers.origin ?? "unknown";
+  const ip = req.socket.remoteAddress ?? "unknown";
+  console.log(`[VOICE] Twilio WebSocket connected — origin=${origin} ip=${ip}`);
+  logger.info({ origin, ip }, "New Twilio media stream WebSocket connection");
   handleMediaStream(ws);
 });
 

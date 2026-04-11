@@ -11,7 +11,7 @@ const router: IRouter = Router();
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const OPENAI_REALTIME_URL =
-  "wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-12-17";
+  "wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview";
 
 const AI_PERSONA = `You are Sarah, a professional Australian real estate receptionist for Directive OS. 
 You are helping Jayson manage enquiries for commercial and residential properties in Western Sydney.
@@ -74,6 +74,18 @@ interface CallSession {
 // ─── WebSocket Bridge: Twilio ↔ OpenAI Realtime ───────────────────────────────
 
 export function handleMediaStream(twilioWs: WebSocket): void {
+  console.log("[VOICE] New Twilio media stream connection received");
+  logger.info("New Twilio media stream connection received");
+
+  if (!process.env.OPENAI_API_KEY) {
+    console.error("[VOICE] FATAL: OPENAI_API_KEY is not set — closing connection");
+    logger.error("OPENAI_API_KEY is not set");
+    twilioWs.close();
+    return;
+  }
+
+  console.log("[VOICE] Connecting to OpenAI Realtime API:", OPENAI_REALTIME_URL);
+
   const session: CallSession = {
     streamSid: null,
     callSid: null,
@@ -91,6 +103,7 @@ export function handleMediaStream(twilioWs: WebSocket): void {
 
   // ── OpenAI Realtime session setup ──────────────────────────────────────────
   session.openaiWs.on("open", () => {
+    console.log("[VOICE] OpenAI Realtime WebSocket connected successfully");
     logger.info("OpenAI Realtime WebSocket open");
 
     // Configure the session
@@ -171,7 +184,13 @@ export function handleMediaStream(twilioWs: WebSocket): void {
   });
 
   session.openaiWs.on("error", (err) => {
+    console.error("[VOICE] OpenAI Realtime WebSocket error:", err);
     logger.error({ err }, "OpenAI Realtime WebSocket error");
+  });
+
+  session.openaiWs.on("close", (code, reason) => {
+    console.log(`[VOICE] OpenAI WebSocket closed — code=${code} reason=${reason.toString()}`);
+    logger.info({ code, reason: reason.toString() }, "OpenAI WebSocket closed");
   });
 
   // ── Twilio → OpenAI audio relay ────────────────────────────────────────────
@@ -183,6 +202,7 @@ export function handleMediaStream(twilioWs: WebSocket): void {
         session.streamSid = msg.start.streamSid;
         session.callSid = msg.start.callSid ?? null;
         session.startTime = Date.now();
+        console.log(`[VOICE] Twilio stream started — streamSid=${session.streamSid} callSid=${session.callSid}`);
         logger.info({ streamSid: session.streamSid, callSid: session.callSid }, "Twilio stream started");
       }
 
