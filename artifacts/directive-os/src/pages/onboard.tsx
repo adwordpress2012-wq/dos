@@ -173,9 +173,9 @@ export default function Onboard() {
                   <span className="font-semibold text-foreground">Monthly Total</span>
                   <span className="font-bold text-primary text-lg">${monthly}/mo</span>
                 </div>
-                <div className="flex justify-between text-sm text-muted-foreground">
-                  <span>One-time setup fee</span>
-                  <span>${SETUP_FEE} AUD</span>
+                <div className="flex justify-between text-sm text-muted-foreground items-start">
+                  <span>Done-for-you onboarding</span>
+                  <span className="text-right text-xs leading-snug">Investment confirmed<br />on your strategy call</span>
                 </div>
                 <div className="text-xs text-muted-foreground">All prices shown exclude GST</div>
               </div>
@@ -202,7 +202,7 @@ export default function Onboard() {
                 <div className="text-xs text-muted-foreground">{form.contactEmail}</div>
                 <div className="border-t border-border pt-3 mt-3 flex justify-between text-sm">
                   <span className="text-muted-foreground">{form.seatCount} seat{form.seatCount > 1 ? "s" : ""}</span>
-                  <span className="font-bold text-primary">${monthly}/mo + ${SETUP_FEE} setup</span>
+                  <span className="font-bold text-primary">${monthly}/mo + onboarding</span>
                 </div>
               </div>
 
@@ -229,7 +229,7 @@ export default function Onboard() {
 
               <div className="flex items-start gap-2 text-xs text-muted-foreground mb-6 bg-muted/50 rounded-lg p-3">
                 <Shield className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-                <span>Your payment is processed securely by Stripe. The $1,500 setup fee will be charged immediately. Your monthly subscription begins after onboarding is complete.</span>
+                <span>Your monthly subscription is processed securely by Stripe. Onboarding investment is confirmed separately during your strategy call before any setup charges apply.</span>
               </div>
 
               <div className="flex gap-3">
