@@ -18,6 +18,8 @@ export const listingsTable = pgTable("listings", {
   inspectionTimes: text("inspection_times").array().notNull().default([]),
   vaultreId: text("vaultre_id"),
   status: text("status").notNull().default("active"),
+  photoUrl: text("photo_url"),
+  description: text("description"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });

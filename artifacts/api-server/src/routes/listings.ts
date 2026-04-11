@@ -69,7 +69,7 @@ router.post("/listings/sync-vaultre", async (req, res): Promise<void> => {
   let updated = 0;
 
   for (const mock of sourceListings) {
-    const { description, carSpaces, ...dbFields } = mock as typeof mock & { description?: string; carSpaces?: number };
+    const { carSpaces, ...dbFields } = mock as typeof mock & { carSpaces?: number };
     const existing = await db.select({ id: listingsTable.id }).from(listingsTable)
       .where(and(eq(listingsTable.agencyId, agencyId), eq(listingsTable.vaultreId, mock.vaultreId)));
     if (existing.length > 0) {

@@ -110,6 +110,8 @@ export const GetListingsResponseItem = zod.object({
   inspectionTimes: zod.array(zod.string()),
   vaultreId: zod.string().nullish(),
   status: zod.enum(["active", "under_offer", "sold", "leased"]),
+  photoUrl: zod.string().nullish(),
+  description: zod.string().nullish(),
   createdAt: zod.coerce.date(),
 });
 export const GetListingsResponse = zod.array(GetListingsResponseItem);
@@ -129,6 +131,8 @@ export const CreateListingBody = zod.object({
   agentName: zod.string(),
   agentMobile: zod.string(),
   inspectionTimes: zod.array(zod.string()).optional(),
+  photoUrl: zod.string().optional(),
+  description: zod.string().optional(),
 });
 
 /**

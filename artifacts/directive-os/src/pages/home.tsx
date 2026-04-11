@@ -5,7 +5,8 @@ import { useAiChat } from "@workspace/api-client-react";
 import {
   Phone, MessageSquare, Zap, Shield, Building2, FileText,
   ArrowRight, Check, X, Send, Star, BarChart3,
-  Workflow, BrainCircuit, CalendarCheck, Bell, Lock, ChevronRight
+  Workflow, BrainCircuit, CalendarCheck, Bell, Lock, ChevronRight,
+  Bed, Bath
 } from "lucide-react";
 
 const BASE_PRICE = 299;
@@ -488,6 +489,94 @@ export default function Home() {
                 <p className="text-muted-foreground text-sm leading-relaxed">{step.desc}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Listings Preview */}
+      <section className="py-20 border-t border-border">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <div className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: "#00d1b2" }}>Property Intelligence</div>
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Your Listings. Live. Always Accurate.</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
+              The AI Receptionist knows every property in your portfolio — prices, inspection times, agent contacts — synced directly from VaultRE in real time.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-5 max-w-5xl mx-auto mb-10">
+            {[
+              {
+                photo: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=600&q=80",
+                type: "sale",
+                status: "active",
+                address: "14 Jamison Road",
+                suburb: "Penrith NSW 2750",
+                price: "$895,000",
+                beds: 4, baths: 2,
+                agent: "Mark Thompson",
+                inspection: "Sat 11:00–11:30am"
+              },
+              {
+                photo: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&q=80",
+                type: "sale",
+                status: "active",
+                address: "45 Richmond Road",
+                suburb: "Blacktown NSW 2148",
+                price: "$1,050,000",
+                beds: 5, baths: 3,
+                agent: "Mark Thompson",
+                inspection: "Sat 2:00–2:45pm"
+              },
+              {
+                photo: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=600&q=80",
+                type: "rental",
+                status: "active",
+                address: "7 Illaroo Place",
+                suburb: "Colyton NSW 2760",
+                price: "$460/week",
+                beds: 3, baths: 1,
+                agent: "Rachel Kim",
+                inspection: "Sat 9:30–10:00am"
+              },
+            ].map((l, i) => (
+              <div key={i} className="rounded-xl overflow-hidden group"
+                style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
+                <div className="relative h-44 overflow-hidden bg-muted">
+                  <img src={l.photo} alt={l.address} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
+                    <span className={`text-xs px-2.5 py-1 rounded-lg font-semibold ${l.type === "rental" ? "bg-blue-600/90 text-white" : "bg-emerald-600/90 text-white"}`}>
+                      For {l.type === "rental" ? "Rent" : "Sale"}
+                    </span>
+                    <span className="text-xs px-2 py-0.5 rounded border font-medium bg-emerald-500/10 text-emerald-400 border-emerald-500/20">Active</span>
+                  </div>
+                </div>
+                <div className="p-4">
+                  <div className="font-semibold text-foreground text-sm mb-0.5">{l.address}</div>
+                  <div className="text-xs text-muted-foreground mb-2">{l.suburb}</div>
+                  <div className="text-lg font-bold mb-2" style={{ color: "#00d1b2" }}>{l.price}</div>
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground mb-3">
+                    <span className="flex items-center gap-1">
+                      <Bed className="w-3 h-3" />{l.beds} bed
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Bath className="w-3 h-3" />{l.baths} bath
+                    </span>
+                  </div>
+                  <div className="text-xs text-muted-foreground border-t border-white/5 pt-3 flex justify-between">
+                    <span>{l.agent}</span>
+                    <span style={{ color: "#00d1b2" }}>{l.inspection}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="text-center">
+            <div className="inline-flex items-center gap-3 text-sm text-muted-foreground">
+              <Check className="w-4 h-4" style={{ color: "#00d1b2" }} />
+              Can't sync with your CRM? Add listings manually from the Command Bridge — no integration required.
+            </div>
           </div>
         </div>
       </section>
