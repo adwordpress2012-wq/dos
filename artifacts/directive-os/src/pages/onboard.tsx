@@ -189,6 +189,18 @@ export default function Onboard() {
                 </div>
               </div>
               <div className="bg-muted rounded-xl p-5 space-y-3 mb-6">
+                {/* One-time setup fee — shown upfront so there are no surprises at checkout */}
+                <div className="flex justify-between text-sm pb-3 border-b border-border">
+                  <div>
+                    <div className="font-medium text-foreground">Onboarding &amp; Setup</div>
+                    <div className="text-xs text-muted-foreground mt-0.5">One-time · includes full training &amp; configuration</div>
+                  </div>
+                  <div className="text-right flex-shrink-0 ml-3">
+                    <span className="font-semibold text-foreground">${SETUP_FEE.toLocaleString()}</span>
+                    <div className="text-xs text-muted-foreground">once</div>
+                  </div>
+                </div>
+                {/* Recurring subscription */}
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Base License (1st seat)</span>
                   <span className="font-medium">${BASE_PRICE}/mo</span>
@@ -200,14 +212,14 @@ export default function Onboard() {
                   </div>
                 )}
                 <div className="flex justify-between text-sm border-t border-border pt-3">
-                  <span className="font-semibold text-foreground">Monthly Total</span>
+                  <span className="font-semibold text-foreground">Monthly from month 2</span>
                   <span className="font-bold text-primary text-lg">${monthly}/mo</span>
                 </div>
-                <div className="flex justify-between text-sm text-muted-foreground items-start">
-                  <span>Done-for-you onboarding</span>
-                  <span className="text-right text-xs leading-snug">Investment confirmed<br />on your strategy call</span>
+                <div className="flex justify-between text-sm font-semibold border-t border-border pt-3">
+                  <span className="text-foreground">Due today</span>
+                  <span className="text-foreground">${(SETUP_FEE + monthly).toLocaleString()}</span>
                 </div>
-                <div className="text-xs text-muted-foreground">All prices shown exclude GST</div>
+                <div className="text-xs text-muted-foreground">All prices shown exclude GST · Paid securely via Stripe</div>
               </div>
               {/* Training included */}
               <div className="rounded-xl p-4 mb-6"
@@ -284,9 +296,26 @@ export default function Onboard() {
                 </span>
               </label>
 
+              {/* Payment summary */}
+              <div className="bg-muted rounded-xl p-4 mb-4 space-y-2">
+                <div className="flex justify-between text-xs">
+                  <span className="text-muted-foreground">Onboarding &amp; Setup (one-time)</span>
+                  <span className="font-medium text-foreground">${SETUP_FEE.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between text-xs">
+                  <span className="text-muted-foreground">Directive OS License ({monthly === BASE_PRICE ? "1 seat" : `${form.seatCount} seats`})</span>
+                  <span className="font-medium text-foreground">${monthly}/mo</span>
+                </div>
+                <div className="flex justify-between text-xs border-t border-border pt-2 font-semibold">
+                  <span className="text-foreground">Due today</span>
+                  <span className="text-foreground">${(SETUP_FEE + monthly).toLocaleString()} AUD</span>
+                </div>
+              </div>
+
+              {/* Accepted payment methods */}
               <div className="flex items-start gap-2 text-xs text-muted-foreground mb-4 bg-muted/50 rounded-lg p-3">
                 <Shield className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-                <span>Your monthly subscription is processed securely by Stripe. Onboarding investment is confirmed separately during your strategy call before any setup charges apply.</span>
+                <span>Payment processed securely by Stripe. Accepted: Visa, Mastercard, Amex, and Klarna (pay in instalments). Afterpay is not available for subscription plans — contact us if you need a custom payment arrangement.</span>
               </div>
 
               <div className="flex items-center justify-between rounded-xl p-3 mb-6"
