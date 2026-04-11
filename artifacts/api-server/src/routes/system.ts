@@ -6,8 +6,7 @@ const router: IRouter = Router();
 const IS_SIMULATION = process.env.DATABASE_MODE === "SIMULATION";
 
 router.get("/system/status", (_req, res): void => {
-  const candidates = [process.env.STRIPE_SK, process.env.STRIPE_SECRET_KEY_DOS, process.env.STRIPE_SECRET_KEY_OS, process.env.SECRET_KEY_DOS, process.env.SECRET_KEY_OS, process.env.STRIPE_SECRET_KEY];
-  const stripeKey = candidates.find(k => k && k.length > 0) ?? "";
+  const stripeKey = process.env.STRIPE_KEY_ACTIVE ?? "";
   const stripeKeyType = !stripeKey
     ? "NOT_SET"
     : stripeKey.startsWith("sk_live_")

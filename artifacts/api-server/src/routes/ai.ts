@@ -5,20 +5,8 @@ import { AiChatBody, AiSendFormBody } from "@workspace/api-zod";
 import { logger } from "../lib/logger";
 import Stripe from "stripe";
 
-function findStripeKey(): string | undefined {
-  const candidates = [
-    process.env.STRIPE_SK,
-    process.env.STRIPE_SECRET_KEY_DOS,
-    process.env.STRIPE_SECRET_KEY_OS,
-    process.env.SECRET_KEY_DOS,
-    process.env.SECRET_KEY_OS,
-    process.env.STRIPE_SECRET_KEY,
-  ];
-  return candidates.find(k => k && (k.startsWith("sk_live_") || k.startsWith("sk_test_")));
-}
-
 async function reportAiUsage(customerId: string): Promise<void> {
-  const key = findStripeKey();
+  const key = process.env.STRIPE_KEY_ACTIVE;
   if (!key) return;
   try {
     const stripe = new Stripe(key, { apiVersion: "2025-03-31.basil" });
