@@ -6,7 +6,7 @@ import {
   Phone, MessageSquare, Zap, Shield, Building2, FileText,
   ArrowRight, Check, X, Send, Star, BarChart3,
   Workflow, BrainCircuit, CalendarCheck, Bell, Lock, ChevronRight,
-  Bed, Bath
+  Bed, Bath, Mail, Inbox
 } from "lucide-react";
 
 const BASE_PRICE = 299;
@@ -375,6 +375,163 @@ export default function Home() {
                 <p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Transcript Emails Feature */}
+      <section className="py-20 border-t border-border" style={{ background: "rgba(0,209,178,0.025)" }}>
+        <div className="container mx-auto px-4">
+          <div className="max-w-5xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+
+            {/* Left: Copy */}
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold tracking-widest uppercase mb-6"
+                style={{ background: "rgba(0,209,178,0.1)", border: "1px solid rgba(0,209,178,0.2)", color: "#00d1b2" }}>
+                <Mail className="w-3.5 h-3.5" />
+                Included in Every Plan
+              </div>
+
+              <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4 leading-tight">
+                Every Conversation.<br />
+                <span style={{ color: "#00d1b2" }}>Delivered to Your Inbox.</span>
+              </h2>
+
+              <p className="text-muted-foreground text-lg leading-relaxed mb-8">
+                After every call and chat, Sarah automatically emails you a full formatted transcript — who enquired,
+                what they asked, and what contact details were captured. No dashboard login needed.
+                Everything you need to follow up and close, right in your inbox.
+              </p>
+
+              <div className="space-y-4 mb-8">
+                {[
+                  {
+                    icon: <Inbox className="w-4 h-4" />,
+                    title: "Instant delivery",
+                    desc: "Transcript arrives the moment Sarah captures contact info or a booking signal — not at end of day.",
+                  },
+                  {
+                    icon: <Mail className="w-4 h-4" />,
+                    title: "Multiple recipients",
+                    desc: "Send transcripts to your principal, your PA, and your business mobile — whoever needs to know.",
+                  },
+                  {
+                    icon: <BrainCircuit className="w-4 h-4" />,
+                    title: "Closing intelligence",
+                    desc: "The email surfaces extracted contact info at the top — name, phone, email — so you can call before a competitor does.",
+                  },
+                  {
+                    icon: <Shield className="w-4 h-4" />,
+                    title: "Full audit trail",
+                    desc: "Every enquiry is timestamped and archived. Useful for compliance, handovers, and dispute resolution.",
+                  },
+                ].map(b => (
+                  <div key={b.title} className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
+                      style={{ background: "rgba(0,209,178,0.1)", color: "#00d1b2" }}>
+                      {b.icon}
+                    </div>
+                    <div>
+                      <div className="font-semibold text-foreground text-sm">{b.title}</div>
+                      <div className="text-muted-foreground text-sm leading-relaxed">{b.desc}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="inline-flex items-center gap-2 text-sm font-semibold" style={{ color: "#00d1b2" }}>
+                <Check className="w-4 h-4" />
+                Included at no extra cost in every Directive OS subscription
+              </div>
+            </div>
+
+            {/* Right: Email preview mockup */}
+            <div className="relative">
+              {/* Glow behind */}
+              <div className="absolute inset-0 rounded-2xl blur-3xl opacity-20 pointer-events-none"
+                style={{ background: "radial-gradient(circle at 50% 50%, #00d1b2, transparent 70%)" }} />
+
+              <div className="relative rounded-2xl overflow-hidden shadow-2xl"
+                style={{ border: "1px solid rgba(255,255,255,0.1)", background: "#1a1a2e" }}>
+
+                {/* Email client chrome */}
+                <div className="px-4 py-3 flex items-center gap-2"
+                  style={{ background: "rgba(255,255,255,0.04)", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+                  <div className="flex gap-1.5">
+                    <div className="w-2.5 h-2.5 rounded-full bg-red-500/60" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/60" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-green-500/60" />
+                  </div>
+                  <div className="flex-1 mx-3 px-3 py-1 rounded text-xs text-white/30"
+                    style={{ background: "rgba(255,255,255,0.05)" }}>
+                    New Message — 🔔 New Enquiry: Marcus Webb — Hills Property Partners
+                  </div>
+                </div>
+
+                {/* Email body */}
+                <div className="p-5 space-y-4">
+                  {/* Header bar */}
+                  <div className="rounded-xl p-4"
+                    style={{ background: "#0a0e1a", border: "1px solid rgba(0,209,178,0.2)" }}>
+                    <div className="text-sm font-bold" style={{ color: "#00d1b2" }}>Directive OS — New Chat Enquiry</div>
+                    <div className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.4)" }}>Today at 2:14 AM · Session dos_1714...</div>
+                  </div>
+
+                  {/* Extracted info */}
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    {[
+                      { label: "Name detected", value: "Marcus Webb" },
+                      { label: "Agency", value: "Hills Property Partners" },
+                      { label: "Phone", value: "0412 938 477" },
+                      { label: "Email", value: "m.webb@hpp.com.au" },
+                    ].map(r => (
+                      <div key={r.label} className="rounded-lg p-2.5" style={{ background: "rgba(255,255,255,0.05)" }}>
+                        <div style={{ color: "rgba(255,255,255,0.4)" }} className="mb-0.5">{r.label}</div>
+                        <div className="font-semibold text-white">{r.value}</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Transcript */}
+                  <div>
+                    <div className="text-xs font-semibold mb-2 pb-1.5"
+                      style={{ color: "rgba(255,255,255,0.5)", borderBottom: "1px solid rgba(0,209,178,0.2)" }}>
+                      Full Conversation
+                    </div>
+                    <div className="space-y-2">
+                      {[
+                        { role: "sarah", text: "Hey! Running an agency is full-on. When a call comes in after hours, what happens?" },
+                        { role: "prospect", text: "Honestly? Usually voicemail. We miss a lot of after-hours stuff." },
+                        { role: "sarah", text: "Heaps of agencies are in the same boat — and it's costing real deals. How many agents do you have?" },
+                        { role: "prospect", text: "6 agents. We're growing but the phone stuff is a headache. What does this cost?" },
+                        { role: "sarah", text: "$299/month after a $1,500 setup — and a free website's included. Worth a 20-min chat with Jayson?" },
+                        { role: "prospect", text: "Yeah keen. My number is 0412 938 477, email m.webb@hpp.com.au" },
+                      ].map((msg, i) => (
+                        <div key={i} className={`flex gap-2 ${msg.role === "prospect" ? "justify-end" : ""}`}>
+                          <div className="max-w-[85%] rounded-lg px-3 py-1.5 text-xs leading-relaxed"
+                            style={{
+                              background: msg.role === "sarah" ? "rgba(0,209,178,0.12)" : "rgba(99,102,241,0.15)",
+                              color: msg.role === "sarah" ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.85)",
+                              border: `1px solid ${msg.role === "sarah" ? "rgba(0,209,178,0.2)" : "rgba(99,102,241,0.25)"}`,
+                            }}>
+                            <span className="font-semibold text-[10px] block mb-0.5"
+                              style={{ color: msg.role === "sarah" ? "#00d1b2" : "#818cf8" }}>
+                              {msg.role === "sarah" ? "🤖 Sarah" : "👤 Marcus"}
+                            </span>
+                            {msg.text}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Footer */}
+                  <div className="text-[10px] text-center pt-1" style={{ color: "rgba(255,255,255,0.2)" }}>
+                    Sent automatically by Sarah · Directive OS AI Receptionist
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -919,6 +1076,7 @@ export default function Home() {
                     "AI Voice Receptionist (24/7)",
                     "AI Chat Receptionist",
                     "Agency website — free (Enterprise, Voyager or Discovery)",
+                    "Automatic transcript emails after every call & chat",
                     "VaultRE CRM live sync",
                     "100 AI minutes/month included",
                     "NSW Tenancy Form automation",
