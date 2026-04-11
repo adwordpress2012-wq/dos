@@ -4,6 +4,9 @@ import { db, agenciesTable, chatSessionsTable, transcriptsTable, transcriptMessa
 import { AiChatBody, AiSendFormBody } from "@workspace/api-zod";
 import { logger } from "../lib/logger";
 import Stripe from "stripe";
+import OpenAI from "openai";
+
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 async function reportAiUsage(customerId: string): Promise<void> {
   const key = process.env.STRIPE_KEY_ACTIVE;
@@ -30,17 +33,23 @@ interface ChatMessage {
 }
 
 function buildSystemPrompt(agencyName: string): string {
-  return `You are an AI receptionist for ${agencyName}, a real estate agency. 
-You are professional, helpful, and friendly. 
+  return `You are an AI receptionist named Sarah for ${agencyName}, an Australian real estate agency.
+You are professional, warm, and efficient. You speak with an Australian tone — friendly but not overly casual.
 
 Your primary goals:
-1. First, determine if the caller is a buyer, tenant, vendor, or landlord
-2. For tenants: Help them with rental applications, offer to email the NSW Fair Trading Standard Tenancy Form
-3. For buyers: Provide information about properties and offer to connect them with an agent
-4. If someone expresses high intent like "I want to make an offer" or "I want to buy", indicate a live transfer to the agent is available
-5. Collect contact details (name, email, phone) for lead capture
+1. Identify whether the caller is a buyer, tenant, vendor, or landlord
+2. For tenants: Assist with rental enquiries, offer to email the NSW Fair Trading Standard Tenancy Application Form (just ask for their email)
+3. For buyers: Help them find suitable properties, gather their requirements (suburb, budget, bedrooms), offer to book an inspection or connect them with an agent
+4. For vendors/landlords: Offer to arrange a free property appraisal with the principal agent
+5. If someone says "I want to make an offer" or "I want to buy", let them know you can arrange an immediate callback from the listing agent
+6. Always try to collect a name, email, and phone number for follow-up
 
-Keep responses concise and professional. Always be helpful and warm.`;
+Rules:
+- Keep responses to 2–3 sentences maximum. Be concise.
+- Never make up specific property addresses, prices, or agent names unless they were mentioned in the conversation
+- Use Australian spelling (e.g. "enquiry" not "inquiry", "authorise" not "authorize")
+- Do not use emojis
+- Always end with a clear next step or question`;
 }
 
 function detectAction(message: string, history: ChatMessage[]): { action: string | null; leadData?: Record<string, string> } {
@@ -90,29 +99,26 @@ router.post("/ai/chat", async (req, res): Promise<void> => {
     if (ag) agencyName = ag.name;
   }
 
-  // Build AI response (mock GPT-4o logic without API key)
+  // Build AI response using OpenAI GPT-4o-mini
   let reply = "";
-  const lower = message.toLowerCase();
-  const isFirstMessage = history.filter(m => m.role === "user").length === 1;
+  try {
+    const openaiMessages: OpenAI.Chat.ChatCompletionMessageParam[] = [
+      { role: "system", content: buildSystemPrompt(agencyName) },
+      ...history.slice(0, -1).map(m => ({ role: m.role as "user" | "assistant", content: m.content })),
+      { role: "user", content: message },
+    ];
 
-  if (isFirstMessage) {
-    reply = `Thank you for contacting ${agencyName}! I'm your AI receptionist, available 24/7 to assist you. To best help you today, could you let me know — are you a buyer looking to purchase a property, or a tenant looking for a rental?`;
-  } else if (lower.includes("buyer") || lower.includes("purchase") || lower.includes("buy")) {
-    reply = `Excellent! I can help you find the perfect property. We have a number of great listings available. Could you share a bit more about what you're looking for — preferred suburb, budget range, and the number of bedrooms? I can also arrange for one of our agents to call you directly.`;
-  } else if (lower.includes("tenant") || lower.includes("rent") || lower.includes("rental")) {
-    reply = `Of course! I'd love to help you find your next home. We have several rental properties currently available. Are you looking for anything specific in terms of location, size, or budget? Also, if you'd like to apply for a property, I can email you the NSW Fair Trading Standard Tenancy Application Form — just provide your email address.`;
-  } else if (lower.includes("inspection") || lower.includes("open home") || lower.includes("when can i")) {
-    reply = `We'd love to show you through the property! Our current inspection times are available on each listing. I can also arrange a private inspection for you with the listing agent. Could you confirm your name and contact number so we can get that booked in?`;
-  } else if (lower.includes("form") || lower.includes("application") || lower.includes("apply")) {
-    reply = `Absolutely! I can arrange for the NSW Fair Trading Standard Tenancy Application Form to be sent to your email immediately. Could you provide your email address and the property address you're interested in?`;
-  } else if (lower.includes("offer") || lower.includes("make an offer") || lower.includes("purchase price")) {
-    reply = `That's fantastic — it sounds like you're ready to move forward! I'll connect you directly with the listing agent right away. They'll be able to guide you through the offer process. Please hold while I transfer your call, or I can have them call you back shortly. What's the best number to reach you?`;
-  } else if (lower.includes("price") || lower.includes("how much") || lower.includes("cost")) {
-    reply = `Great question! Prices vary depending on the property. Our current listings range from $650/week for apartments to $2.8M+ for premium homes. Would you like me to pull up details on a specific property, or would you prefer our agents to send you a tailored list based on your budget?`;
-  } else if (lower.includes("@") || lower.includes("email")) {
-    reply = `Perfect, I've noted your contact details. One of our agents will be in touch with you shortly. In the meantime, is there anything else I can help you with today?`;
-  } else {
-    reply = `Thank you for that information. I want to make sure I connect you with the right person from our team. Could you tell me a bit more about what you're looking for — are you interested in buying, renting, selling, or managing a property?`;
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: openaiMessages,
+      max_tokens: 180,
+      temperature: 0.7,
+    });
+
+    reply = completion.choices[0]?.message?.content ?? "Thank you for reaching out. One of our agents will be in touch with you shortly.";
+  } catch (err) {
+    logger.error({ err }, "OpenAI chat completion failed");
+    reply = "Thank you for reaching out. One of our team members will be in contact with you shortly.";
   }
 
   history.push({ role: "assistant", content: reply });
