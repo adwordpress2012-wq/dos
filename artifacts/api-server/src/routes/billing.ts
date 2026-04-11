@@ -195,11 +195,23 @@ router.post("/billing/create-subscription", async (req, res): Promise<void> => {
   }
 
   const paymentIntent = session.payment_intent as Stripe.PaymentIntent | null;
-  const paymentMethodId = paymentIntent
-    ? typeof paymentIntent.payment_method === "string"
-      ? paymentIntent.payment_method
-      : (paymentIntent.payment_method as Stripe.PaymentMethod | null)?.id ?? null
-    : null;
+  const rawPaymentMethod = paymentIntent?.payment_method ?? null;
+  const paymentMethodId = typeof rawPaymentMethod === "string"
+    ? rawPaymentMethod
+    : (rawPaymentMethod as Stripe.PaymentMethod | null)?.id ?? null;
+
+  // Only card payment methods can be saved for off-session recurring billing.
+  // Klarna, bank redirects etc. are one-off — subscription will start on trial
+  // and Stripe will contact the customer to add a card before month 2.
+  let cardPaymentMethodId: string | null = null;
+  if (paymentMethodId) {
+    try {
+      const pm = await stripe.paymentMethods.retrieve(paymentMethodId);
+      if (pm.type === "card") cardPaymentMethodId = pm.id;
+    } catch {
+      // Non-fatal — proceed without a default payment method
+    }
+  }
 
   const agency = await getAgency(clerkOrgId);
   const additionalSeats = Math.max(0, (agency?.seatCount ?? 1) - 1);
@@ -216,7 +228,7 @@ router.post("/billing/create-subscription", async (req, res): Promise<void> => {
     items: subscriptionItems,
     trial_period_days: 30,  // Month 1 already paid via payment checkout
     metadata: { clerkOrgId },
-    ...(paymentMethodId ? { default_payment_method: paymentMethodId } : {}),
+    ...(cardPaymentMethodId ? { default_payment_method: cardPaymentMethodId } : {}),
   };
 
   try {
