@@ -267,7 +267,27 @@ export default function Home() {
               See Live Demo
             </button>
           </div>
-          <p className="text-sm text-muted-foreground mt-5 mb-16">
+
+          {/* Live Voice Demo CTA */}
+          <div className="mt-6 mb-2 flex justify-center">
+            <a
+              href="tel:+61258504038"
+              className="inline-flex items-center gap-3 px-6 py-3 rounded-2xl transition-all hover:scale-105 group"
+              style={{ background: "rgba(0,209,178,0.08)", border: "1px solid rgba(0,209,178,0.25)", backdropFilter: "blur(10px)" }}
+            >
+              <div className="relative flex items-center justify-center w-8 h-8">
+                <span className="absolute w-8 h-8 rounded-full opacity-40 animate-ping" style={{ background: "rgba(0,209,178,0.4)" }} />
+                <Phone className="w-4 h-4 relative z-10" style={{ color: "#00d1b2" }} />
+              </div>
+              <div className="text-left">
+                <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Call Our Live AI Receptionist</div>
+                <div className="font-bold text-foreground tracking-wide">+61 2 5850 4038</div>
+              </div>
+              <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+            </a>
+          </div>
+
+          <p className="text-sm text-muted-foreground mt-4 mb-16">
             Want to talk it through first?{" "}
             <a
               href="https://calendly.com/adwordpress2012/directive-os-agency-onboarding"
@@ -720,6 +740,87 @@ export default function Home() {
           <p className="text-muted-foreground text-sm mt-6">
             From $299/mo + GST — no lock-in contracts — Australian-hosted infrastructure
           </p>
+        </div>
+      </section>
+
+      {/* ── Voice Demo Section ───────────────────────────────────────────── */}
+      <section className="py-20 relative overflow-hidden" id="voice-demo">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] blur-3xl opacity-10"
+            style={{ background: "radial-gradient(ellipse, rgba(0,209,178,0.6) 0%, transparent 70%)" }} />
+        </div>
+        <div className="container mx-auto px-4 relative">
+          <div className="max-w-4xl mx-auto rounded-3xl overflow-hidden"
+            style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(0,209,178,0.2)", backdropFilter: "blur(20px)" }}>
+            <div className="grid md:grid-cols-2 gap-0">
+
+              {/* Left — description */}
+              <div className="p-10 flex flex-col justify-center">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mb-5 w-fit"
+                  style={{ background: "rgba(0,209,178,0.12)", color: "#00d1b2", border: "1px solid rgba(0,209,178,0.2)" }}>
+                  <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#00d1b2" }} />
+                  LIVE AI VOICE DEMO
+                </div>
+                <h2 className="text-3xl font-bold text-foreground mb-4 leading-tight">
+                  Call Sarah.<br />
+                  <span style={{ background: "linear-gradient(135deg, #00d1b2, #00e8c8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+                    Your AI Receptionist.
+                  </span>
+                </h2>
+                <p className="text-muted-foreground leading-relaxed mb-6">
+                  Sarah answers 24/7, qualifies buyers and tenants, books inspections, and logs every lead to your dashboard automatically.
+                  This is the same AI that will answer calls for your agency.
+                </p>
+                <div className="space-y-2.5">
+                  {[
+                    "Natural Australian female voice",
+                    "Qualifies buyer intent in real time",
+                    "Captures lead details automatically",
+                    "Full transcript saved to your dashboard",
+                  ].map(point => (
+                    <div key={point} className="flex items-center gap-2.5 text-sm text-muted-foreground">
+                      <Check className="w-4 h-4 flex-shrink-0" style={{ color: "#00d1b2" }} />
+                      {point}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Right — call CTA */}
+              <div className="p-10 flex flex-col items-center justify-center text-center"
+                style={{ background: "rgba(0,209,178,0.04)", borderLeft: "1px solid rgba(0,209,178,0.15)" }}>
+                <div className="relative mb-6">
+                  <div className="w-24 h-24 rounded-full flex items-center justify-center mx-auto"
+                    style={{ background: "linear-gradient(135deg, rgba(0,209,178,0.2), rgba(0,209,178,0.05))", border: "2px solid rgba(0,209,178,0.3)" }}>
+                    <Phone className="w-10 h-10" style={{ color: "#00d1b2" }} />
+                  </div>
+                  <span className="absolute top-0 right-0 w-5 h-5 rounded-full border-2 border-background flex items-center justify-center"
+                    style={{ background: "#22c55e" }}>
+                    <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest mb-2">AI Receptionist — Live Now</p>
+                <a
+                  href="tel:+61258504038"
+                  className="text-4xl font-bold tracking-wider mb-2 hover:opacity-80 transition-opacity block"
+                  style={{ color: "#00d1b2" }}
+                >
+                  +61 2 5850 4038
+                </a>
+                <p className="text-xs text-muted-foreground mb-6">Australian number · tap to call on mobile</p>
+                <a
+                  href="tel:+61258504038"
+                  className="w-full font-bold py-4 px-6 rounded-xl transition-all hover:scale-105 flex items-center justify-center gap-2.5"
+                  style={{ background: "linear-gradient(135deg, #00d1b2, #00b89c)", color: "#0a0a0a", boxShadow: "0 4px 24px rgba(0,209,178,0.35)" }}
+                >
+                  <Phone className="w-4 h-4" />
+                  Call Now — It's Free
+                </a>
+                <p className="text-xs text-muted-foreground mt-3">Normal call rates apply · No signup required</p>
+              </div>
+
+            </div>
+          </div>
         </div>
       </section>
 
