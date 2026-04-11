@@ -1,9 +1,9 @@
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import {
   useGetBillingSubscription, useGetBillingUsage, useGetBillingInvoices,
-  useCreateBillingPortal
+  useCreateBillingPortal, useCreateCheckout
 } from "@workspace/api-client-react";
-import { CreditCard, Zap, FileText, ExternalLink, Check, AlertCircle } from "lucide-react";
+import { CreditCard, Zap, FileText, ExternalLink, Check, AlertCircle, Rocket } from "lucide-react";
 
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, string> = {
@@ -39,6 +39,7 @@ export default function Billing() {
   const { data: usage, isLoading: usageLoading } = useGetBillingUsage();
   const { data: invoices, isLoading: invoicesLoading } = useGetBillingInvoices();
   const createPortal = useCreateBillingPortal();
+  const createCheckout = useCreateCheckout();
 
   const aiPct = usage ? Math.min(100, Math.round((usage.minutesUsed / usage.minutesIncluded) * 100)) : 0;
 
@@ -48,6 +49,17 @@ export default function Billing() {
       window.open(result.url, "_blank");
     } catch {
       alert("Unable to open billing portal at this time.");
+    }
+  };
+
+  const handleCheckout = async () => {
+    try {
+      const result = await createCheckout.mutateAsync();
+      if (result.url) {
+        window.location.href = result.url;
+      }
+    } catch {
+      alert("Unable to start checkout at this time. Please try again.");
     }
   };
 
@@ -105,6 +117,17 @@ export default function Billing() {
                   <><AlertCircle className="w-3.5 h-3.5 text-amber-400" /> Onboarding fee pending</>
                 )}
               </div>
+              {subscription.status === "pending" || !subscription.setupFeePaid ? (
+                <button
+                  onClick={handleCheckout}
+                  disabled={createCheckout.isPending}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold transition-all hover:opacity-90 active:scale-95 mb-2"
+                  style={{ backgroundColor: "#00d1b2", color: "#0a0a0a" }}
+                >
+                  <Rocket className="w-4 h-4" />
+                  {createCheckout.isPending ? "Redirecting..." : "Activate License"}
+                </button>
+              ) : null}
               <button
                 onClick={handlePortal}
                 disabled={createPortal.isPending}
@@ -115,7 +138,18 @@ export default function Billing() {
               </button>
             </>
           ) : (
-            <div className="text-muted-foreground text-sm">No subscription data available.</div>
+            <div className="space-y-4">
+              <p className="text-muted-foreground text-sm">No active license yet. Get started with a one-time onboarding fee of $1,500 AUD and a $299/mo subscription.</p>
+              <button
+                onClick={handleCheckout}
+                disabled={createCheckout.isPending}
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold transition-all hover:opacity-90 active:scale-95"
+                style={{ backgroundColor: "#00d1b2", color: "#0a0a0a" }}
+              >
+                <Rocket className="w-4 h-4" />
+                {createCheckout.isPending ? "Redirecting..." : "Get Started"}
+              </button>
+            </div>
           )}
         </div>
 

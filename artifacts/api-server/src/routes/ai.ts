@@ -3,6 +3,24 @@ import { eq } from "drizzle-orm";
 import { db, agenciesTable, chatSessionsTable, transcriptsTable, transcriptMessagesTable, leadsTable } from "@workspace/db";
 import { AiChatBody, AiSendFormBody } from "@workspace/api-zod";
 import { logger } from "../lib/logger";
+import Stripe from "stripe";
+
+async function reportAiUsage(customerId: string): Promise<void> {
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key) return;
+  try {
+    const stripe = new Stripe(key, { apiVersion: "2025-03-31.basil" });
+    await stripe.billing.meterEvents.create({
+      event_name: "ai_interaction",
+      payload: {
+        stripe_customer_id: customerId,
+        value: "1",
+      },
+    });
+  } catch (err) {
+    logger.warn({ err }, "Failed to report AI usage meter event");
+  }
+}
 
 const router: IRouter = Router();
 
@@ -131,6 +149,18 @@ router.post("/ai/chat", async (req, res): Promise<void> => {
       ]);
     } catch (err) {
       logger.warn({ err }, "Failed to save transcript message");
+    }
+  }
+
+  // Report AI usage meter event if agency has a Stripe customer ID
+  if (agencyId) {
+    try {
+      const [ag] = await db.select({ stripeCustomerId: agenciesTable.stripeCustomerId }).from(agenciesTable).where(eq(agenciesTable.id, agencyId));
+      if (ag?.stripeCustomerId) {
+        void reportAiUsage(ag.stripeCustomerId);
+      }
+    } catch (err) {
+      logger.warn({ err }, "Failed to look up Stripe customer for usage reporting");
     }
   }
 

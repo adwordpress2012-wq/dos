@@ -1,9 +1,17 @@
 import { Router, type IRouter } from "express";
 import { eq } from "drizzle-orm";
 import { db, agenciesTable } from "@workspace/db";
-import { CreateSetupCheckoutBody, CreateSubscriptionCheckoutBody } from "@workspace/api-zod";
+import Stripe from "stripe";
 
 const router: IRouter = Router();
+
+function getStripe(): Stripe {
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key) throw new Error("STRIPE_SECRET_KEY environment variable is not set");
+  return new Stripe(key, { apiVersion: "2025-03-31.basil" });
+}
+
+const YOUR_DOMAIN = "https://directiveos.com.au";
 
 async function getAgency(clerkOrgId: string) {
   const [agency] = await db.select().from(agenciesTable).where(eq(agenciesTable.clerkOrgId, clerkOrgId));
@@ -54,29 +62,107 @@ router.get("/billing/usage", async (req, res): Promise<void> => {
   });
 });
 
-router.post("/billing/checkout/setup", async (req, res): Promise<void> => {
-  const parsed = CreateSetupCheckoutBody.safeParse(req.body);
-  if (!parsed.success) { res.status(400).json({ error: parsed.error.message }); return; }
-  // Mock Stripe checkout — in production this would create a real Stripe session
-  res.json({ url: `${parsed.data.successUrl}?mock=setup_paid` });
-});
+router.post("/billing/checkout", async (req, res): Promise<void> => {
+  const clerkOrgId = req.headers["x-clerk-org-id"] as string | undefined;
+  if (!clerkOrgId) { res.status(401).json({ error: "Unauthorized" }); return; }
 
-router.post("/billing/checkout/subscription", async (req, res): Promise<void> => {
-  const parsed = CreateSubscriptionCheckoutBody.safeParse(req.body);
-  if (!parsed.success) { res.status(400).json({ error: parsed.error.message }); return; }
-  res.json({ url: `${parsed.data.successUrl}?mock=subscription_started&seats=${parsed.data.seatCount}` });
+  const priceOnboarding = process.env.STRIPE_PRICE_ONBOARDING;
+  const priceSubscription = process.env.STRIPE_PRICE_SUBSCRIPTION;
+  const pricePerSeat = process.env.STRIPE_PRICE_PER_SEAT;
+  const priceExcessUsage = process.env.STRIPE_PRICE_EXCESS_USAGE;
+
+  if (!priceOnboarding || !priceSubscription) {
+    res.status(500).json({ error: "Stripe price IDs are not configured. Please set STRIPE_PRICE_ONBOARDING and STRIPE_PRICE_SUBSCRIPTION." });
+    return;
+  }
+
+  let stripe: Stripe;
+  try {
+    stripe = getStripe();
+  } catch {
+    res.status(500).json({ error: "Stripe is not configured. Please set STRIPE_SECRET_KEY." });
+    return;
+  }
+
+  const agency = await getAgency(clerkOrgId);
+  const additionalSeats = Math.max(0, (agency?.seatCount ?? 1) - 1);
+
+  const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
+    { price: priceOnboarding, quantity: 1 },
+    { price: priceSubscription, quantity: 1 },
+  ];
+
+  if (additionalSeats > 0 && pricePerSeat) {
+    lineItems.push({ price: pricePerSeat, quantity: additionalSeats });
+  }
+
+  // Add metered excess usage (no quantity — Stripe tracks via meter events)
+  if (priceExcessUsage) {
+    lineItems.push({ price: priceExcessUsage });
+  }
+
+  const sessionParams: Stripe.Checkout.SessionCreateParams = {
+    mode: "subscription",
+    automatic_tax: { enabled: true },
+    line_items: lineItems,
+    success_url: `${YOUR_DOMAIN}/dashboard/billing/success?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${YOUR_DOMAIN}/dashboard/billing`,
+  };
+
+  if (agency?.stripeCustomerId) {
+    sessionParams.customer = agency.stripeCustomerId;
+  } else if (agency?.contactEmail) {
+    sessionParams.customer_email = agency.contactEmail;
+  }
+
+  try {
+    const session = await stripe.checkout.sessions.create(sessionParams);
+    res.json({ url: session.url });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    res.status(500).json({ error: `Failed to create checkout session: ${message}` });
+  }
 });
 
 router.post("/billing/portal", async (req, res): Promise<void> => {
   const clerkOrgId = req.headers["x-clerk-org-id"] as string | undefined;
   if (!clerkOrgId) { res.status(401).json({ error: "Unauthorized" }); return; }
-  res.json({ url: "https://billing.stripe.com/p/session/mock" });
+
+  const agency = await getAgency(clerkOrgId);
+  if (!agency?.stripeCustomerId) {
+    res.status(400).json({ error: "No Stripe customer found for this agency." });
+    return;
+  }
+
+  let stripe: Stripe;
+  try {
+    stripe = getStripe();
+  } catch {
+    res.status(500).json({ error: "Stripe is not configured." });
+    return;
+  }
+
+  try {
+    const session = await stripe.billingPortal.sessions.create({
+      customer: agency.stripeCustomerId,
+      return_url: `${YOUR_DOMAIN}/dashboard/billing`,
+    });
+    res.json({ url: session.url });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    res.status(500).json({ error: `Failed to create portal session: ${message}` });
+  }
+});
+
+router.get("/billing/success", async (req, res): Promise<void> => {
+  const sessionId = req.query.session_id as string | undefined;
+  const redirectUrl = `${YOUR_DOMAIN}/dashboard/billing/success${sessionId ? `?session_id=${sessionId}` : ""}`;
+  res.redirect(302, redirectUrl);
 });
 
 router.get("/billing/invoices", async (req, res): Promise<void> => {
   const clerkOrgId = req.headers["x-clerk-org-id"] as string | undefined;
   if (!clerkOrgId) { res.status(401).json({ error: "Unauthorized" }); return; }
-  // Mock invoice history
   const now = new Date();
   const invoices = [
     {

@@ -15,6 +15,7 @@ import Transcripts from "@/pages/dashboard/transcripts";
 import Listings from "@/pages/dashboard/listings";
 import Staff from "@/pages/dashboard/staff";
 import Billing from "@/pages/dashboard/billing";
+import BillingSuccess from "@/pages/dashboard/billing-success";
 import Settings from "@/pages/dashboard/settings";
 
 const queryClient = new QueryClient({
@@ -42,6 +43,7 @@ function Router() {
       <Route path="/dashboard/listings" component={Listings} />
       <Route path="/dashboard/staff" component={Staff} />
       <Route path="/dashboard/billing" component={Billing} />
+      <Route path="/dashboard/billing/success" component={BillingSuccess} />
       <Route path="/dashboard/settings" component={Settings} />
       <Route component={NotFound} />
     </Switch>
