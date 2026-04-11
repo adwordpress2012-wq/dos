@@ -315,7 +315,7 @@ export default function Onboard() {
               {/* Accepted payment methods */}
               <div className="flex items-start gap-2 text-xs text-muted-foreground mb-4 bg-muted/50 rounded-lg p-3">
                 <Shield className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-                <span>Payment processed securely by Stripe. Accepted: Visa, Mastercard, Amex, and Klarna (pay in instalments). Afterpay is not available for subscription plans — contact us if you need a custom payment arrangement.</span>
+                <span>Accepted: Visa, Mastercard, Amex, Apple Pay, Google Pay, and Klarna (pay in instalments). Processed securely by Stripe — all amounts in AUD ex. GST.</span>
               </div>
 
               <div className="flex items-center justify-between rounded-xl p-3 mb-6"

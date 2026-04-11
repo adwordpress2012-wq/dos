@@ -62,7 +62,12 @@ router.get("/billing/usage", async (req, res): Promise<void> => {
   });
 });
 
-// ─── Step 1: Setup fee only — payment mode — supports Afterpay + Klarna + card ─
+// ─── Onboarding checkout ──────────────────────────────────────────────────────
+// payment mode — both line items shown (itemised order).
+// card → Apple Pay & Google Pay surface automatically on compatible browsers.
+// klarna → pay in instalments.
+// payment_intent_data.setup_future_usage saves the card so the subscription
+// checkout (step 2) doesn't ask for card details again.
 
 router.post("/billing/checkout/setup", async (req, res): Promise<void> => {
   const clerkOrgId = req.headers["x-clerk-org-id"] as string | undefined;
@@ -80,12 +85,49 @@ router.post("/billing/checkout/setup", async (req, res): Promise<void> => {
   }
 
   const agency = await getAgency(clerkOrgId);
+  const seatCount = agency?.seatCount ?? 1;
+  const additionalSeats = Math.max(0, seatCount - 1);
+
+  const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
+    // Line 1 — setup fee (uses the Stripe price record so name/description come from Stripe)
+    { price: priceOnboarding, quantity: 1 },
+    // Line 2 — first month licence shown inline
+    {
+      price_data: {
+        currency: "aud",
+        product_data: {
+          name: "Directive OS Licence — Month 1",
+          description: "Then A$299/month from month 2 onwards",
+        },
+        unit_amount: 29900,
+      },
+      quantity: 1,
+    },
+  ];
+
+  if (additionalSeats > 0) {
+    lineItems.push({
+      price_data: {
+        currency: "aud",
+        product_data: {
+          name: `Additional Seats — Month 1 (${additionalSeats} × A$89)`,
+          description: "Then A$89/seat/month from month 2 onwards",
+        },
+        unit_amount: 8900,
+      },
+      quantity: additionalSeats,
+    });
+  }
 
   const sessionParams: Stripe.Checkout.SessionCreateParams = {
     mode: "payment",
-    payment_method_types: ["card", "afterpay_clearpay", "klarna"],
-    line_items: [{ price: priceOnboarding, quantity: 1 }],
-    // After setup fee paid, send user to the subscription step
+    payment_method_types: ["card", "klarna"],
+    payment_intent_data: {
+      // Saves payment method so subscription checkout pre-fills it
+      setup_future_usage: "off_session",
+      metadata: { clerkOrgId },
+    },
+    line_items: lineItems,
     success_url: `${YOUR_DOMAIN}/onboard/subscribe?orgId=${encodeURIComponent(clerkOrgId)}&session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${YOUR_DOMAIN}/onboard`,
   };
@@ -101,11 +143,92 @@ router.post("/billing/checkout/setup", async (req, res): Promise<void> => {
     res.json({ url: session.url });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
-    res.status(500).json({ error: `Failed to create setup checkout: ${message}` });
+    res.status(500).json({ error: `Failed to create checkout: ${message}` });
   }
 });
 
-// ─── Step 2: Subscription — Klarna + card — no Afterpay (recurring not supported) ─
+// ─── Create subscription programmatically after payment checkout completes ─────
+// Called by the bridge page (/onboard/subscribe) with the Stripe session ID.
+// Retrieves the completed payment session, extracts the saved payment method,
+// and creates a subscription with a 30-day trial (month 1 already paid above).
+
+router.post("/billing/create-subscription", async (req, res): Promise<void> => {
+  const clerkOrgId = req.headers["x-clerk-org-id"] as string | undefined;
+  if (!clerkOrgId) { res.status(401).json({ error: "Unauthorized" }); return; }
+
+  const { sessionId } = req.body as { sessionId?: string };
+  if (!sessionId) { res.status(400).json({ error: "sessionId is required" }); return; }
+
+  const priceSubscription = process.env.SUBSCRIPTION_PRICE_ID ?? process.env.STRIPE_PRICE_SUBSCRIPTION;
+  const pricePerSeat = process.env.STRIPE_PRICE_PER_SEAT;
+
+  if (!priceSubscription) {
+    res.status(500).json({ error: "STRIPE_PRICE_SUBSCRIPTION is not configured." });
+    return;
+  }
+
+  let stripe: Stripe;
+  try { stripe = getStripe(); } catch {
+    res.status(500).json({ error: "Stripe is not configured." }); return;
+  }
+
+  let session: Stripe.Checkout.Session;
+  try {
+    session = await stripe.checkout.sessions.retrieve(sessionId, {
+      expand: ["payment_intent.payment_method"],
+    });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Unknown error";
+    res.status(400).json({ error: `Could not retrieve checkout session: ${msg}` });
+    return;
+  }
+
+  const customerId = session.customer as string | null;
+  if (!customerId) {
+    res.status(400).json({ error: "No Stripe customer on this session." });
+    return;
+  }
+
+  const paymentIntent = session.payment_intent as Stripe.PaymentIntent | null;
+  const paymentMethodId = paymentIntent
+    ? typeof paymentIntent.payment_method === "string"
+      ? paymentIntent.payment_method
+      : (paymentIntent.payment_method as Stripe.PaymentMethod | null)?.id ?? null
+    : null;
+
+  const agency = await getAgency(clerkOrgId);
+  const additionalSeats = Math.max(0, (agency?.seatCount ?? 1) - 1);
+
+  const subscriptionItems: Stripe.SubscriptionCreateParams.Item[] = [
+    { price: priceSubscription },
+  ];
+  if (additionalSeats > 0 && pricePerSeat) {
+    subscriptionItems.push({ price: pricePerSeat, quantity: additionalSeats });
+  }
+
+  const subscriptionParams: Stripe.SubscriptionCreateParams = {
+    customer: customerId,
+    items: subscriptionItems,
+    trial_period_days: 30,  // Month 1 already paid via payment checkout
+    metadata: { clerkOrgId },
+    ...(paymentMethodId ? { default_payment_method: paymentMethodId } : {}),
+  };
+
+  try {
+    const subscription = await stripe.subscriptions.create(subscriptionParams);
+
+    await db.update(agenciesTable)
+      .set({ stripeCustomerId: customerId, subscriptionStatus: "active", setupFeePaid: true })
+      .where(eq(agenciesTable.clerkOrgId, clerkOrgId));
+
+    res.json({ success: true, subscriptionId: subscription.id });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    res.status(500).json({ error: `Failed to create subscription: ${message}` });
+  }
+});
+
+// ─── /billing/checkout/subscription — kept for any direct subscription upgrades ─
 
 router.post("/billing/checkout/subscription", async (req, res): Promise<void> => {
   const clerkOrgId = req.headers["x-clerk-org-id"] as string | undefined;
@@ -140,10 +263,11 @@ router.post("/billing/checkout/subscription", async (req, res): Promise<void> =>
 
   const sessionParams: Stripe.Checkout.SessionCreateParams = {
     mode: "subscription",
+    payment_method_types: ["card", "klarna"],
     automatic_tax: { enabled: true },
     line_items: lineItems,
     success_url: `${YOUR_DOMAIN}/dashboard?subscribed=true`,
-    cancel_url: `${YOUR_DOMAIN}/onboard/subscribe?orgId=${encodeURIComponent(clerkOrgId)}`,
+    cancel_url: `${YOUR_DOMAIN}/onboard`,
   };
 
   if (agency?.stripeCustomerId) {
@@ -161,7 +285,7 @@ router.post("/billing/checkout/subscription", async (req, res): Promise<void> =>
   }
 });
 
-// ─── Legacy combined checkout (kept for backward compat) ──────────────────────
+// ─── /billing/checkout — dashboard "upgrade plan" route ──────────────────────
 
 router.post("/billing/checkout", async (req, res): Promise<void> => {
   const clerkOrgId = req.headers["x-clerk-org-id"] as string | undefined;
@@ -188,26 +312,24 @@ router.post("/billing/checkout", async (req, res): Promise<void> => {
   const agency = await getAgency(clerkOrgId);
   const additionalSeats = Math.max(0, (agency?.seatCount ?? 1) - 1);
 
-  // In subscription mode, Stripe allows one-time and recurring prices together.
-  // The one-time setup fee is charged on the first invoice only.
   const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
-    { price: priceOnboarding, quantity: 1 },     // $1,500 one-time onboarding & training
-    { price: priceSubscription, quantity: 1 },   // $299/mo base subscription
+    { price: priceSubscription, quantity: 1 },
   ];
-
   if (additionalSeats > 0 && pricePerSeat) {
     lineItems.push({ price: pricePerSeat, quantity: additionalSeats });
   }
-
-  // Metered excess usage (no quantity — Stripe tracks via meter events)
   if (priceExcessUsage) {
     lineItems.push({ price: priceExcessUsage });
   }
 
   const sessionParams: Stripe.Checkout.SessionCreateParams = {
     mode: "subscription",
+    payment_method_types: ["card", "klarna"],
     automatic_tax: { enabled: true },
     line_items: lineItems,
+    subscription_data: {
+      add_invoice_items: [{ price: priceOnboarding, quantity: 1 }],
+    },
     success_url: `${YOUR_DOMAIN}/dashboard/billing/success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${YOUR_DOMAIN}/dashboard/billing`,
   };
