@@ -19,6 +19,12 @@ import Staff from "@/pages/dashboard/staff";
 import Billing from "@/pages/dashboard/billing";
 import BillingSuccess from "@/pages/dashboard/billing-success";
 import Settings from "@/pages/dashboard/settings";
+import AdminLogin from "@/pages/admin/index";
+import AdminBridge from "@/pages/admin/bridge";
+import AdminClients from "@/pages/admin/clients";
+import AdminFinancials from "@/pages/admin/financials";
+import AdminPipeline from "@/pages/admin/pipeline";
+import AdminActivity from "@/pages/admin/activity";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -49,6 +55,12 @@ function Router() {
       <Route path="/dashboard/billing" component={Billing} />
       <Route path="/dashboard/billing/success" component={BillingSuccess} />
       <Route path="/dashboard/settings" component={Settings} />
+      <Route path="/admin" component={AdminLogin} />
+      <Route path="/admin/bridge" component={AdminBridge} />
+      <Route path="/admin/clients" component={AdminClients} />
+      <Route path="/admin/financials" component={AdminFinancials} />
+      <Route path="/admin/pipeline" component={AdminPipeline} />
+      <Route path="/admin/activity" component={AdminActivity} />
       <Route component={NotFound} />
     </Switch>
   );

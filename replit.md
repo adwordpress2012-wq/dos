@@ -16,6 +16,21 @@ The platform includes a **master portal site** (Directive OS) and **industry-spe
 - **Database**: PostgreSQL (`lib/db`)
 - **Validation**: Zod schemas at `lib/api-zod`
 
+## Admin Command Centre (Captain's Bridge)
+
+- **Route**: `/admin` on the master site — Jayson-only access
+- **Access code**: `directive-captain-2024` (change via `ADMIN_SECRET` env var)
+- **Modules**: Bridge Overview, Fleet Manifest (clients + CSV), Financial Ops (P&L + expenses + CSV), Strategic Command (CRM pipeline), Intel Feed (AI activity all agencies)
+- **API**: All endpoints at `/api/admin/*` protected by `x-admin-secret` header
+- **DB tables added**: `admin_expenses`, `admin_pipeline`
+
+## Demo Dashboard (Meridian)
+
+- **Route**: `/realestate-demo/dashboard` — public, no auth
+- **Purpose**: Sales tool — shows prospects what their agency dashboard would look like
+- **Data**: Mock leads (includes real Jason Ojumpo lead), transcripts, activity log
+- **CTA bar** at bottom: "This is YOUR Command Bridge" → Calendly booking link
+
 ## Demo Sites
 
 ### Real Estate Demo — Meridian Property Group

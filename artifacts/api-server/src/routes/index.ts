@@ -10,6 +10,7 @@ import aiRouter from "./ai";
 import voiceRouter from "./voice";
 import dashboardRouter from "./dashboard";
 import systemRouter from "./system";
+import adminRouter from "./admin";
 
 const DEMO_ORG_ID = "org_demo_001";
 
@@ -33,5 +34,6 @@ router.use(aiRouter);
 router.use(voiceRouter);
 router.use(dashboardRouter);
 router.use(systemRouter);
+router.use(adminRouter);
 
 export default router;
