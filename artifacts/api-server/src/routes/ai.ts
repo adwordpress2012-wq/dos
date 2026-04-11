@@ -130,36 +130,77 @@ router.post("/ai/chat", async (req, res): Promise<void> => {
     await db.insert(chatSessionsTable).values({ sessionId, agencyId: agencyId ?? null, history: JSON.stringify(history) });
   }
 
-  // Detect action
+  // Detect action and contact info in the conversation
   const { action, leadData } = detectAction(message, history);
 
-  // Save transcript message if we have a session connected to an agency
+  // Save transcript and lead if we have an agency
   if (agencyId) {
     try {
+      // Find or create one transcript per chat session (keyed by sessionId in summary)
       let transcript = await db.select().from(transcriptsTable)
-        .where(eq(transcriptsTable.leadId, -1 * agencyId))
+        .where(eq(transcriptsTable.summary, `chat:${sessionId}`))
         .then(r => r[0]);
 
       if (!transcript) {
         const [newTranscript] = await db.insert(transcriptsTable).values({
           agencyId,
           channel: "chat",
-          summary: "Web chat session",
+          summary: `chat:${sessionId}`,
+          leadName: "Website Visitor",
         }).returning();
         transcript = newTranscript;
       }
 
+      // Append both sides of this exchange to the transcript
       await db.insert(transcriptMessagesTable).values([
         { transcriptId: transcript.id, role: "user", content: message, timestamp: new Date() },
         { transcriptId: transcript.id, role: "assistant", content: reply, timestamp: new Date() },
       ]);
-    } catch (err) {
-      logger.warn({ err }, "Failed to save transcript message");
-    }
-  }
 
-  // Report AI usage meter event if agency has a Stripe customer ID
-  if (agencyId) {
+      // Save lead when contact info is detected for the first time
+      if (action === "collect_lead" && (leadData?.email || leadData?.phone)) {
+        // Check if a lead already exists for this session
+        const existingLead = await db.select({ id: leadsTable.id })
+          .from(leadsTable)
+          .where(eq(leadsTable.notes, `session:${sessionId}`))
+          .then(r => r[0]);
+
+        if (!existingLead) {
+          // Infer lead type from conversation history
+          const allText = history.map(m => m.content).join(" ").toLowerCase();
+          const leadType = allText.includes("buy") || allText.includes("purchas") ? "buyer"
+            : allText.includes("rent") || allText.includes("tenant") ? "tenant"
+            : allText.includes("sell") || allText.includes("vendor") ? "vendor"
+            : allText.includes("landlord") || allText.includes("manag") ? "landlord"
+            : "enquiry";
+
+          const hotLead = action === "transfer_call";
+
+          const [newLead] = await db.insert(leadsTable).values({
+            agencyId,
+            name: "Website Enquiry",
+            email: leadData.email || null,
+            phone: leadData.phone || null,
+            leadType,
+            status: "new",
+            channel: "chat",
+            hotLead,
+            notes: `session:${sessionId}`,
+          }).returning();
+
+          // Link lead to transcript
+          await db.update(transcriptsTable)
+            .set({ leadId: newLead.id, leadName: leadData.email || leadData.phone || "Website Enquiry" })
+            .where(eq(transcriptsTable.id, transcript.id));
+
+          logger.info({ leadId: newLead.id, email: leadData.email, phone: leadData.phone }, "New lead captured from chat");
+        }
+      }
+    } catch (err) {
+      logger.warn({ err }, "Failed to save transcript or lead");
+    }
+
+    // Report AI usage meter event if agency has a Stripe customer ID
     try {
       const [ag] = await db.select({ stripeCustomerId: agenciesTable.stripeCustomerId }).from(agenciesTable).where(eq(agenciesTable.id, agencyId));
       if (ag?.stripeCustomerId) {

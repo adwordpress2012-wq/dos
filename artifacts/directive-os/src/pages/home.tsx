@@ -132,7 +132,7 @@ function DemoChatWidget() {
     setInput("");
     setMessages(prev => [...prev, { role: "user", content: userMsg }]);
     try {
-      const result = await chat.mutateAsync({ data: { sessionId, message: userMsg, agencyId: null } });
+      const result = await chat.mutateAsync({ data: { sessionId, message: userMsg, agencyId: 1 } });
       setMessages(prev => [...prev, { role: "assistant", content: result.reply }]);
       setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
     } catch {
