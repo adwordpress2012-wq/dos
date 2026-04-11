@@ -2,7 +2,7 @@
 
 ## Overview
 
-Directive OS is a professional SaaS platform providing AI receptionist services to Australian real estate agencies. Built on a pnpm workspace monorepo using TypeScript.
+Directive OS is a professional SaaS platform providing AI receptionist services to Australian real estate agencies. Built on a pnpm workspace monorepo using TypeScript. Live at **https://directiveos.com.au**
 
 ## Architecture
 
@@ -13,12 +13,19 @@ Directive OS is a professional SaaS platform providing AI receptionist services 
 - **Database**: PostgreSQL (`lib/db`)
 - **Validation**: Zod schemas at `lib/api-zod`
 
-## Simulation Mode
+## Design System
 
-Set `DATABASE_MODE=SIMULATION` to enable the Mock VaultRE Bridge (`artifacts/api-server/src/lib/mockVault.ts`).
-- Returns 10 realistic NSW listings across Cronulla, Surry Hills, Bondi Beach, Manly, Chatswood, Newtown, Balmain, Parramatta
-- System status endpoint (`/api/system/status`) reports `ACTIVE (SIMULATED)` with the badge visible in the dashboard sidebar
-- Demo org: `org_demo_001` = "Pinnacle Real Estate" (auto-injected when no auth header present)
+- Background: Deep Navy (`#0a0e1a`)
+- Accent: Emerald Green (`#00d1b2`)
+- Glassmorphism cards, no emojis
+- Font: System sans-serif
+
+## Simulation / Demo Mode
+
+- Demo org: `org_demo_001` = "Pinnacle Real Estate" (auto-injected by middleware when no auth header present)
+- 20 Western Sydney leads, 12 unique transcripts, 10 listings (3 auction, 5 sale, 2 rental)
+- VaultRE badge shows "VaultRE Connected" pill (not a banner)
+- `DATABASE_MODE=SIMULATION` enables mock VaultRE bridge
 
 ## Key Routes
 
@@ -26,49 +33,81 @@ Set `DATABASE_MODE=SIMULATION` to enable the Mock VaultRE Bridge (`artifacts/api
 - `GET /api/system/status` — current system mode + VaultRE bridge info
 - `GET/PATCH /api/agencies/me` — agency profile
 - `POST /api/agencies/onboard` — onboarding flow
-- `GET/POST /api/listings` — property listings
+- `GET/POST /api/listings` — property listings (supports photoUrl as base64)
 - `POST /api/listings/sync-vaultre` — sync from VaultRE (uses mockVault in SIMULATION mode)
 - `GET/POST/PATCH /api/leads` — lead management
 - `GET /api/transcripts` + `GET /api/transcripts/:id` — call/chat transcripts
 - `GET/POST/DELETE /api/staff` — team seat management
 - `GET /api/billing/subscription` + `/usage` + `/invoices` — billing data
 - `POST /api/billing/portal` — Stripe portal redirect
-- `POST /api/ai/chat` — AI receptionist chat (pattern-matching mock)
+- `POST /api/ai/chat` — AI receptionist chat (pattern-matching mock — UPGRADE PENDING to OpenAI)
 - `GET /api/dashboard/summary|recent-leads|lead-breakdown|activity` — dashboard data
 
 ### Frontend (`artifacts/directive-os`) — served at `/`
-- `/` — Marketing homepage (hero, features, pricing calculator, live demo chat)
-- `/sign-in`, `/sign-up` — Auth pages
-- `/onboard` — 3-step agency onboarding wizard
+- `/` — Marketing homepage (hero, features, pricing calculator, live demo chat, Calendly links)
+- `/book` — Free consultation booking page with Calendly iframe embed
+- `/sign-in`, `/sign-up` — Auth pages (demo mode, Clerk auth PENDING)
+- `/onboard` — 3-step agency onboarding wizard (includes training section + Calendly)
 - `/terms`, `/privacy`, `/resources` — Legal + docs
-- `/dashboard` — Command Centre (simulation banner, stats, charts)
+- `/dashboard` — Command Centre (stats, charts, activity feed)
 - `/dashboard/leads` — Lead Inbox
 - `/dashboard/transcripts` — Communication Logs
-- `/dashboard/listings` — Property Intelligence (VaultRE sync)
+- `/dashboard/listings` — Property Intelligence (portal-style cards, auction support)
 - `/dashboard/staff` — Seat Management
 - `/dashboard/billing` — Billing Command (invoices, AI usage)
 - `/dashboard/settings` — Communication Protocols
 
-## Stack
+## Listings Schema (important fields)
 
-- **Monorepo tool**: pnpm workspaces
-- **Node.js**: 24
-- **TypeScript**: 5.9
-- **API framework**: Express 5
-- **Database ORM**: Drizzle ORM
-- **Validation**: Zod v4, drizzle-zod
-- **API codegen**: Orval (from OpenAPI spec)
-- **Charts**: Recharts
-- **UI Components**: Radix UI + shadcn/ui primitives
-- **Routing**: Wouter
-- **State**: TanStack Query
+```typescript
+// lib/db/src/schema/listings.ts
+photoUrl: text — stores base64 compressed JPEG (max 480px, 65% quality ~40KB)
+listingMethod: text — "private_treaty" | "auction"
+auctionDate: text — "Sat 17 May"
+auctionTime: text — "11:00am"
+carSpaces: integer
+inspectionTimes: jsonb — array of strings "Sat 3 May, 10:00-10:30am"
+```
 
 ## Pricing Model
 
 - Base: $299/mo (includes 1 seat) + $89/mo per additional seat
-- Setup fee: $1,500 AUD (one-time)
+- Setup/onboarding fee: $1,500 AUD (one-time) — NOT shown on site, deferred to strategy call
 - AI minutes: 100/month included, $25 per 10-min overage block
 - All prices ex-GST
+- Calendly: https://calendly.com/adwordpress2012/directive-os-agency-onboarding
+
+## Stripe (test mode)
+
+- Secret key: `STRIPE_SECRET_KEY` env var
+- Onboarding price: `STRIPE_PRICE_ONBOARDING` = `price_1TKwod9aGsy5kFWkRGkCu61m`
+- Subscription price: `price_1TKwuz9aGsy5kFWkNYUwwGQH`
+- Per-seat price: `price_1TKwxl9aGsy5kFWk8tEbNyKc`
+- AI overage price: `price_1TKwyH9aGsy5kFWkBWcoTfZY`
+- Meter: `mtr_test_61UUKvWeRyLG29Qn6419aGsy5kFWkSVM`
+
+## Next Steps (Priority Order)
+
+### 1. OpenAI Chat Integration
+- Replace `POST /api/ai/chat` pattern-matching with OpenAI GPT-4o-mini
+- System prompt: real estate receptionist for Australian agencies
+- Needs: `OPENAI_API_KEY` secret
+- See skill: `.local/skills/directive-os-ai-voice/SKILL.md`
+
+### 2. Twilio Voice — AI Phone Receptionist
+- Inbound +61 Australian number via Twilio
+- OpenAI Realtime API (gpt-4o-realtime-preview) for live voice conversation
+- Female voice: OpenAI `shimmer`
+- Needs: `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_PHONE_NUMBER` secrets
+- See skill: `.local/skills/directive-os-ai-voice/SKILL.md`
+
+### 3. Clerk Auth
+- Real user authentication replacing demo middleware
+- Needs: Clerk account + `CLERK_PUBLISHABLE_KEY` + `CLERK_SECRET_KEY`
+
+### 4. Stripe Checkout Wiring
+- Connect "Proceed to Payment" to real Stripe checkout session
+- Keys already configured in environment
 
 ## Key Commands
 
