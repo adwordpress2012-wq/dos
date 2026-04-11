@@ -4,6 +4,7 @@ import Stripe from "stripe";
 import { db, agenciesTable, transcriptsTable, transcriptMessagesTable, leadsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { logger } from "../lib/logger";
+import { sendVoiceTranscriptEmail } from "../lib/email";
 
 const router: IRouter = Router();
 
@@ -414,6 +415,28 @@ async function onCallEnd(session: CallSession): Promise<void> {
       );
 
       logger.info({ transcriptId: savedTranscript.id }, "Voice transcript saved");
+    }
+
+    // ── Email transcript to agency contact ───────────────────────────────────
+    if (session.transcript.length > 0) {
+      try {
+        const [agency] = await db
+          .select({ name: agenciesTable.name, contactEmail: agenciesTable.contactEmail })
+          .from(agenciesTable)
+          .where(eq(agenciesTable.id, saveAgencyId));
+
+        if (agency) {
+          void sendVoiceTranscriptEmail({
+            agencyName: agency.name,
+            agencyEmail: agency.contactEmail,
+            duration: durationSeconds,
+            messages: session.transcript,
+            leadType,
+          });
+        }
+      } catch (err) {
+        logger.warn({ err }, "Failed to send voice transcript email");
+      }
     }
 
     // Stripe usage billing — only for paying agencies

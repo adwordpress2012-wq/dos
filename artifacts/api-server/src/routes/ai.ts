@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import { db, agenciesTable, chatSessionsTable, transcriptsTable, transcriptMessagesTable, leadsTable } from "@workspace/db";
 import { AiChatBody, AiSendFormBody } from "@workspace/api-zod";
 import { logger } from "../lib/logger";
+import { sendChatTranscriptEmail, OWNER_EMAILS } from "../lib/email";
 import Stripe from "stripe";
 import OpenAI from "openai";
 
@@ -102,75 +103,6 @@ function buildSystemPrompt(agencyName: string | null): string {
   return buildRealEstateSarahPrompt(agencyName);
 }
 
-const OWNER_EMAILS = ["adwordpress2012@gmail.com", "jayson@directiveos.com.au"];
-
-async function sendTranscriptEmail(sessionId: string, history: ChatMessage[]): Promise<void> {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) {
-    logger.warn("RESEND_API_KEY not set — transcript not emailed");
-    return;
-  }
-
-  const allText = history.map(m => m.content).join(" ");
-  const emailMatch = allText.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
-  const phoneMatch = allText.match(/(\+?61|0)[0-9 ]{8,12}/);
-
-  const rows = history.map(m => `
-    <tr>
-      <td style="padding:8px 12px;vertical-align:top;width:90px;color:${m.role === "user" ? "#6366f1" : "#00d1b2"};font-weight:bold;white-space:nowrap;font-size:13px;">
-        ${m.role === "user" ? "👤 Prospect" : "🤖 Sarah"}
-      </td>
-      <td style="padding:8px 12px;font-size:14px;line-height:1.5;color:#222;background:${m.role === "user" ? "#f5f5ff" : "#f0fffc"};border-radius:8px;">
-        ${m.content.replace(/\n/g, "<br/>")}
-      </td>
-    </tr>
-    <tr><td colspan="2" style="height:4px;"></td></tr>`
-  ).join("");
-
-  const subject = emailMatch
-    ? `🔔 New Directive OS Enquiry — ${emailMatch[0]}`
-    : phoneMatch
-    ? `🔔 New Directive OS Enquiry — ${phoneMatch[0]}`
-    : `🔔 New Directive OS Enquiry — ${history.length} messages`;
-
-  const html = `
-    <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:640px;margin:auto;padding:24px;">
-      <div style="background:#0a0e1a;border-radius:12px;padding:20px 24px;margin-bottom:24px;">
-        <h2 style="margin:0;color:#00d1b2;font-size:20px;">Directive OS — New Chat Enquiry</h2>
-        <p style="margin:6px 0 0;color:rgba(255,255,255,0.5);font-size:12px;">Session: ${sessionId} &nbsp;·&nbsp; ${history.length} messages</p>
-      </div>
-      <table style="width:100%;border-collapse:collapse;margin-bottom:20px;font-size:13px;">
-        <tr><td style="padding:4px 0;color:#888;width:130px;">Email detected:</td><td style="padding:4px 0;font-weight:600;">${emailMatch?.[0] ?? "—"}</td></tr>
-        <tr><td style="padding:4px 0;color:#888;">Phone detected:</td><td style="padding:4px 0;font-weight:600;">${phoneMatch?.[0] ?? "—"}</td></tr>
-      </table>
-      <h3 style="margin:0 0 12px;color:#333;border-bottom:2px solid #00d1b2;padding-bottom:8px;">Full Conversation</h3>
-      <table style="width:100%;border-collapse:separate;border-spacing:0 2px;">${rows}</table>
-      <div style="margin-top:28px;padding:12px 16px;background:#f8f8f8;border-radius:8px;font-size:11px;color:#999;">
-        Sent automatically by Sarah · Directive OS AI Receptionist
-      </div>
-    </div>`;
-
-  try {
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        from: "Sarah at Directive OS <onboarding@resend.dev>",
-        to: OWNER_EMAILS,
-        subject,
-        html,
-      }),
-    });
-    if (!res.ok) {
-      const err = await res.text();
-      logger.warn({ err }, "Resend API returned error");
-    } else {
-      logger.info({ sessionId, email: emailMatch?.[0] }, "Transcript email sent");
-    }
-  } catch (err) {
-    logger.warn({ err }, "Failed to send transcript email");
-  }
-}
 
 function detectAction(message: string, history: ChatMessage[]): { action: string | null; leadData?: Record<string, string> } {
   const lower = message.toLowerCase();
@@ -314,6 +246,33 @@ router.post("/ai/chat", async (req, res): Promise<void> => {
             .where(eq(transcriptsTable.id, transcript.id));
 
           logger.info({ leadId: newLead.id, email: leadData.email, phone: leadData.phone }, "New lead captured from chat");
+
+          // Email transcript to agency contact on first lead capture
+          try {
+            const [ag] = await db
+              .select({ name: agenciesTable.name, contactEmail: agenciesTable.contactEmail })
+              .from(agenciesTable)
+              .where(eq(agenciesTable.id, agencyId));
+
+            if (ag) {
+              const allText = history.map(m => m.content).join(" ").toLowerCase();
+              const leadType = allText.includes("buy") || allText.includes("purchas") ? "buyer"
+                : allText.includes("rent") || allText.includes("tenant") ? "tenant"
+                : allText.includes("sell") || allText.includes("vendor") ? "vendor"
+                : allText.includes("landlord") || allText.includes("manag") ? "landlord"
+                : "enquiry";
+
+              void sendChatTranscriptEmail({
+                agencyName: ag.name,
+                agencyEmail: ag.contactEmail,
+                sessionId,
+                messages: history,
+                leadType,
+              });
+            }
+          } catch (err) {
+            logger.warn({ err }, "Failed to send agency chat transcript email");
+          }
         }
       }
     } catch (err) {
@@ -342,7 +301,12 @@ router.post("/ai/chat", async (req, res): Promise<void> => {
     const highEngagement = history.length >= 10 && history.length % 10 === 0;
 
     if ((hasContact && !hadContact) || bookingIntent || highEngagement) {
-      void sendTranscriptEmail(sessionId, history);
+      void sendChatTranscriptEmail({
+        agencyName: "Directive OS",
+        agencyEmail: null,
+        sessionId,
+        messages: history,
+      });
     }
   }
 
