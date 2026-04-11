@@ -5,10 +5,22 @@ import Stripe from "stripe";
 
 const router: IRouter = Router();
 
+function getStripeKey(): string {
+  const candidates = [
+    process.env.STRIPE_SK,
+    process.env.STRIPE_SECRET_KEY_DOS,
+    process.env.STRIPE_SECRET_KEY_OS,
+    process.env.SECRET_KEY_DOS,
+    process.env.SECRET_KEY_OS,
+    process.env.STRIPE_SECRET_KEY,
+  ];
+  const key = candidates.find(k => k && (k.startsWith("sk_live_") || k.startsWith("sk_test_")));
+  if (!key) throw new Error("No valid Stripe secret key found. Please set a key starting with sk_live_ or sk_test_.");
+  return key;
+}
+
 function getStripe(): Stripe {
-  const key = process.env.STRIPE_SK ?? process.env.STRIPE_SECRET_KEY;
-  if (!key) throw new Error("Stripe secret key is not configured");
-  return new Stripe(key, { apiVersion: "2025-03-31.basil" });
+  return new Stripe(getStripeKey(), { apiVersion: "2025-03-31.basil" });
 }
 
 const YOUR_DOMAIN = "https://directiveos.com.au";
