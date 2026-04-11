@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import {
   useGetListings, useCreateListing, useSyncVaultRE,
@@ -7,8 +7,33 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import {
   Building2, RefreshCw, Plus, Home, Key, X, Bed, Bath, Car,
-  User, ImageIcon, Gavel, CalendarCheck, Phone
+  User, Upload, Gavel, CalendarCheck, Phone, Trash2, Link2
 } from "lucide-react";
+
+// ── Client-side image compression ──────────────────────────────────────────
+// Resize to max 480px wide, JPEG at 65% quality → ~30–60 KB typically
+async function compressImage(file: File, maxWidth = 480, quality = 0.65): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = reject;
+    reader.onload = ev => {
+      const img = new Image();
+      img.onerror = reject;
+      img.onload = () => {
+        const scale = Math.min(1, maxWidth / img.width);
+        const w = Math.round(img.width * scale);
+        const h = Math.round(img.height * scale);
+        const canvas = document.createElement("canvas");
+        canvas.width = w;
+        canvas.height = h;
+        canvas.getContext("2d")!.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL("image/jpeg", quality));
+      };
+      img.src = ev.target!.result as string;
+    };
+    reader.readAsDataURL(file);
+  });
+}
 
 // ── Inspection time parser ──────────────────────────────────────────────────
 // Expects: "Sat 3 May, 10:00-10:30am"
@@ -53,6 +78,7 @@ function StatusBadge({ status }: { status: string }) {
 
 function AddListingModal({ onClose }: { onClose: () => void }) {
   const queryClient = useQueryClient();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const createListing = useCreateListing({
     mutation: {
       onSuccess: () => {
@@ -72,9 +98,34 @@ function AddListingModal({ onClose }: { onClose: () => void }) {
     auctionDate: "", auctionTime: "",
     photoUrl: "", description: "",
   });
+  const [photoCompressing, setPhotoCompressing] = useState(false);
+  const [photoSizeKb, setPhotoSizeKb] = useState<number | null>(null);
+  const [photoMode, setPhotoMode] = useState<"upload" | "url">("upload");
+  const [dragOver, setDragOver] = useState(false);
 
   const f = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setForm(p => ({ ...p, [k]: e.target.value }));
+
+  const handleFileSelect = async (file: File) => {
+    if (!file.type.startsWith("image/")) return;
+    setPhotoCompressing(true);
+    try {
+      const dataUrl = await compressImage(file);
+      // Calculate compressed size in KB
+      const bytes = Math.round((dataUrl.length - "data:image/jpeg;base64,".length) * 0.75);
+      setPhotoSizeKb(Math.round(bytes / 1024));
+      setForm(p => ({ ...p, photoUrl: dataUrl }));
+    } finally {
+      setPhotoCompressing(false);
+    }
+  };
+
+  const handleFileDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+    const file = e.dataTransfer.files[0];
+    if (file) handleFileSelect(file);
+  };
 
   const submit = () => {
     createListing.mutate({
@@ -113,17 +164,99 @@ function AddListingModal({ onClose }: { onClose: () => void }) {
         </div>
 
         <div className="p-6 space-y-4 max-h-[72vh] overflow-y-auto">
-          {form.photoUrl && (
-            <div className="rounded-xl overflow-hidden h-32 bg-muted">
-              <img src={form.photoUrl} alt="Preview" className="w-full h-full object-cover" onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />
-            </div>
-          )}
+
+          {/* ── Photo section ── */}
           <div>
-            <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Photo URL</label>
-            <div className="flex gap-2 items-center">
-              <ImageIcon className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-              <input value={form.photoUrl} onChange={f("photoUrl")} placeholder="https://..." className={inputCls} />
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-xs font-medium text-muted-foreground">Property Photo</label>
+              <div className="flex items-center gap-1 bg-muted rounded-lg p-0.5">
+                <button
+                  onClick={() => setPhotoMode("upload")}
+                  className={`text-xs px-2 py-1 rounded-md transition-colors flex items-center gap-1 ${photoMode === "upload" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+                >
+                  <Upload className="w-3 h-3" /> Upload
+                </button>
+                <button
+                  onClick={() => setPhotoMode("url")}
+                  className={`text-xs px-2 py-1 rounded-md transition-colors flex items-center gap-1 ${photoMode === "url" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+                >
+                  <Link2 className="w-3 h-3" /> URL
+                </button>
+              </div>
             </div>
+
+            {/* Preview */}
+            {form.photoUrl && (
+              <div className="relative rounded-xl overflow-hidden h-36 bg-muted mb-2 group">
+                <img src={form.photoUrl} alt="Preview" className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors" />
+                <div className="absolute top-2 right-2 flex items-center gap-1.5">
+                  {photoSizeKb !== null && (
+                    <span className="text-[10px] bg-black/60 text-white px-2 py-0.5 rounded-full font-medium">
+                      {photoSizeKb} KB compressed
+                    </span>
+                  )}
+                  <button
+                    onClick={() => { setForm(p => ({ ...p, photoUrl: "" })); setPhotoSizeKb(null); }}
+                    className="bg-red-500/80 hover:bg-red-500 text-white p-1 rounded-lg transition-colors"
+                    title="Remove photo"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Upload drop zone */}
+            {photoMode === "upload" && !form.photoUrl && (
+              <>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={e => { const f = e.target.files?.[0]; if (f) handleFileSelect(f); }}
+                />
+                <div
+                  onDrop={handleFileDrop}
+                  onDragOver={e => { e.preventDefault(); setDragOver(true); }}
+                  onDragLeave={() => setDragOver(false)}
+                  onClick={() => fileInputRef.current?.click()}
+                  className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors ${
+                    dragOver
+                      ? "border-primary bg-primary/5"
+                      : "border-border hover:border-primary/50 hover:bg-muted/50"
+                  }`}
+                >
+                  {photoCompressing ? (
+                    <div className="text-sm text-muted-foreground">
+                      <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+                      Compressing...
+                    </div>
+                  ) : (
+                    <>
+                      <Upload className="w-7 h-7 text-muted-foreground mx-auto mb-2" />
+                      <div className="text-sm font-medium text-foreground mb-0.5">
+                        {dragOver ? "Drop it here" : "Click to upload or drag & drop"}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        JPG, PNG, WebP — auto-compressed to ~480px, ~40 KB
+                      </div>
+                    </>
+                  )}
+                </div>
+              </>
+            )}
+
+            {/* URL input */}
+            {photoMode === "url" && !form.photoUrl && (
+              <input
+                value={form.photoUrl}
+                onChange={f("photoUrl")}
+                placeholder="https://images.unsplash.com/..."
+                className={inputCls}
+              />
+            )}
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="col-span-2">
