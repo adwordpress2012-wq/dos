@@ -119,10 +119,10 @@ interface Message { role: "assistant" | "user"; content: string; }
 function DemoChatWidget() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
-    { role: "assistant", content: "Hello! I'm the Directive OS AI Receptionist for Pinnacle Real Estate. I'm available 24/7 to assist you. Are you a buyer looking to purchase, or a tenant looking for a rental?" }
+    { role: "assistant", content: "G'day! I'm Sarah, the Directive OS AI Receptionist. I can tell you about our platform, pricing, and how we can help your agency capture more leads 24/7. What would you like to know?" }
   ]);
   const [input, setInput] = useState("");
-  const [sessionId] = useState(`demo_${Date.now()}`);
+  const [sessionId] = useState(`dos_${Date.now()}`);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chat = useAiChat();
 
@@ -132,7 +132,7 @@ function DemoChatWidget() {
     setInput("");
     setMessages(prev => [...prev, { role: "user", content: userMsg }]);
     try {
-      const result = await chat.mutateAsync({ data: { sessionId, message: userMsg, agencyId: 1 } });
+      const result = await chat.mutateAsync({ data: { sessionId, message: userMsg, agencyId: null } });
       setMessages(prev => [...prev, { role: "assistant", content: result.reply }]);
       setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
     } catch {
@@ -158,8 +158,8 @@ function DemoChatWidget() {
             <div className="flex items-center gap-2.5">
               <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: "#00d1b2", boxShadow: "0 0 8px #00d1b2" }} />
               <div>
-                <div className="text-sm font-semibold text-foreground">Directive OS — Live Demo</div>
-                <div className="text-xs text-muted-foreground">Pinnacle Real Estate · AI Receptionist</div>
+                <div className="text-sm font-semibold text-foreground">Sarah · Directive OS</div>
+                <div className="text-xs text-muted-foreground">AI Receptionist · Available 24/7</div>
               </div>
             </div>
             <button onClick={() => setOpen(false)} className="text-muted-foreground hover:text-foreground transition-colors">
@@ -201,7 +201,7 @@ function DemoChatWidget() {
               type="text" value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key === "Enter" && send()}
-              placeholder="Ask about a property..."
+              placeholder="Ask about Directive OS..."
               className="flex-1 rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1"
               style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", focusRingColor: "#00d1b2" } as React.CSSProperties}
             />
