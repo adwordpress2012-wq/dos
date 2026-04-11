@@ -77,10 +77,19 @@ function PricingCalculator() {
         </div>
       </div>
 
-      <div className="rounded-xl p-4 mb-6 text-sm flex items-start gap-3"
+      <div className="rounded-xl p-4 mb-6 text-sm"
         style={{ background: "rgba(0,209,178,0.06)", border: "1px solid rgba(0,209,178,0.15)" }}>
-        <Shield className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-        <span className="text-muted-foreground">One-time onboarding &amp; setup fee: <strong className="text-foreground">${SETUP_FEE.toLocaleString()} AUD + GST</strong> — includes full configuration, VaultRE sync, and agent training.</span>
+        <div className="flex items-center gap-2 mb-2">
+          <Shield className="w-4 h-4 text-primary flex-shrink-0" />
+          <span className="font-semibold text-foreground text-sm">Done-for-you onboarding included</span>
+        </div>
+        <ul className="space-y-1 text-muted-foreground text-xs ml-6">
+          <li className="flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-primary flex-shrink-0" />Full platform configuration &amp; custom setup</li>
+          <li className="flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-primary flex-shrink-0" />VaultRE CRM mapping &amp; live sync</li>
+          <li className="flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-primary flex-shrink-0" />AI receptionist training for your listings</li>
+          <li className="flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-primary flex-shrink-0" />Live walkthrough &amp; staff onboarding session</li>
+        </ul>
+        <p className="text-xs text-muted-foreground mt-2 ml-6 italic">Onboarding investment outlined during your free strategy call.</p>
       </div>
 
       <Link href="/sign-up">
@@ -686,7 +695,7 @@ export default function Home() {
             </button>
           </Link>
           <p className="text-muted-foreground text-sm mt-6">
-            $1,500 setup fee + $299/mo — GST-compliant invoicing — Australian-hosted infrastructure
+            From $299/mo + GST — no lock-in contracts — Australian-hosted infrastructure
           </p>
         </div>
       </section>
