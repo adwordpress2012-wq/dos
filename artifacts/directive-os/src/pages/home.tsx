@@ -271,7 +271,7 @@ export default function Home() {
           {/* Live Voice Demo CTA */}
           <div className="mt-6 mb-2 flex justify-center">
             <a
-              href="tel:+61258504038"
+              href="tel:0258504038"
               className="inline-flex items-center gap-3 px-6 py-3 rounded-2xl transition-all hover:scale-105 group"
               style={{ background: "rgba(0,209,178,0.08)", border: "1px solid rgba(0,209,178,0.25)", backdropFilter: "blur(10px)" }}
             >
@@ -281,7 +281,7 @@ export default function Home() {
               </div>
               <div className="text-left">
                 <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Call Our Live AI Receptionist</div>
-                <div className="font-bold text-foreground tracking-wide">+61 2 5850 4038</div>
+                <div className="font-bold text-foreground tracking-wide">02 5850 4038</div>
               </div>
               <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />
             </a>
@@ -801,15 +801,15 @@ export default function Home() {
                 </div>
                 <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest mb-2">AI Receptionist — Live Now</p>
                 <a
-                  href="tel:+61258504038"
+                  href="tel:0258504038"
                   className="text-4xl font-bold tracking-wider mb-2 hover:opacity-80 transition-opacity block"
                   style={{ color: "#00d1b2" }}
                 >
-                  +61 2 5850 4038
+                  02 5850 4038
                 </a>
                 <p className="text-xs text-muted-foreground mb-6">Australian number · tap to call on mobile</p>
                 <a
-                  href="tel:+61258504038"
+                  href="tel:0258504038"
                   className="w-full font-bold py-4 px-6 rounded-xl transition-all hover:scale-105 flex items-center justify-center gap-2.5"
                   style={{ background: "linear-gradient(135deg, #00d1b2, #00b89c)", color: "#0a0a0a", boxShadow: "0 4px 24px rgba(0,209,178,0.35)" }}
                 >

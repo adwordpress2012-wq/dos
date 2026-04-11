@@ -33,20 +33,15 @@ Do not use emojis or filler words. End every response with a question or next st
 // ─── TwiML Entry Point ────────────────────────────────────────────────────────
 
 router.post("/voice/incoming", (req: Request, res: Response) => {
-  // Use explicit env var first, then forwarded host, then host header
-  // VOICE_DOMAIN should always be set in production to "directiveos.com.au"
-  const domain =
-    process.env.VOICE_DOMAIN ||
-    (req.headers["x-forwarded-host"] as string) ||
-    req.headers.host ||
-    "directiveos.com.au";
+  // CRITICAL: The WebSocket host MUST match the host that served this TwiML response.
+  // Twilio will connect the media-stream WebSocket back to whatever host we specify here.
+  // Using x-forwarded-host ensures this works in both dev (replit.dev) and production.
+  const forwardedHost = req.headers["x-forwarded-host"] as string | undefined;
+  const rawHost = forwardedHost || req.headers.host || "directiveos.com.au";
+  // Strip port from host — wss:// doesn't need it for standard TLS
+  const host = rawHost.split(",")[0].trim().replace(/:\d+$/, "");
 
-  // Strip any port suffix for the production domain
-  const cleanDomain = domain.replace(/:\d+$/, "") === "localhost"
-    ? "directiveos.com.au"
-    : domain.replace(/:\d+$/, "");
-
-  const wsUrl = `wss://${cleanDomain}/api/voice/media-stream`;
+  const wsUrl = `wss://${host}/api/voice/media-stream`;
 
   const twiml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
@@ -55,7 +50,8 @@ router.post("/voice/incoming", (req: Request, res: Response) => {
   </Connect>
 </Response>`;
 
-  logger.info({ wsUrl, domain: cleanDomain }, "Incoming call — returning TwiML media stream");
+  console.log(`[VOICE] Incoming call → TwiML host=${host} wsUrl=${wsUrl}`);
+  logger.info({ wsUrl, host }, "Incoming call — returning TwiML media stream");
   res.type("text/xml").send(twiml);
 });
 
@@ -226,11 +222,19 @@ export function handleMediaStream(twilioWs: WebSocket): void {
 
   // ── Cleanup and billing on call end ───────────────────────────────────────
   twilioWs.on("close", () => {
-    session.openaiWs.close();
+    console.log("[VOICE] Twilio WebSocket closed — cleaning up session");
+    // Only close OpenAI if it's in a closeable state (not CONNECTING=0)
+    if (session.openaiWs.readyState !== WebSocket.CONNECTING) {
+      session.openaiWs.close();
+    } else {
+      // If still connecting, terminate immediately to avoid "closed before established" error
+      session.openaiWs.terminate();
+    }
     void onCallEnd(session);
   });
 
   session.openaiWs.on("close", () => {
+    console.log("[VOICE] OpenAI WebSocket closed — closing Twilio if still open");
     if (twilioWs.readyState === WebSocket.OPEN) twilioWs.close();
   });
 }
