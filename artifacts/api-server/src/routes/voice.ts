@@ -11,7 +11,7 @@ const router: IRouter = Router();
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const OPENAI_REALTIME_URL =
-  "wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-10-01";
+  "wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-12-17";
 
 const AI_PERSONA = `You are Sarah, a professional Australian real estate receptionist for Directive OS. 
 You are helping Jayson manage enquiries for commercial and residential properties in Western Sydney.
@@ -33,8 +33,20 @@ Do not use emojis or filler words. End every response with a question or next st
 // ─── TwiML Entry Point ────────────────────────────────────────────────────────
 
 router.post("/voice/incoming", (req: Request, res: Response) => {
-  const host = req.headers.host ?? "directiveos.com.au";
-  const wsUrl = `wss://${host}/api/voice/media-stream`;
+  // Use explicit env var first, then forwarded host, then host header
+  // VOICE_DOMAIN should always be set in production to "directiveos.com.au"
+  const domain =
+    process.env.VOICE_DOMAIN ||
+    (req.headers["x-forwarded-host"] as string) ||
+    req.headers.host ||
+    "directiveos.com.au";
+
+  // Strip any port suffix for the production domain
+  const cleanDomain = domain.replace(/:\d+$/, "") === "localhost"
+    ? "directiveos.com.au"
+    : domain.replace(/:\d+$/, "");
+
+  const wsUrl = `wss://${cleanDomain}/api/voice/media-stream`;
 
   const twiml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
@@ -43,7 +55,7 @@ router.post("/voice/incoming", (req: Request, res: Response) => {
   </Connect>
 </Response>`;
 
-  logger.info({ wsUrl }, "Incoming call — returning TwiML media stream");
+  logger.info({ wsUrl, domain: cleanDomain }, "Incoming call — returning TwiML media stream");
   res.type("text/xml").send(twiml);
 });
 
@@ -86,9 +98,10 @@ export function handleMediaStream(twilioWs: WebSocket): void {
       JSON.stringify({
         type: "session.update",
         session: {
-          turn_detection: { type: "server_vad" },
+          turn_detection: { type: "server_vad", silence_duration_ms: 800 },
           input_audio_format: "g711_ulaw",
           output_audio_format: "g711_ulaw",
+          input_audio_transcription: { model: "whisper-1" },
           voice: "shimmer",
           instructions: AI_PERSONA,
           modalities: ["text", "audio"],
@@ -136,6 +149,7 @@ export function handleMediaStream(twilioWs: WebSocket): void {
       // Capture assistant speech transcript
       if (event.type === "response.audio_transcript.done" && event.transcript) {
         session.transcript.push({ role: "assistant", content: event.transcript });
+        logger.info({ content: event.transcript.substring(0, 80) }, "Sarah spoke");
       }
 
       // Capture user speech transcript
@@ -144,6 +158,12 @@ export function handleMediaStream(twilioWs: WebSocket): void {
         event.transcript
       ) {
         session.transcript.push({ role: "user", content: event.transcript });
+        logger.info({ content: event.transcript.substring(0, 80) }, "Caller spoke");
+      }
+
+      // Log OpenAI errors explicitly so we can see them
+      if (event.type === "error") {
+        logger.error({ openaiError: event.error }, "OpenAI Realtime API error event");
       }
     } catch (err) {
       logger.warn({ err }, "Failed to parse OpenAI Realtime message");

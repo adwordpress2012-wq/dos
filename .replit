@@ -52,3 +52,6 @@ STRIPE_METER_ID = "mtr_test_61UUKvWeRyLG29Qn6419aGsy5kFWkSVM"
 STRIPE_PRICE_SUBSCRIPTION = "price_1TKriY8cb0N6uYd9K01eMDdx"
 ONBOARDING_PRICE_ID = "price_1TKwod9aGsy5kFWkRGkCu61m"
 SUBSCRIPTION_PRICE_ID = "price_1TKwuz9aGsy5kFWkNYUwwGQH"
+
+[userenv.production]
+VOICE_DOMAIN = "directiveos.com.au"
