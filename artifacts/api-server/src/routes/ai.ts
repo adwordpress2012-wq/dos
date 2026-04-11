@@ -33,30 +33,42 @@ interface ChatMessage {
 }
 
 function buildPlatformSarahPrompt(): string {
-  return `You are Sarah, the AI Receptionist for Directive OS — Australia's leading AI receptionist platform built specifically for real estate agencies.
+  return `You are Sarah — a sharp, warm, genuinely curious consultant for Directive OS, Australia's AI receptionist platform for real estate agencies. You're not a salesperson, you're more like a knowledgeable mate having a coffee chat with a busy agency principal.
 
-You are the platform's own customer-facing AI. Your job is to answer questions about Directive OS, qualify interest, and book Discovery Calls.
+Your core message (weave this in naturally, don't lecture):
+Directive OS means agency principals and agents stop spending their days answering the same calls over and over. Sarah (the AI) handles every call and web enquiry — 24/7 — so the team can focus on listings, appraisals, and deals that actually make money. Less phone grind. More profit. Zero missed leads.
 
-What Directive OS does:
-- AI Voice Receptionist: Answers every call 24/7, qualifies buyers, tenants, vendors and landlords, books inspections, transfers hot leads — exactly like a trained human receptionist
-- AI Chat Receptionist: Handles website enquiries the same way, captures leads even at 2am
-- Sarah (the AI persona): Trained specifically for real estate, natural Australian voice and personality
-- VaultRE CRM Integration: Live two-way sync — listings, contacts, and leads all stay in sync automatically
-- Free Agency Website: Every subscription includes a professionally built agency website — three layout templates to choose from (Enterprise, Voyager, Discovery) — colours matched to your logo, no web design cost
-- Command Bridge Dashboard: Full visibility over every call, chat, lead, and transcript from one place
-- Pricing: One-time $1,500 setup fee + $299 per month (includes 100 AI minutes/month) + $89/month per additional agent seat
-- No lock-in contracts — cancel any time, all data stays yours
+What's included (know this cold):
+- AI Voice Receptionist: Picks up every call, 24/7 — qualifies buyers, tenants, vendors, landlords, books inspections, flags hot leads for immediate callback
+- AI Chat Receptionist: Same thing for website enquiries — captures leads at 2am so no one falls through the cracks
+- Free Agency Website: Every subscription includes a professionally built website (3 template choices: Enterprise, Voyager, Discovery) — colours matched to the agency's logo, no web design cost, no maintenance
+- VaultRE CRM Integration: Live two-way sync — listings, contacts, leads always up to date
+- Command Bridge Dashboard: All calls, chats, leads, and transcripts in one place — full visibility, anywhere
+- Pricing: $1,500 one-time setup + $299/month (100 AI minutes included) + $89/month per extra agent seat
+- No lock-in contracts. Cancel any time.
 
-To book a free Discovery Call (20–30 min with our founder): https://calendly.com/adwordpress2012/directive-os-agency-onboarding
+Book a free 20-min Discovery Call: https://calendly.com/adwordpress2012/directive-os-agency-onboarding
 
-Rules:
-- Speak with a warm, confident Australian tone — professional but never stiff
-- Keep responses to 2–3 sentences max — be concise and useful
-- When someone expresses interest, offer to book a free Discovery Call and share the Calendly link
-- Always try to capture their name, agency name, email, and phone number for follow-up
-- Never invent features or pricing not listed above
-- Australian spelling always: "enquiry", "authorise", "colour", "recognise"
-- End every message with a question or a clear next step`;
+Your conversation goal — gather intelligence. Ask about:
+1. Their agency name and how many agents/staff they have
+2. How they handle after-hours calls right now — voicemail? Agents rostered? Missed calls?
+3. Whether they've ever lost a deal because no one picked up or a lead came in after hours
+4. What CRM they use (VaultRE, Rex, PropertyTree, something else?)
+5. Their biggest day-to-day operational headache
+6. Whether they have a website and if they're happy with it
+7. Rough weekly call/enquiry volume
+8. Whether they're the principal, director, or a senior agent
+9. Their name, best phone number, and email — for a follow-up from the founder
+
+Conversation rules:
+- Casual and warm — like a knowledgeable mate, not a call centre script
+- Australian English naturally: "reckon", "heaps", "keen", "arvo", "no worries", "cheers"
+- Short messages — 2–3 sentences MAX, then ask ONE question
+- Never stack more than one question at a time — keep it flowing, not interrogative
+- When someone mentions a pain point (missed calls, agents burned out on phones, after-hours chaos), reflect it back with empathy THEN connect it to the solution
+- Push for the Calendly booking when interest is warm — "Worth a quick 20-min chat with Jayson, our founder? He can show you exactly how it'd work for your setup."
+- Always try to get: name, agency name, phone, email — but naturally, not like a form
+- Australian spelling always: "enquiry", "authorise", "colour", "recognise"`;
 }
 
 function buildRealEstateSarahPrompt(agencyName: string): string {
@@ -88,6 +100,76 @@ Rules:
 function buildSystemPrompt(agencyName: string | null): string {
   if (!agencyName) return buildPlatformSarahPrompt();
   return buildRealEstateSarahPrompt(agencyName);
+}
+
+const OWNER_EMAILS = ["adwordpress2012@gmail.com", "jayson@directiveos.com.au"];
+
+async function sendTranscriptEmail(sessionId: string, history: ChatMessage[]): Promise<void> {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    logger.warn("RESEND_API_KEY not set — transcript not emailed");
+    return;
+  }
+
+  const allText = history.map(m => m.content).join(" ");
+  const emailMatch = allText.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+  const phoneMatch = allText.match(/(\+?61|0)[0-9 ]{8,12}/);
+
+  const rows = history.map(m => `
+    <tr>
+      <td style="padding:8px 12px;vertical-align:top;width:90px;color:${m.role === "user" ? "#6366f1" : "#00d1b2"};font-weight:bold;white-space:nowrap;font-size:13px;">
+        ${m.role === "user" ? "👤 Prospect" : "🤖 Sarah"}
+      </td>
+      <td style="padding:8px 12px;font-size:14px;line-height:1.5;color:#222;background:${m.role === "user" ? "#f5f5ff" : "#f0fffc"};border-radius:8px;">
+        ${m.content.replace(/\n/g, "<br/>")}
+      </td>
+    </tr>
+    <tr><td colspan="2" style="height:4px;"></td></tr>`
+  ).join("");
+
+  const subject = emailMatch
+    ? `🔔 New Directive OS Enquiry — ${emailMatch[0]}`
+    : phoneMatch
+    ? `🔔 New Directive OS Enquiry — ${phoneMatch[0]}`
+    : `🔔 New Directive OS Enquiry — ${history.length} messages`;
+
+  const html = `
+    <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:640px;margin:auto;padding:24px;">
+      <div style="background:#0a0e1a;border-radius:12px;padding:20px 24px;margin-bottom:24px;">
+        <h2 style="margin:0;color:#00d1b2;font-size:20px;">Directive OS — New Chat Enquiry</h2>
+        <p style="margin:6px 0 0;color:rgba(255,255,255,0.5);font-size:12px;">Session: ${sessionId} &nbsp;·&nbsp; ${history.length} messages</p>
+      </div>
+      <table style="width:100%;border-collapse:collapse;margin-bottom:20px;font-size:13px;">
+        <tr><td style="padding:4px 0;color:#888;width:130px;">Email detected:</td><td style="padding:4px 0;font-weight:600;">${emailMatch?.[0] ?? "—"}</td></tr>
+        <tr><td style="padding:4px 0;color:#888;">Phone detected:</td><td style="padding:4px 0;font-weight:600;">${phoneMatch?.[0] ?? "—"}</td></tr>
+      </table>
+      <h3 style="margin:0 0 12px;color:#333;border-bottom:2px solid #00d1b2;padding-bottom:8px;">Full Conversation</h3>
+      <table style="width:100%;border-collapse:separate;border-spacing:0 2px;">${rows}</table>
+      <div style="margin-top:28px;padding:12px 16px;background:#f8f8f8;border-radius:8px;font-size:11px;color:#999;">
+        Sent automatically by Sarah · Directive OS AI Receptionist
+      </div>
+    </div>`;
+
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        from: "Sarah at Directive OS <onboarding@resend.dev>",
+        to: OWNER_EMAILS,
+        subject,
+        html,
+      }),
+    });
+    if (!res.ok) {
+      const err = await res.text();
+      logger.warn({ err }, "Resend API returned error");
+    } else {
+      logger.info({ sessionId, email: emailMatch?.[0] }, "Transcript email sent");
+    }
+  } catch (err) {
+    logger.warn({ err }, "Failed to send transcript email");
+  }
 }
 
 function detectAction(message: string, history: ChatMessage[]): { action: string | null; leadData?: Record<string, string> } {
@@ -149,8 +231,8 @@ router.post("/ai/chat", async (req, res): Promise<void> => {
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: openaiMessages,
-      max_tokens: 180,
-      temperature: 0.7,
+      max_tokens: agencyName ? 180 : 250,
+      temperature: agencyName ? 0.7 : 0.85,
     });
 
     reply = completion.choices[0]?.message?.content ?? "Thank you for reaching out. One of our agents will be in touch with you shortly.";
@@ -246,6 +328,21 @@ router.post("/ai/chat", async (req, res): Promise<void> => {
       }
     } catch (err) {
       logger.warn({ err }, "Failed to look up Stripe customer for usage reporting");
+    }
+  }
+
+  // For platform (Directive OS) conversations — email transcript on key triggers
+  if (!agencyId) {
+    const allText = history.map(m => m.content).join(" ").toLowerCase();
+    const prevText = history.slice(0, -2).map(m => m.content).join(" ").toLowerCase();
+
+    const hasContact = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}|(\+?61|0)[0-9 ]{8,12}/.test(allText);
+    const hadContact = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}|(\+?61|0)[0-9 ]{8,12}/.test(prevText);
+    const bookingIntent = /book|schedule|calendly|call me|sign up|keen to chat|let's chat|sounds good|interested/i.test(message);
+    const highEngagement = history.length >= 10 && history.length % 10 === 0;
+
+    if ((hasContact && !hadContact) || bookingIntent || highEngagement) {
+      void sendTranscriptEmail(sessionId, history);
     }
   }
 

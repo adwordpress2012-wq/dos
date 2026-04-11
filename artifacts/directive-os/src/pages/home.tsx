@@ -119,7 +119,7 @@ interface Message { role: "assistant" | "user"; content: string; }
 function DemoChatWidget() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
-    { role: "assistant", content: "G'day! I'm Sarah, the Directive OS AI Receptionist. I can tell you about our platform, pricing, and how we can help your agency capture more leads 24/7. What would you like to know?" }
+    { role: "assistant", content: "Hey! Running an agency is full-on, yeah? I'm Sarah from Directive OS. Quick one to kick things off — when a call comes in after hours or while your agents are out on inspections, what happens to it? Voicemail, or does someone always have to be on call?" }
   ]);
   const [input, setInput] = useState("");
   const [sessionId] = useState(`dos_${Date.now()}`);
