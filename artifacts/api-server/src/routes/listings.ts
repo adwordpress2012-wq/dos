@@ -69,14 +69,34 @@ router.post("/listings/sync-vaultre", async (req, res): Promise<void> => {
   let updated = 0;
 
   for (const mock of sourceListings) {
-    const { carSpaces, ...dbFields } = mock as typeof mock & { carSpaces?: number };
+    const dbFields = {
+      address: mock.address,
+      suburb: mock.suburb,
+      state: mock.state,
+      postcode: mock.postcode,
+      price: mock.price,
+      listingType: mock.listingType,
+      listingMethod: (mock as typeof mock & { listingMethod?: string }).listingMethod ?? "private_treaty",
+      bedrooms: mock.bedrooms,
+      bathrooms: mock.bathrooms,
+      carSpaces: (mock as typeof mock & { carSpaces?: number }).carSpaces ?? null,
+      agentName: mock.agentName,
+      agentMobile: mock.agentMobile,
+      inspectionTimes: mock.inspectionTimes ?? [],
+      auctionDate: (mock as typeof mock & { auctionDate?: string }).auctionDate ?? null,
+      auctionTime: (mock as typeof mock & { auctionTime?: string }).auctionTime ?? null,
+      status: mock.status,
+      photoUrl: (mock as typeof mock & { photoUrl?: string }).photoUrl ?? null,
+      description: (mock as typeof mock & { description?: string }).description ?? null,
+      vaultreId: mock.vaultreId,
+    };
     const existing = await db.select({ id: listingsTable.id }).from(listingsTable)
       .where(and(eq(listingsTable.agencyId, agencyId), eq(listingsTable.vaultreId, mock.vaultreId)));
     if (existing.length > 0) {
       await db.update(listingsTable).set(dbFields).where(eq(listingsTable.id, existing[0].id));
       updated++;
     } else {
-      await db.insert(listingsTable).values({ agencyId, ...dbFields, inspectionTimes: dbFields.inspectionTimes ?? [] });
+      await db.insert(listingsTable).values({ agencyId, ...dbFields });
       added++;
     }
   }
