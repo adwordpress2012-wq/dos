@@ -143,15 +143,15 @@ function DemoChatWidget() {
   return (
     <>
       <button
-        onClick={() => setOpen(true)}
-        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-all hover:scale-110"
+        onClick={() => setOpen(o => !o)}
+        className="fixed bottom-24 right-6 z-[60] w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-all hover:scale-110"
         style={{ background: "linear-gradient(135deg, #00d1b2, #00b89c)", boxShadow: "0 4px 24px rgba(0,209,178,0.4)" }}
       >
-        <MessageSquare className="w-6 h-6 text-black" />
+        {open ? <X className="w-5 h-5 text-black" /> : <MessageSquare className="w-6 h-6 text-black" />}
       </button>
 
       {open && (
-        <div className="fixed bottom-24 right-6 z-50 w-[340px] rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+        <div className="fixed bottom-44 right-6 z-[60] w-[340px] sm:w-[380px] rounded-2xl shadow-2xl flex flex-col overflow-hidden"
           style={{ background: "rgba(13,17,23,0.97)", border: "1px solid rgba(0,209,178,0.25)", backdropFilter: "blur(20px)" }}>
           <div className="px-4 py-3 flex items-center justify-between"
             style={{ background: "linear-gradient(135deg, rgba(0,209,178,0.15), rgba(0,209,178,0.05))", borderBottom: "1px solid rgba(0,209,178,0.15)" }}>

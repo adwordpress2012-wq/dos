@@ -20,12 +20,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-background text-foreground selection:bg-primary/30">
       <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="size-8 rounded bg-primary flex items-center justify-center font-bold text-primary-foreground">
-              D
-            </div>
-            <Link href="/" className="font-bold text-xl tracking-tight">Directive OS</Link>
-          </div>
+          <Link href="/" className="flex items-center gap-2.5">
+            <img src="/logo.png" alt="Directive OS" className="w-9 h-9 object-contain" />
+            <span className="font-bold text-xl tracking-tight">Directive OS</span>
+          </Link>
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
             <a href="/#templates" className="hover:text-foreground transition-colors">Templates</a>
             <a href="/#demos" className="hover:text-foreground transition-colors">Live Demos</a>
@@ -65,7 +63,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
       {/* Floating Book-a-Call bar */}
       <div
-        className="fixed bottom-0 left-0 right-0 z-50 transition-transform duration-500"
+        className="fixed bottom-0 left-0 right-0 z-[45] transition-transform duration-500"
         style={{ transform: showBar ? "translateY(0)" : "translateY(100%)" }}
       >
         <div className="border-t" style={{ background: "rgba(10,14,26,0.97)", backdropFilter: "blur(20px)", borderColor: "rgba(0,209,178,0.25)" }}>
@@ -108,10 +106,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
             <div className="md:col-span-1">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="size-7 rounded bg-primary flex items-center justify-center font-bold text-primary-foreground text-xs">
-                  D
-                </div>
+              <div className="flex items-center gap-2.5 mb-3">
+                <img src="/logo.png" alt="Directive OS" className="w-8 h-8 object-contain" />
                 <span className="font-bold tracking-tight text-lg">Directive OS</span>
               </div>
               <p className="text-sm text-muted-foreground mb-4 leading-relaxed">

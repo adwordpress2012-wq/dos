@@ -1,7 +1,8 @@
-import { X, Zap } from "lucide-react";
+import { X } from "lucide-react";
 import { usePromo } from "@/context/promo-context";
 
 const DIRECTIVE_URL = "/";
+const LOGO = `${import.meta.env.BASE_URL}logo.png`;
 
 export default function AgencyPromoBar() {
   const { promoVisible, dismissPromo } = usePromo();
@@ -16,29 +17,29 @@ export default function AgencyPromoBar() {
       }}
     >
       <div className="max-w-7xl mx-auto w-full px-4 flex items-center gap-3">
-        {/* Live indicator */}
+        {/* Logo + branding */}
         <div className="hidden sm:flex items-center gap-1.5 shrink-0">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          <img src={LOGO} alt="Directive OS" className="w-5 h-5 object-contain" />
           <span className="text-[10px] font-bold tracking-widest uppercase text-emerald-400">Live Demo</span>
         </div>
         <div className="h-3 w-px bg-white/15 hidden sm:block shrink-0" />
 
         {/* Message */}
         <p className="flex-1 text-xs text-white/70 text-center sm:text-left truncate">
-          <span className="text-white font-semibold">This is a Directive OS demo site.</span>
-          {" "}Your agency website is{" "}
-          <span className="text-emerald-400 font-semibold">free</span>
-          {" "}— included with your subscription.
+          <span className="text-white font-semibold">Powered by Directive OS.</span>
+          {" "}Your agency website + AI Receptionist is{" "}
+          <span className="text-emerald-400 font-semibold">included free</span>
+          {" "}— from $299/month.
         </p>
 
         {/* CTA */}
         <a
           href={DIRECTIVE_URL}
-          className="shrink-0 flex items-center gap-1.5 text-[11px] font-bold px-3 py-1.5 rounded-full transition-all whitespace-nowrap"
+          className="shrink-0 flex items-center gap-1.5 text-[11px] font-bold px-3 py-1.5 rounded-full transition-all hover:opacity-90 whitespace-nowrap"
           style={{ background: "#00d1b2", color: "#0a0e1a" }}
         >
-          <Zap className="w-3 h-3" />
-          Get Started Free
+          <img src={LOGO} alt="" className="w-3 h-3 object-contain" />
+          Get Started
         </a>
 
         {/* Dismiss */}
