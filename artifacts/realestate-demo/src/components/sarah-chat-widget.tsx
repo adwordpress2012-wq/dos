@@ -19,6 +19,7 @@ export default function SarahChatWidget() {
   const [loading, setLoading] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const sessionId = useRef<string>(crypto.randomUUID());
 
   useEffect(() => {
     if (open) {
@@ -44,9 +45,9 @@ export default function SarahChatWidget() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          sessionId: sessionId.current,
           message: text,
           agencyId: 1,
-          history: messages.map((m) => ({ role: m.role, content: m.content })),
         }),
       });
 
