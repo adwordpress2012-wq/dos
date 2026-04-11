@@ -60,10 +60,12 @@ export default function Onboard() {
   const handleBack = () => setStep(s => s - 1);
 
   const handleSubmit = async () => {
+    const orgId = `org_${Date.now()}`;
     try {
+      // Step 1 — create the agency record
       await onboard.mutateAsync({
         data: {
-          clerkOrgId: `org_${Date.now()}`,
+          clerkOrgId: orgId,
           name: form.name,
           abn: form.abn,
           contactEmail: form.contactEmail,
@@ -72,9 +74,27 @@ export default function Onboard() {
           termsAccepted: true,
         },
       });
-      navigate("/dashboard");
+
+      // Step 2 — create a Stripe Checkout session and redirect to payment
+      const res = await fetch("/api/billing/checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-clerk-org-id": orgId,
+        },
+      });
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error((body as { error?: string }).error ?? `Checkout failed (${res.status})`);
+      }
+
+      const { url } = await res.json() as { url: string };
+      // Redirect to Stripe hosted checkout page
+      window.location.href = url;
     } catch (err) {
-      alert("There was an error processing your request. Please try again.");
+      const message = err instanceof Error ? err.message : "Unknown error";
+      alert(`There was an error processing your request: ${message}`);
     }
   };
 

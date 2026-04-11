@@ -87,16 +87,18 @@ router.post("/billing/checkout", async (req, res): Promise<void> => {
   const agency = await getAgency(clerkOrgId);
   const additionalSeats = Math.max(0, (agency?.seatCount ?? 1) - 1);
 
+  // In subscription mode, Stripe allows one-time and recurring prices together.
+  // The one-time setup fee is charged on the first invoice only.
   const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
-    { price: priceOnboarding, quantity: 1 },
-    { price: priceSubscription, quantity: 1 },
+    { price: priceOnboarding, quantity: 1 },     // $1,500 one-time onboarding & training
+    { price: priceSubscription, quantity: 1 },   // $299/mo base subscription
   ];
 
   if (additionalSeats > 0 && pricePerSeat) {
     lineItems.push({ price: pricePerSeat, quantity: additionalSeats });
   }
 
-  // Add metered excess usage (no quantity — Stripe tracks via meter events)
+  // Metered excess usage (no quantity — Stripe tracks via meter events)
   if (priceExcessUsage) {
     lineItems.push({ price: priceExcessUsage });
   }
