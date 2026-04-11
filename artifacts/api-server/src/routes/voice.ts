@@ -1,7 +1,6 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import WebSocket from "ws";
 import Stripe from "stripe";
-import OpenAI from "openai";
 import { db, agenciesTable, transcriptsTable, transcriptMessagesTable, leadsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { logger } from "../lib/logger";
@@ -13,7 +12,32 @@ const router: IRouter = Router();
 const OPENAI_REALTIME_URL =
   "wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview";
 
-const AI_PERSONA = `You are Sarah, a Class 2 licensed real estate agent and AI receptionist for Meridian Property Group, a boutique agency in Western Sydney's Hills District, powered by Directive OS.
+// ─── Personas ─────────────────────────────────────────────────────────────────
+
+const DIRECTIVE_OS_PERSONA = `You are Sarah, the AI Receptionist built by Directive OS — Australia's leading AI receptionist platform for real estate agencies.
+
+Personality & Voice:
+- Warm, confident, and professional — you represent cutting-edge Australian PropTech
+- Natural Australian tone: "arvo", "reckon", "keen", "heaps", "no worries", "cheers"
+- Short, natural sentences — 1–2 sentences max per turn, then pause and listen
+- Never stiff or corporate. Never use "certainly" or "absolutely" as filler
+
+Your greeting: "G'day! This is Sarah from Directive OS — how can I help you today?"
+
+Your purpose on this line:
+- This is the Directive OS main demonstration line — you are showing what Sarah can do for a real estate agency
+- If someone calls to enquire about Directive OS for their agency, capture their name, agency name, phone and email, and let them know the team will be in touch within the hour
+- If someone is testing the system, warmly explain what you can do: handle buyer, vendor, tenant and landlord enquiries 24/7, book inspections, capture leads, and send transcripts after every call
+- If someone asks about pricing, say "Our agencies are on a simple monthly plan — I'll have our team send you the details. What's the best email for you?"
+
+Ground rules:
+- ALWAYS capture: name, phone number, email — do not end the call without at least a name and number
+- Australian spelling always: "enquiry", "authorise", "recognise"
+- End every response with a question or clear next step
+- You are the demonstration of what Directive OS can do — be impressive`;
+
+function buildAgencyPersona(agency: { name: string; address?: string | null }): string {
+  return `You are Sarah, a Class 2 licensed real estate agent and AI receptionist for ${agency.name}${agency.address ? ` (${agency.address})` : ""}, powered by Directive OS.
 
 Personality & Voice:
 - Warm, confident, and genuinely expert — you are a highly skilled real estate professional, not just a receptionist
@@ -22,6 +46,8 @@ Personality & Voice:
 - Never stiff or corporate. Never use "certainly" or "absolutely" as filler
 - Short, natural sentences — 1–2 sentences max per turn, then pause and listen
 - If someone sounds stressed (being evicted, can't find a place), be extra warm and reassuring
+
+Your greeting: "G'day, thanks for calling ${agency.name} — this is Sarah, how can I help you today?"
 
 Your prime directive: Never miss a lead. Every call must end with at minimum a name and phone number captured.
 
@@ -40,31 +66,57 @@ Ground rules:
 - End every response with a question or clear next step to keep the lead engaged
 - You are a licensed professional — confident and expert, never just a message-taker
 - If someone asks something totally outside real estate, say "That's a bit outside my lane — but for anything property, I'm your girl!"`;
+}
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
+function normalisePhone(raw: string): string {
+  return raw.replace(/\D/g, "");
+}
+
+function phonesMatch(a: string, b: string): boolean {
+  const na = normalisePhone(a);
+  const nb = normalisePhone(b);
+  // Match last 8 digits to handle +61 / 0 prefix variations
+  return na.slice(-8) === nb.slice(-8) && na.slice(-8).length === 8;
+}
 
 // ─── TwiML Entry Point ────────────────────────────────────────────────────────
 
-router.post("/voice/incoming", (req: Request, res: Response) => {
+router.post("/voice/incoming", async (req: Request, res: Response) => {
   // CRITICAL: The WebSocket host MUST match the host that served this TwiML response.
-  // Twilio will connect the media-stream WebSocket back to whatever host we specify here.
-  // Using x-forwarded-host ensures this works in both dev (replit.dev) and production.
   const forwardedHost = req.headers["x-forwarded-host"] as string | undefined;
   const rawHost = forwardedHost || req.headers.host || "directiveos.com.au";
-  // Strip port from host — wss:// doesn't need it for standard TLS
   const host = rawHost.split(",")[0].trim().replace(/:\d+$/, "");
-
   const wsUrl = `wss://${host}/api/voice/media-stream`;
+
+  // Look up the agency by the called number (Twilio sends "To" in POST body)
+  const toNumber = (req.body?.To as string | undefined) ?? "";
+  let agencyId = 0; // 0 = Directive OS main line
+
+  if (toNumber) {
+    try {
+      const agencies = await db.select().from(agenciesTable);
+      const matched = agencies.find(
+        (a) => a.contactPhone && phonesMatch(a.contactPhone, toNumber)
+      );
+      if (matched) agencyId = matched.id;
+    } catch (err) {
+      logger.warn({ err }, "Agency phone lookup failed — defaulting to Directive OS persona");
+    }
+  }
 
   const twiml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
   <Connect>
-    <Stream url="${wsUrl}" />
+    <Stream url="${wsUrl}">
+      <Parameter name="agencyId" value="${agencyId}" />
+    </Stream>
   </Connect>
 </Response>`;
 
-  console.log(`[VOICE] Incoming call → TwiML host=${host} wsUrl=${wsUrl}`);
-  logger.info({ wsUrl, host }, "Incoming call — returning TwiML media stream");
+  console.log(`[VOICE] Incoming call → To=${toNumber} agencyId=${agencyId} host=${host}`);
+  logger.info({ wsUrl, host, toNumber, agencyId }, "Incoming call — returning TwiML media stream");
   res.type("text/xml").send(twiml);
 });
 
@@ -74,10 +126,49 @@ interface CallSession {
   streamSid: string | null;
   callSid: string | null;
   agencyId: number;
+  persona: string | null;
+  openaiReady: boolean;
   startTime: number;
   transcript: Array<{ role: "user" | "assistant"; content: string }>;
   openaiWs: WebSocket;
   twilioWs: WebSocket;
+}
+
+function configureOpenAiSession(session: CallSession): void {
+  if (!session.persona) return;
+  session.openaiWs.send(
+    JSON.stringify({
+      type: "session.update",
+      session: {
+        turn_detection: { type: "server_vad", silence_duration_ms: 800 },
+        input_audio_format: "g711_ulaw",
+        output_audio_format: "g711_ulaw",
+        input_audio_transcription: { model: "whisper-1" },
+        voice: "shimmer",
+        instructions: session.persona,
+        modalities: ["text", "audio"],
+        temperature: 0.7,
+      },
+    })
+  );
+
+  // Trigger greeting
+  session.openaiWs.send(
+    JSON.stringify({
+      type: "conversation.item.create",
+      item: {
+        type: "message",
+        role: "user",
+        content: [
+          {
+            type: "input_text",
+            text: "Greet the caller warmly and ask how you can help them today.",
+          },
+        ],
+      },
+    })
+  );
+  session.openaiWs.send(JSON.stringify({ type: "response.create" }));
 }
 
 // ─── WebSocket Bridge: Twilio ↔ OpenAI Realtime ───────────────────────────────
@@ -93,12 +184,12 @@ export function handleMediaStream(twilioWs: WebSocket): void {
     return;
   }
 
-  console.log("[VOICE] Connecting to OpenAI Realtime API:", OPENAI_REALTIME_URL);
-
   const session: CallSession = {
     streamSid: null,
     callSid: null,
-    agencyId: 1, // default demo agency; replace with lookup once auth is live
+    agencyId: 0,
+    persona: null,
+    openaiReady: false,
     startTime: Date.now(),
     transcript: [],
     openaiWs: new WebSocket(OPENAI_REALTIME_URL, {
@@ -111,44 +202,18 @@ export function handleMediaStream(twilioWs: WebSocket): void {
   };
 
   // ── OpenAI Realtime session setup ──────────────────────────────────────────
+  // We intentionally do NOT configure the session here yet.
+  // We wait for the Twilio "start" event which carries the agencyId custom parameter.
+  // Once we have the agencyId, we load the right persona and send session.update.
   session.openaiWs.on("open", () => {
-    console.log("[VOICE] OpenAI Realtime WebSocket connected successfully");
+    console.log("[VOICE] OpenAI Realtime WebSocket connected");
     logger.info("OpenAI Realtime WebSocket open");
+    session.openaiReady = true;
 
-    // Configure the session
-    session.openaiWs.send(
-      JSON.stringify({
-        type: "session.update",
-        session: {
-          turn_detection: { type: "server_vad", silence_duration_ms: 800 },
-          input_audio_format: "g711_ulaw",
-          output_audio_format: "g711_ulaw",
-          input_audio_transcription: { model: "whisper-1" },
-          voice: "shimmer",
-          instructions: AI_PERSONA,
-          modalities: ["text", "audio"],
-          temperature: 0.7,
-        },
-      }),
-    );
-
-    // Send greeting trigger
-    session.openaiWs.send(
-      JSON.stringify({
-        type: "conversation.item.create",
-        item: {
-          type: "message",
-          role: "user",
-          content: [
-            {
-              type: "input_text",
-              text: "Greet the caller warmly and ask how you can help them today.",
-            },
-          ],
-        },
-      }),
-    );
-    session.openaiWs.send(JSON.stringify({ type: "response.create" }));
+    // If Twilio start already arrived before OpenAI opened, configure now
+    if (session.persona) {
+      configureOpenAiSession(session);
+    }
   });
 
   // ── OpenAI → Twilio audio relay ────────────────────────────────────────────
@@ -156,25 +221,20 @@ export function handleMediaStream(twilioWs: WebSocket): void {
     try {
       const event = JSON.parse(raw.toString());
 
-      // Stream audio back to the caller via Twilio
       if (event.type === "response.audio.delta" && event.delta && session.streamSid) {
         const twilioMsg = JSON.stringify({
           event: "media",
           streamSid: session.streamSid,
           media: { payload: event.delta },
         });
-        if (twilioWs.readyState === WebSocket.OPEN) {
-          twilioWs.send(twilioMsg);
-        }
+        if (twilioWs.readyState === WebSocket.OPEN) twilioWs.send(twilioMsg);
       }
 
-      // Capture assistant speech transcript
       if (event.type === "response.audio_transcript.done" && event.transcript) {
         session.transcript.push({ role: "assistant", content: event.transcript });
         logger.info({ content: event.transcript.substring(0, 80) }, "Sarah spoke");
       }
 
-      // Capture user speech transcript
       if (
         event.type === "conversation.item.input_audio_transcription.completed" &&
         event.transcript
@@ -183,7 +243,6 @@ export function handleMediaStream(twilioWs: WebSocket): void {
         logger.info({ content: event.transcript.substring(0, 80) }, "Caller spoke");
       }
 
-      // Log OpenAI errors explicitly so we can see them
       if (event.type === "error") {
         logger.error({ openaiError: event.error }, "OpenAI Realtime API error event");
       }
@@ -199,11 +258,10 @@ export function handleMediaStream(twilioWs: WebSocket): void {
 
   session.openaiWs.on("close", (code, reason) => {
     console.log(`[VOICE] OpenAI WebSocket closed — code=${code} reason=${reason.toString()}`);
-    logger.info({ code, reason: reason.toString() }, "OpenAI WebSocket closed");
   });
 
   // ── Twilio → OpenAI audio relay ────────────────────────────────────────────
-  twilioWs.on("message", (raw: Buffer) => {
+  twilioWs.on("message", async (raw: Buffer) => {
     try {
       const msg = JSON.parse(raw.toString());
 
@@ -211,8 +269,37 @@ export function handleMediaStream(twilioWs: WebSocket): void {
         session.streamSid = msg.start.streamSid;
         session.callSid = msg.start.callSid ?? null;
         session.startTime = Date.now();
-        console.log(`[VOICE] Twilio stream started — streamSid=${session.streamSid} callSid=${session.callSid}`);
-        logger.info({ streamSid: session.streamSid, callSid: session.callSid }, "Twilio stream started");
+
+        // Read agencyId from TwiML custom parameter
+        const rawAgencyId = msg.start?.customParameters?.agencyId;
+        session.agencyId = rawAgencyId != null ? parseInt(rawAgencyId, 10) : 0;
+
+        console.log(`[VOICE] Stream started — streamSid=${session.streamSid} agencyId=${session.agencyId}`);
+        logger.info({ streamSid: session.streamSid, agencyId: session.agencyId }, "Twilio stream started");
+
+        // Load the appropriate persona
+        if (session.agencyId && session.agencyId > 0) {
+          try {
+            const [agency] = await db
+              .select()
+              .from(agenciesTable)
+              .where(eq(agenciesTable.id, session.agencyId));
+            session.persona = agency
+              ? buildAgencyPersona({ name: agency.name, address: agency.address })
+              : DIRECTIVE_OS_PERSONA;
+          } catch (err) {
+            logger.warn({ err }, "Agency DB lookup failed — using Directive OS persona");
+            session.persona = DIRECTIVE_OS_PERSONA;
+          }
+        } else {
+          session.persona = DIRECTIVE_OS_PERSONA;
+        }
+
+        // Configure OpenAI session now that we have the persona
+        if (session.openaiReady) {
+          configureOpenAiSession(session);
+        }
+        // Otherwise openaiWs.on("open") will call configureOpenAiSession when ready
       }
 
       if (msg.event === "media" && session.openaiWs.readyState === WebSocket.OPEN) {
@@ -220,7 +307,7 @@ export function handleMediaStream(twilioWs: WebSocket): void {
           JSON.stringify({
             type: "input_audio_buffer.append",
             audio: msg.media.payload,
-          }),
+          })
         );
       }
 
@@ -236,18 +323,15 @@ export function handleMediaStream(twilioWs: WebSocket): void {
   // ── Cleanup and billing on call end ───────────────────────────────────────
   twilioWs.on("close", () => {
     console.log("[VOICE] Twilio WebSocket closed — cleaning up session");
-    // Only close OpenAI if it's in a closeable state (not CONNECTING=0)
     if (session.openaiWs.readyState !== WebSocket.CONNECTING) {
       session.openaiWs.close();
     } else {
-      // If still connecting, terminate immediately to avoid "closed before established" error
       session.openaiWs.terminate();
     }
     void onCallEnd(session);
   });
 
   session.openaiWs.on("close", () => {
-    console.log("[VOICE] OpenAI WebSocket closed — closing Twilio if still open");
     if (twilioWs.readyState === WebSocket.OPEN) twilioWs.close();
   });
 }
@@ -264,7 +348,6 @@ async function onCallEnd(session: CallSession): Promise<void> {
   );
 
   try {
-    // ── Detect contact info from transcript ──────────────────────────────────
     const fullText = session.transcript.map((m) => m.content).join(" ").toLowerCase();
     const emailMatch = fullText.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
     const phoneMatch = fullText.match(/(\+?61|0)[0-9 ]{8,12}/);
@@ -280,9 +363,9 @@ async function onCallEnd(session: CallSession): Promise<void> {
       : fullText.includes("landlord") || fullText.includes("manag") ? "landlord"
       : "enquiry";
 
-    // ── Save lead ────────────────────────────────────────────────────────────
+    // Only save leads for real agency calls (agencyId > 0)
     let leadId: number | null = null;
-    if (callerEmail || callerPhone) {
+    if (session.agencyId > 0 && (callerEmail || callerPhone)) {
       const [lead] = await db
         .insert(leadsTable)
         .values({
@@ -301,12 +384,13 @@ async function onCallEnd(session: CallSession): Promise<void> {
       logger.info({ leadId, callerName, callerEmail }, "Voice lead saved");
     }
 
-    // ── Save transcript ──────────────────────────────────────────────────────
+    // Save transcript for all calls (agencyId 0 = Directive OS demo)
+    const saveAgencyId = session.agencyId > 0 ? session.agencyId : 1;
     if (session.transcript.length > 0) {
       const [savedTranscript] = await db
         .insert(transcriptsTable)
         .values({
-          agencyId: session.agencyId,
+          agencyId: saveAgencyId,
           leadId,
           leadName: callerName,
           channel: "voice",
@@ -327,9 +411,9 @@ async function onCallEnd(session: CallSession): Promise<void> {
       logger.info({ transcriptId: savedTranscript.id }, "Voice transcript saved");
     }
 
-    // ── Stripe usage billing — $25 per 10-minute block ───────────────────────
+    // Stripe usage billing — only for paying agencies
     const stripeKey = process.env.STRIPE_KEY_ACTIVE;
-    if (stripeKey && durationMinutes >= 1) {
+    if (stripeKey && session.agencyId > 0 && durationMinutes >= 1) {
       try {
         const [agency] = await db
           .select({ stripeCustomerId: agenciesTable.stripeCustomerId })
@@ -337,9 +421,7 @@ async function onCallEnd(session: CallSession): Promise<void> {
           .where(eq(agenciesTable.id, session.agencyId));
 
         if (agency?.stripeCustomerId) {
-          const tenMinBlocks = Math.ceil(durationMinutes / 10);
           const stripe = new Stripe(stripeKey, { apiVersion: "2025-03-31.basil" });
-
           await stripe.billing.meterEvents.create({
             event_name: "ai_voice_minutes",
             payload: {
@@ -347,11 +429,7 @@ async function onCallEnd(session: CallSession): Promise<void> {
               value: String(Math.ceil(durationMinutes)),
             },
           });
-
-          logger.info(
-            { blocks: tenMinBlocks, durationMinutes },
-            "Stripe voice usage reported",
-          );
+          logger.info({ durationMinutes }, "Stripe voice usage reported");
         }
       } catch (err) {
         logger.warn({ err }, "Failed to report Stripe voice usage");
