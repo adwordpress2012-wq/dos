@@ -76,7 +76,7 @@ export default function Onboard() {
       });
 
       // Step 2 — create a Stripe Checkout session and redirect to payment
-      const res = await fetch("/api/billing/checkout", {
+      const res = await fetch("/api/billing/checkout/setup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

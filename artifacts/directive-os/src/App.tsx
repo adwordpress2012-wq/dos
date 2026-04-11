@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Onboard from "@/pages/onboard";
+import OnboardSubscribe from "@/pages/onboard-subscribe";
 import { SignIn, SignUp } from "@/pages/auth";
 import Terms from "@/pages/terms";
 import Privacy from "@/pages/privacy";
@@ -35,6 +36,7 @@ function Router() {
       <Route path="/sign-in" component={SignIn} />
       <Route path="/sign-up" component={SignUp} />
       <Route path="/onboard" component={Onboard} />
+      <Route path="/onboard/subscribe" component={OnboardSubscribe} />
       <Route path="/terms" component={Terms} />
       <Route path="/privacy" component={Privacy} />
       <Route path="/resources" component={Resources} />

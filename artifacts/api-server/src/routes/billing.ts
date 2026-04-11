@@ -62,6 +62,107 @@ router.get("/billing/usage", async (req, res): Promise<void> => {
   });
 });
 
+// ─── Step 1: Setup fee only — payment mode — supports Afterpay + Klarna + card ─
+
+router.post("/billing/checkout/setup", async (req, res): Promise<void> => {
+  const clerkOrgId = req.headers["x-clerk-org-id"] as string | undefined;
+  if (!clerkOrgId) { res.status(401).json({ error: "Unauthorized" }); return; }
+
+  const priceOnboarding = process.env.ONBOARDING_PRICE_ID ?? process.env.STRIPE_PRICE_ONBOARDING;
+  if (!priceOnboarding) {
+    res.status(500).json({ error: "STRIPE_PRICE_ONBOARDING is not configured." });
+    return;
+  }
+
+  let stripe: Stripe;
+  try { stripe = getStripe(); } catch {
+    res.status(500).json({ error: "Stripe is not configured." }); return;
+  }
+
+  const agency = await getAgency(clerkOrgId);
+
+  const sessionParams: Stripe.Checkout.SessionCreateParams = {
+    mode: "payment",
+    payment_method_types: ["card", "afterpay_clearpay", "klarna"],
+    line_items: [{ price: priceOnboarding, quantity: 1 }],
+    // After setup fee paid, send user to the subscription step
+    success_url: `${YOUR_DOMAIN}/onboard/subscribe?orgId=${encodeURIComponent(clerkOrgId)}&session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${YOUR_DOMAIN}/onboard`,
+  };
+
+  if (agency?.stripeCustomerId) {
+    sessionParams.customer = agency.stripeCustomerId;
+  } else if (agency?.contactEmail) {
+    sessionParams.customer_email = agency.contactEmail;
+  }
+
+  try {
+    const session = await stripe.checkout.sessions.create(sessionParams);
+    res.json({ url: session.url });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    res.status(500).json({ error: `Failed to create setup checkout: ${message}` });
+  }
+});
+
+// ─── Step 2: Subscription — Klarna + card — no Afterpay (recurring not supported) ─
+
+router.post("/billing/checkout/subscription", async (req, res): Promise<void> => {
+  const clerkOrgId = req.headers["x-clerk-org-id"] as string | undefined;
+  if (!clerkOrgId) { res.status(401).json({ error: "Unauthorized" }); return; }
+
+  const priceSubscription = process.env.SUBSCRIPTION_PRICE_ID ?? process.env.STRIPE_PRICE_SUBSCRIPTION;
+  const pricePerSeat = process.env.STRIPE_PRICE_PER_SEAT;
+  const priceExcessUsage = process.env.STRIPE_PRICE_EXCESS_USAGE;
+
+  if (!priceSubscription) {
+    res.status(500).json({ error: "STRIPE_PRICE_SUBSCRIPTION is not configured." });
+    return;
+  }
+
+  let stripe: Stripe;
+  try { stripe = getStripe(); } catch {
+    res.status(500).json({ error: "Stripe is not configured." }); return;
+  }
+
+  const agency = await getAgency(clerkOrgId);
+  const additionalSeats = Math.max(0, (agency?.seatCount ?? 1) - 1);
+
+  const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
+    { price: priceSubscription, quantity: 1 },
+  ];
+  if (additionalSeats > 0 && pricePerSeat) {
+    lineItems.push({ price: pricePerSeat, quantity: additionalSeats });
+  }
+  if (priceExcessUsage) {
+    lineItems.push({ price: priceExcessUsage });
+  }
+
+  const sessionParams: Stripe.Checkout.SessionCreateParams = {
+    mode: "subscription",
+    automatic_tax: { enabled: true },
+    line_items: lineItems,
+    success_url: `${YOUR_DOMAIN}/dashboard?subscribed=true`,
+    cancel_url: `${YOUR_DOMAIN}/onboard/subscribe?orgId=${encodeURIComponent(clerkOrgId)}`,
+  };
+
+  if (agency?.stripeCustomerId) {
+    sessionParams.customer = agency.stripeCustomerId;
+  } else if (agency?.contactEmail) {
+    sessionParams.customer_email = agency.contactEmail;
+  }
+
+  try {
+    const session = await stripe.checkout.sessions.create(sessionParams);
+    res.json({ url: session.url });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    res.status(500).json({ error: `Failed to create subscription checkout: ${message}` });
+  }
+});
+
+// ─── Legacy combined checkout (kept for backward compat) ──────────────────────
+
 router.post("/billing/checkout", async (req, res): Promise<void> => {
   const clerkOrgId = req.headers["x-clerk-org-id"] as string | undefined;
   if (!clerkOrgId) { res.status(401).json({ error: "Unauthorized" }); return; }
