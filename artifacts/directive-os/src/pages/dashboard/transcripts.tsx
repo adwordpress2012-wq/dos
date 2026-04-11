@@ -58,7 +58,7 @@ function TranscriptDetail({ id, onClose }: { id: number; onClose: () => void }) 
                     : "bg-muted text-foreground"
                 }`}>
                   <div className={`text-xs font-medium mb-1 ${msg.role === "user" ? "text-primary" : "text-muted-foreground"}`}>
-                    {msg.role === "user" ? "Caller" : "Station Intelligence (AI)"}
+                    {msg.role === "user" ? "Caller" : "Directive OS (AI Receptionist)"}
                   </div>
                   <p className="text-sm leading-relaxed">{msg.content}</p>
                 </div>
@@ -82,7 +82,7 @@ export default function Transcripts() {
     <DashboardLayout>
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">Communication Logs</h1>
-        <p className="text-muted-foreground text-sm mt-1">All voice calls and chat sessions handled by Station Intelligence</p>
+        <p className="text-muted-foreground text-sm mt-1">All voice calls and chat sessions handled by your AI receptionist</p>
       </div>
 
       <div className="flex gap-2 mb-6">
