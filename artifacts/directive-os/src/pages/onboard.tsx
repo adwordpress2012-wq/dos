@@ -1,7 +1,17 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useOnboardAgency } from "@workspace/api-client-react";
-import { Check, ChevronRight, Shield, ArrowLeft } from "lucide-react";
+import { Check, ChevronRight, Shield, ArrowLeft, CalendarCheck, Phone } from "lucide-react";
+
+const CALENDLY_URL = "https://calendly.com/adwordpress2012/directive-os-agency-onboarding";
+
+const TRAINING_ITEMS = [
+  "Live platform walkthrough with your whole team",
+  "AI receptionist scripted for your exact listings",
+  "VaultRE CRM mapping & sync configuration",
+  "Lead routing rules set up for your agents",
+  "30-day post-launch check-in support",
+];
 
 const STEPS = ["Agency Details", "Select Seats", "Legal & Payment"];
 
@@ -179,6 +189,33 @@ export default function Onboard() {
                 </div>
                 <div className="text-xs text-muted-foreground">All prices shown exclude GST</div>
               </div>
+              {/* Training included */}
+              <div className="rounded-xl p-4 mb-6"
+                style={{ background: "rgba(0,209,178,0.05)", border: "1px solid rgba(0,209,178,0.15)" }}>
+                <div className="flex items-center gap-2 mb-3">
+                  <CalendarCheck className="w-4 h-4 text-primary flex-shrink-0" />
+                  <span className="text-sm font-semibold text-foreground">Your onboarding training includes</span>
+                </div>
+                <ul className="space-y-2 mb-3">
+                  {TRAINING_ITEMS.map(item => (
+                    <li key={item} className="flex items-start gap-2">
+                      <Check className="w-3.5 h-3.5 text-primary flex-shrink-0 mt-0.5" />
+                      <span className="text-xs text-muted-foreground">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+                <a
+                  href={CALENDLY_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 text-xs font-semibold mt-1 transition-opacity hover:opacity-80"
+                  style={{ color: "#00d1b2" }}
+                >
+                  <Phone className="w-3 h-3" />
+                  Pre-book your training session now — free
+                </a>
+              </div>
+
               <div className="flex gap-3">
                 <button onClick={handleBack} className="flex-1 flex items-center justify-center gap-1 bg-muted border border-border text-muted-foreground hover:text-foreground py-3 rounded-lg text-sm font-medium transition-colors">
                   <ArrowLeft className="w-4 h-4" /> Back
@@ -227,9 +264,26 @@ export default function Onboard() {
                 </span>
               </label>
 
-              <div className="flex items-start gap-2 text-xs text-muted-foreground mb-6 bg-muted/50 rounded-lg p-3">
+              <div className="flex items-start gap-2 text-xs text-muted-foreground mb-4 bg-muted/50 rounded-lg p-3">
                 <Shield className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
                 <span>Your monthly subscription is processed securely by Stripe. Onboarding investment is confirmed separately during your strategy call before any setup charges apply.</span>
+              </div>
+
+              <div className="flex items-center justify-between rounded-xl p-3 mb-6"
+                style={{ background: "rgba(0,209,178,0.05)", border: "1px solid rgba(0,209,178,0.15)" }}>
+                <div className="flex items-center gap-2">
+                  <CalendarCheck className="w-4 h-4 text-primary flex-shrink-0" />
+                  <span className="text-xs text-muted-foreground">Schedule your onboarding training session</span>
+                </div>
+                <a
+                  href={CALENDLY_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs font-semibold flex items-center gap-1 flex-shrink-0 ml-3 hover:opacity-80"
+                  style={{ color: "#00d1b2" }}
+                >
+                  Book now <Phone className="w-3 h-3" />
+                </a>
               </div>
 
               <div className="flex gap-3">
