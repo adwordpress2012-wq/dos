@@ -125,9 +125,9 @@ export default function Resources() {
               <a href="mailto:support@directiveos.com.au" className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-2.5 rounded-lg text-sm font-medium transition-colors">
                 Email Support
               </a>
-              <button className="bg-muted border border-border hover:border-primary/40 text-foreground px-6 py-2.5 rounded-lg text-sm font-medium transition-colors">
-                Book a Training Call
-              </button>
+              <a href="mailto:billing@directiveos.com.au" className="bg-muted border border-border hover:border-primary/40 text-foreground px-6 py-2.5 rounded-lg text-sm font-medium transition-colors">
+                Billing Enquiries
+              </a>
             </div>
           </div>
         </section>

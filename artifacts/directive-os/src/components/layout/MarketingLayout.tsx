@@ -118,9 +118,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                   <Phone className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "#00d1b2" }} />
                   02 5850 4038
                 </a>
-                <a href="mailto:jayson@directiveos.com.au" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <a href="mailto:support@directiveos.com.au" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
                   <Mail className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "#00d1b2" }} />
-                  jayson@directiveos.com.au
+                  support@directiveos.com.au
                 </a>
               </div>
             </div>

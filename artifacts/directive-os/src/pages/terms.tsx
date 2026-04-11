@@ -66,7 +66,15 @@ export default function Terms() {
 
           <div className="bg-card border border-border rounded-xl p-6">
             <h2 className="text-foreground font-semibold text-lg mb-3">10. Contact</h2>
-            <p>For legal notices: legal@directiveos.com.au | Directive OS Pty Ltd | ABN [000 000 000]</p>
+            <p className="mb-3">Directive OS Pty Ltd | ABN [000 000 000]</p>
+            <table className="text-sm w-full">
+              <tbody className="space-y-1">
+                <tr><td className="text-foreground font-medium pr-4 py-1">General Support</td><td><a href="mailto:support@directiveos.com.au" className="text-primary hover:underline">support@directiveos.com.au</a></td></tr>
+                <tr><td className="text-foreground font-medium pr-4 py-1">Billing Enquiries</td><td><a href="mailto:billing@directiveos.com.au" className="text-primary hover:underline">billing@directiveos.com.au</a></td></tr>
+                <tr><td className="text-foreground font-medium pr-4 py-1">Legal Notices</td><td><a href="mailto:legal@directiveos.com.au" className="text-primary hover:underline">legal@directiveos.com.au</a></td></tr>
+                <tr><td className="text-foreground font-medium pr-4 py-1">Privacy Officer</td><td><a href="mailto:privacy@directiveos.com.au" className="text-primary hover:underline">privacy@directiveos.com.au</a></td></tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
