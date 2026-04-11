@@ -1,7 +1,7 @@
 import { logger } from "./logger";
 
 const OWNER_EMAILS = ["adwordpress2012@gmail.com", "jayson@directiveos.com.au"];
-const FROM = "Sarah at Directive OS <onboarding@resend.dev>";
+const FROM = "Sarah at Directive OS <sarah@directiveos.com.au>";
 
 interface TranscriptMessage {
   role: "user" | "assistant";
