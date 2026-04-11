@@ -27,9 +27,8 @@ export default function AgencyPromoBar() {
         {/* Message */}
         <p className="flex-1 text-xs text-white/70 text-center sm:text-left truncate">
           <span className="text-white font-semibold">Powered by Directive OS.</span>
-          {" "}Your agency website + AI Receptionist is{" "}
-          <span className="text-emerald-400 font-semibold">included free</span>
-          {" "}— from $299/month.
+          {" "}24/7 AI Receptionist + agency website — from{" "}
+          <span className="text-emerald-400 font-semibold">$299/month.</span>
         </p>
 
         {/* CTA */}

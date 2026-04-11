@@ -507,7 +507,7 @@ export default function Home() {
                         { role: "prospect", text: "Honestly? Usually voicemail. We miss a lot of after-hours stuff." },
                         { role: "sarah", text: "Heaps of agencies are in the same boat — and it's costing real deals. How many agents do you have?" },
                         { role: "prospect", text: "6 agents. We're growing but the phone stuff is a headache. What does this cost?" },
-                        { role: "sarah", text: "$299/month after a $1,500 setup — and a free website's included. Worth a 20-min chat with Jayson?" },
+                        { role: "sarah", text: "$299/month after a $1,500 setup — there's a lot included. Worth a 20-min chat with Jayson to go through it all?" },
                         { role: "prospect", text: "Yeah keen. My number is 0412 938 477, email m.webb@hpp.com.au" },
                       ].map((msg, i) => (
                         <div key={i} className={`flex gap-2 ${msg.role === "prospect" ? "justify-end" : ""}`}>
@@ -799,16 +799,16 @@ export default function Home() {
           <div className="text-center mb-6">
             <div className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: "#00d1b2" }}>Your Agency Website</div>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              A Professional Website — <span style={{ color: "#00d1b2" }}>Free</span>
+              A Professional Website — <span style={{ color: "#00d1b2" }}>Built for You</span>
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto text-lg mb-3">
-              Every Directive OS subscription includes a fully built agency website. Choose from three layouts,
+              Every Directive OS subscription comes with a fully built agency website. Choose from three layouts,
               supply your logo — we handle the rest. Colours automatically match your brand.
             </p>
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold"
               style={{ background: "rgba(0,209,178,0.08)", border: "1px solid rgba(0,209,178,0.2)", color: "#00d1b2" }}>
               <Check className="w-3.5 h-3.5" />
-              No web design cost. No ongoing maintenance. Just supply your logo.
+              No ongoing maintenance required. Just supply your logo.
             </div>
           </div>
 
@@ -919,7 +919,7 @@ export default function Home() {
           <div className="text-center mt-10">
             <p className="text-muted-foreground text-sm mb-5">
               Your colours are extracted from your logo automatically — no design work needed on your end.
-              We build and host your website as part of your subscription.
+              Website details are discussed during your onboarding call.
             </p>
             <a
               href="https://calendly.com/adwordpress2012/directive-os-agency-onboarding"
@@ -1078,7 +1078,7 @@ export default function Home() {
                   {[
                     "AI Voice Receptionist (24/7)",
                     "AI Chat Receptionist",
-                    "Agency website — free (Enterprise, Voyager or Discovery)",
+                    "Agency website (Enterprise, Voyager or Discovery)",
                     "Automatic transcript emails after every call & chat",
                     "VaultRE CRM live sync",
                     "100 AI minutes/month included",
