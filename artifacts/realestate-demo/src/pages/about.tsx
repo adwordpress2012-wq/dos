@@ -58,7 +58,7 @@ export default function AboutPage() {
 
       {/* Hero */}
       <div
-        className="relative pt-16 min-h-[380px] flex items-end bg-cover bg-center"
+        className="relative pt-[6.5rem] min-h-[380px] flex items-end bg-cover bg-center"
         style={{ backgroundImage: "url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1600&q=80')" }}
       >
         <div className="absolute inset-0 bg-[#0F1623]/70" />

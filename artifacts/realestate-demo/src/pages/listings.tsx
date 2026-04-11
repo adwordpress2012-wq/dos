@@ -37,7 +37,7 @@ export default function ListingsPage() {
       <Navbar />
 
       {/* Header */}
-      <div className="bg-[#0F1623] pt-24 pb-10 px-4">
+      <div className="bg-[#0F1623] pt-[6.5rem] pb-10 px-4">
         <div className="max-w-7xl mx-auto">
           <p className="text-gold text-xs font-semibold tracking-[0.2em] uppercase mb-2">Properties</p>
           <h1 className="font-serif text-3xl sm:text-4xl font-bold text-white mb-4">

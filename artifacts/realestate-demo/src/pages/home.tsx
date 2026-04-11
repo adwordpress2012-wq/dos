@@ -84,7 +84,7 @@ export default function HomePage() {
         style={{ backgroundImage: "url('https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1800&q=85')" }}
       >
         <div className="absolute inset-0 bg-[#0F1623]/60" />
-        <div className="relative z-10 text-center px-4 max-w-4xl mx-auto pt-16">
+        <div className="relative z-10 text-center px-4 max-w-4xl mx-auto pt-[6.5rem]">
           <p className="text-gold text-sm font-semibold tracking-[0.25em] uppercase mb-4">
             Western Sydney's Boutique Agency
           </p>

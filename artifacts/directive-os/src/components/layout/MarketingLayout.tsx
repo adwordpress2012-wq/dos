@@ -13,6 +13,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <Link href="/" className="font-bold text-xl tracking-tight">Directive OS</Link>
           </div>
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
+            <a href="/#templates" className="hover:text-foreground transition-colors">Templates</a>
             <a href="/#demos" className="hover:text-foreground transition-colors">Live Demos</a>
             <a href="/#pricing" className="hover:text-foreground transition-colors">Pricing</a>
             <Link href="/resources" className="hover:text-foreground transition-colors">Resources</Link>

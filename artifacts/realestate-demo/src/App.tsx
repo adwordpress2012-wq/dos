@@ -7,6 +7,8 @@ import AboutPage from "@/pages/about";
 import ContactPage from "@/pages/contact";
 import NotFound from "@/pages/not-found";
 import SarahChatWidget from "@/components/sarah-chat-widget";
+import AgencyPromoBar from "@/components/agency-promo-bar";
+import { PromoProvider } from "@/context/promo-context";
 
 function Router() {
   return (
@@ -23,11 +25,14 @@ function Router() {
 
 function App() {
   return (
-    <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-      <Router />
-      <SarahChatWidget />
-      <Toaster />
-    </WouterRouter>
+    <PromoProvider>
+      <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+        <AgencyPromoBar />
+        <Router />
+        <SarahChatWidget />
+        <Toaster />
+      </WouterRouter>
+    </PromoProvider>
   );
 }
 

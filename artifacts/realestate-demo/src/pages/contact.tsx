@@ -32,7 +32,7 @@ export default function ContactPage() {
       <Navbar />
 
       {/* Header */}
-      <div className="bg-[#0F1623] pt-24 pb-12 px-4">
+      <div className="bg-[#0F1623] pt-[6.5rem] pb-12 px-4">
         <div className="max-w-7xl mx-auto">
           <p className="text-gold text-xs font-semibold tracking-[0.2em] uppercase mb-2">Get in Touch</p>
           <h1 className="font-serif text-4xl sm:text-5xl font-bold text-white max-w-xl">

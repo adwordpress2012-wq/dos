@@ -26,6 +26,20 @@ The platform includes a **master portal site** (Directive OS) and **industry-spe
 - Sarah Widget: Floating chat widget connecting to `/api/ai/chat` (agencyId: 1)
 - "Powered by Directive OS" badge in footer and chat widget
 - Phone: 02 5850 4038
+- **Agency Promo Bar**: Fixed top banner — "LIVE DEMO | This is a Directive OS demo site. Your agency website is free." with "Get Started Free" teal button linking to Directive OS. Uses React context (`PromoProvider`) + CSS variable `--promo-h: 40px` to offset the navbar dynamically.
+- **Meridian uses the "Voyager" template** (boutique elegant layout)
+
+## Website Templates (Star Trek Names)
+
+Every Directive OS subscription includes a free agency website. Three layout choices — colours auto-extracted from agency logo:
+
+| Template | Personality | Accent |
+|---|---|---|
+| **Enterprise** | Corporate, clean, grid-forward | Indigo `#6366f1` |
+| **Voyager** | Boutique, editorial, serif-warm | Gold `#C9A84C` — Meridian uses this |
+| **Discovery** | Bold, cinematic, high-contrast | Rose `#e11d48` |
+
+Showcased in the master site under `/#templates` (nav: Templates → Live Demos → Pricing).
 
 ## Design System
 

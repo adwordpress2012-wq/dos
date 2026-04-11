@@ -70,7 +70,7 @@ export default function ListingDetailPage() {
       <Navbar />
 
       {/* Breadcrumb */}
-      <div className="pt-20 pb-2 px-4 bg-muted/40 border-b border-border">
+      <div className="pt-[6.5rem] pb-2 px-4 bg-muted/40 border-b border-border">
         <div className="max-w-7xl mx-auto flex items-center gap-2 text-xs text-muted-foreground">
           <a href={`${base}/`} className="hover:text-foreground transition-colors">Home</a>
           <ChevronRight className="w-3 h-3" />

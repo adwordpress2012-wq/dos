@@ -633,6 +633,147 @@ export default function Home() {
         </div>
       </section>
 
+      {/* 3 Website Templates */}
+      <section id="templates" className="py-20 border-t border-border">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-6">
+            <div className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: "#00d1b2" }}>Your Agency Website</div>
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+              A Professional Website — <span style={{ color: "#00d1b2" }}>Free</span>
+            </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto text-lg mb-3">
+              Every Directive OS subscription includes a fully built agency website. Choose from three layouts,
+              supply your logo — we handle the rest. Colours automatically match your brand.
+            </p>
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold"
+              style={{ background: "rgba(0,209,178,0.08)", border: "1px solid rgba(0,209,178,0.2)", color: "#00d1b2" }}>
+              <Check className="w-3.5 h-3.5" />
+              No web design cost. No ongoing maintenance. Just supply your logo.
+            </div>
+          </div>
+
+          {/* Template cards */}
+          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto mt-12">
+            {[
+              {
+                name: "Enterprise",
+                tagline: "The Flagship",
+                desc: "Corporate and authoritative. Clean grid layout with strong typography, a bold header, and a professional property search experience. Perfect for established agencies.",
+                feel: ["Clean & minimal", "Grid-forward", "Corporate authority"],
+                accent: "#6366f1",
+                previewBg: "linear-gradient(135deg, #0f1035 0%, #1e2060 100%)",
+                badge: "Most Popular",
+              },
+              {
+                name: "Voyager",
+                tagline: "The Explorer",
+                desc: "Boutique and editorial. Serif headlines, warm tones, rich photography, and an elegant listing presentation. Ideal for premium, relationship-driven agencies.",
+                feel: ["Boutique & warm", "Serif-forward", "Luxury editorial"],
+                accent: "#C9A84C",
+                previewBg: "linear-gradient(135deg, #1a1208 0%, #2d1f0a 100%)",
+                badge: "Meridian uses this",
+              },
+              {
+                name: "Discovery",
+                tagline: "The Pioneer",
+                desc: "Bold and cinematic. Dark hero sections, high-contrast photography, and a modern sans-serif feel. For agencies that want to stand out with a striking first impression.",
+                feel: ["Bold & cinematic", "High-contrast", "Contemporary dark"],
+                accent: "#e11d48",
+                previewBg: "linear-gradient(135deg, #1a0010 0%, #2d0020 100%)",
+                badge: "New",
+              },
+            ].map((t) => (
+              <div
+                key={t.name}
+                className="relative rounded-2xl overflow-hidden border flex flex-col"
+                style={{ borderColor: `${t.accent}30`, background: "rgba(255,255,255,0.03)", backdropFilter: "blur(10px)" }}
+              >
+                {/* Badge */}
+                <div
+                  className="absolute top-3 right-3 z-10 text-[10px] font-bold px-2 py-0.5 rounded-full"
+                  style={{ background: `${t.accent}20`, border: `1px solid ${t.accent}40`, color: t.accent }}
+                >
+                  {t.badge}
+                </div>
+
+                {/* Preview mockup */}
+                <div className="aspect-[4/3] relative overflow-hidden" style={{ background: t.previewBg }}>
+                  <div className="absolute inset-0 flex flex-col p-4">
+                    {/* Fake nav */}
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex gap-1.5">
+                        <div className="w-12 h-1.5 rounded-full opacity-70" style={{ background: t.accent }} />
+                      </div>
+                      <div className="flex gap-2">
+                        {[1,2,3,4].map(i => <div key={i} className="w-6 h-1 rounded-full bg-white/20" />)}
+                      </div>
+                    </div>
+                    {/* Fake hero text */}
+                    <div className="flex-1 flex flex-col justify-center">
+                      <div className="w-3/4 h-3 rounded-full bg-white/80 mb-2" />
+                      <div className="w-1/2 h-2 rounded-full bg-white/40 mb-4" />
+                      <div className="flex gap-2">
+                        <div className="w-20 h-6 rounded-lg" style={{ background: t.accent }} />
+                        <div className="w-20 h-6 rounded-lg bg-white/10" />
+                      </div>
+                    </div>
+                    {/* Fake property cards */}
+                    <div className="grid grid-cols-3 gap-2 mt-2">
+                      {[1,2,3].map(i => (
+                        <div key={i} className="rounded-lg bg-white/8 overflow-hidden">
+                          <div className="h-8 bg-white/10" />
+                          <div className="p-1.5">
+                            <div className="w-full h-1.5 rounded-full bg-white/30 mb-1" />
+                            <div className="w-2/3 h-1 rounded-full bg-white/15" />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  {/* Colour accent glow */}
+                  <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full blur-3xl opacity-20 pointer-events-none"
+                    style={{ background: t.accent }} />
+                </div>
+
+                {/* Content */}
+                <div className="p-5 flex flex-col flex-1">
+                  <div className="mb-0.5">
+                    <span className="text-[10px] font-semibold tracking-widest uppercase" style={{ color: t.accent }}>{t.tagline}</span>
+                  </div>
+                  <h3 className="text-xl font-bold text-foreground mb-2">{t.name}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed mb-4">{t.desc}</p>
+                  <div className="flex flex-wrap gap-1.5 mt-auto">
+                    {t.feel.map(f => (
+                      <span key={f} className="text-[11px] px-2 py-0.5 rounded-full font-medium"
+                        style={{ background: `${t.accent}15`, color: t.accent, border: `1px solid ${t.accent}25` }}>
+                        {f}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Bottom note */}
+          <div className="text-center mt-10">
+            <p className="text-muted-foreground text-sm mb-5">
+              Your colours are extracted from your logo automatically — no design work needed on your end.
+              We build and host your website as part of your subscription.
+            </p>
+            <a
+              href="https://calendly.com/adwordpress2012/directive-os-agency-onboarding"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all"
+              style={{ background: "rgba(0,209,178,0.1)", border: "1px solid rgba(0,209,178,0.25)", color: "#00d1b2" }}
+            >
+              Book a Call to Choose Your Template <ArrowRight className="w-4 h-4" />
+            </a>
+          </div>
+        </div>
+      </section>
+
       {/* Live Industry Demos */}
       <section id="demos" className="py-20 border-t border-border" style={{ background: "rgba(0,209,178,0.02)" }}>
         <div className="container mx-auto px-4">
@@ -777,6 +918,7 @@ export default function Home() {
                   {[
                     "AI Voice Receptionist (24/7)",
                     "AI Chat Receptionist",
+                    "Agency website — free (Enterprise, Voyager or Discovery)",
                     "VaultRE CRM live sync",
                     "100 AI minutes/month included",
                     "NSW Tenancy Form automation",
