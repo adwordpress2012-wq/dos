@@ -99,6 +99,17 @@ function PricingCalculator() {
           <ArrowRight className="w-4 h-4" />
         </button>
       </Link>
+
+      <a
+        href="https://calendly.com/adwordpress2012/directive-os-agency-onboarding"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center justify-center gap-2 w-full py-2.5 px-6 rounded-xl border transition-all hover:border-primary/40 hover:text-primary text-sm font-medium text-muted-foreground"
+        style={{ borderColor: "rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.02)" }}
+      >
+        <Phone className="w-3.5 h-3.5" />
+        Book a free 15-min strategy call
+      </a>
     </div>
   );
 }
@@ -240,7 +251,7 @@ export default function Home() {
             and routing hot leads to your agents in real time.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/sign-up">
               <button className="font-bold py-3.5 px-8 rounded-xl transition-all hover:scale-105 flex items-center gap-2"
                 style={{ background: "linear-gradient(135deg, #00d1b2, #00b89c)", color: "#0a0a0a", boxShadow: "0 4px 32px rgba(0,209,178,0.35)" }}>
@@ -256,6 +267,18 @@ export default function Home() {
               See Live Demo
             </button>
           </div>
+          <p className="text-sm text-muted-foreground mt-5 mb-16">
+            Want to talk it through first?{" "}
+            <a
+              href="https://calendly.com/adwordpress2012/directive-os-agency-onboarding"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium hover:underline"
+              style={{ color: "#00d1b2" }}
+            >
+              Book a free 15-min strategy call
+            </a>
+          </p>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
             {[
