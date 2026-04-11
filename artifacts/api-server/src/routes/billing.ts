@@ -2,6 +2,7 @@ import { Router, type IRouter } from "express";
 import { eq } from "drizzle-orm";
 import { db, agenciesTable } from "@workspace/db";
 import Stripe from "stripe";
+import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
 
@@ -184,12 +185,14 @@ router.post("/billing/create-subscription", async (req, res): Promise<void> => {
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Unknown error";
+    logger.error({ err, sessionId, clerkOrgId }, `Billing: Could not retrieve Stripe checkout session — ${msg}`);
     res.status(400).json({ error: `Could not retrieve checkout session: ${msg}` });
     return;
   }
 
   const customerId = session.customer as string | null;
   if (!customerId) {
+    logger.error({ sessionId, clerkOrgId, sessionStatus: session.status }, "Billing: Checkout session has no Stripe customer attached");
     res.status(400).json({ error: "No Stripe customer on this session." });
     return;
   }
