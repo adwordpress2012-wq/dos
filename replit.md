@@ -40,7 +40,9 @@ Directive OS is a professional SaaS platform providing AI receptionist services 
 - `GET/POST/DELETE /api/staff` — team seat management
 - `GET /api/billing/subscription` + `/usage` + `/invoices` — billing data
 - `POST /api/billing/portal` — Stripe portal redirect
-- `POST /api/ai/chat` — AI receptionist chat (pattern-matching mock — UPGRADE PENDING to OpenAI)
+- `POST /api/ai/chat` — OpenAI GPT-4o-mini chat receptionist (Sarah persona, saves transcripts + leads)
+- `POST /api/voice/incoming` — TwiML entry point for Twilio inbound calls (LIVE)
+- `WS /api/voice/media-stream` — WebSocket bridge: Twilio ↔ OpenAI Realtime API (LIVE)
 - `GET /api/dashboard/summary|recent-leads|lead-breakdown|activity` — dashboard data
 
 ### Frontend (`artifacts/directive-os`) — served at `/`
@@ -51,11 +53,50 @@ Directive OS is a professional SaaS platform providing AI receptionist services 
 - `/terms`, `/privacy`, `/resources` — Legal + docs
 - `/dashboard` — Command Centre (stats, charts, activity feed)
 - `/dashboard/leads` — Lead Inbox
-- `/dashboard/transcripts` — Communication Logs
+- `/dashboard/transcripts` — Communication Logs (voice + chat, filterable by channel)
 - `/dashboard/listings` — Property Intelligence (portal-style cards, auction support)
 - `/dashboard/staff` — Seat Management
 - `/dashboard/billing` — Billing Command (invoices, AI usage)
 - `/dashboard/settings` — Communication Protocols
+
+## Live AI Voice Receptionist — WORKING ✓
+
+### Flow
+1. Caller dials **02 5850 4038** (Twilio Australian number)
+2. Twilio POST → `/api/voice/incoming` → returns TwiML with `wss://{same-host}/api/voice/media-stream`
+3. Twilio opens WebSocket to `/api/voice/media-stream`
+4. Server bridges Twilio audio ↔ OpenAI Realtime API (`gpt-4o-realtime-preview`, `shimmer` voice)
+5. Sarah (AI persona) greets caller in Australian accent, qualifies lead, collects contact info
+6. On hangup: transcript + lead saved to DB, Stripe usage metered
+
+### Critical Implementation Notes
+- **WebSocket host MUST match TwiML host**: `x-forwarded-host` header used in TwiML generation so Twilio always connects back to the same server that served TwiML. NEVER hardcode `directiveos.com.au` — this caused the original "Application Error" bug (production proxy doesn't WebSocket-proxy correctly when mismatched).
+- **Twilio webhook URL**: Should be set to `https://directiveos.com.au/api/voice/incoming` (production) so both TwiML and WebSocket go through production stack
+- **OpenAI Realtime URL**: `wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview` (no date suffix)
+- **Session config**: `input_audio_transcription: { model: "whisper-1" }` is required for caller speech capture
+- **VAD silence**: `silence_duration_ms: 800` gives natural conversational pauses
+- **Early close guard**: Check `readyState !== CONNECTING` before closing OpenAI WS; use `terminate()` if still connecting
+
+### Sarah Persona
+- Warm, casual Aussie personality — uses "reckon", "keen", "heaps", "arvo", "no worries", "cheers"
+- "Like chatting with a knowledgeable mate who works in real estate"
+- 1-2 sentences per turn, then listens
+- Qualifies: buyer / tenant / vendor / landlord
+- Collects: name, email, phone
+- Offers: inspection bookings (buyers), tenancy form (tenants), free appraisal (vendors/landlords)
+- For urgent offers: flags as urgent, promises immediate Jayson callback
+- File: `artifacts/api-server/src/routes/voice.ts` → `AI_PERSONA` constant
+
+### Post-Call Pipeline
+- Transcript saved to `transcripts` + `transcript_messages` tables
+- Lead auto-created if email or phone detected in speech
+- Lead type auto-classified: buyer / tenant / vendor / landlord / enquiry
+- Stripe meter event `ai_voice_minutes` fired per call
+- All visible in `/dashboard/transcripts` (Communication Logs)
+
+## Skill
+- Twilio Voice AI skill: `.local/skills/twilio-voice-ai/SKILL.md`
+- Old voice skill: `.local/skills/directive-os-ai-voice/SKILL.md`
 
 ## Listings Schema (important fields)
 
@@ -88,26 +129,17 @@ inspectionTimes: jsonb — array of strings "Sat 3 May, 10:00-10:30am"
 
 ## Next Steps (Priority Order)
 
-### 1. OpenAI Chat Integration
-- Replace `POST /api/ai/chat` pattern-matching with OpenAI GPT-4o-mini
-- System prompt: real estate receptionist for Australian agencies
-- Needs: `OPENAI_API_KEY` secret
-- See skill: `.local/skills/directive-os-ai-voice/SKILL.md`
-
-### 2. Twilio Voice — AI Phone Receptionist
-- Inbound +61 Australian number via Twilio
-- OpenAI Realtime API (gpt-4o-realtime-preview) for live voice conversation
-- Female voice: OpenAI `shimmer`
-- Needs: `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_PHONE_NUMBER` secrets
-- See skill: `.local/skills/directive-os-ai-voice/SKILL.md`
-
-### 3. Clerk Auth
+### 1. Clerk Auth
 - Real user authentication replacing demo middleware
 - Needs: Clerk account + `CLERK_PUBLISHABLE_KEY` + `CLERK_SECRET_KEY`
 
-### 4. Stripe Checkout Wiring
+### 2. Stripe Checkout Wiring
 - Connect "Proceed to Payment" to real Stripe checkout session
 - Keys already configured in environment
+
+### 3. Multi-Agency Support
+- Agency lookup by Twilio number for voice calls (currently hardcoded `agencyId: 1`)
+- Requires Clerk auth to be live first
 
 ## Key Commands
 
