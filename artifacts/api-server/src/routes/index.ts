@@ -7,6 +7,7 @@ import transcriptsRouter from "./transcripts";
 import staffRouter from "./staff";
 import billingRouter from "./billing";
 import aiRouter from "./ai";
+import voiceRouter from "./voice";
 import dashboardRouter from "./dashboard";
 import systemRouter from "./system";
 
@@ -29,6 +30,7 @@ router.use(transcriptsRouter);
 router.use(staffRouter);
 router.use(billingRouter);
 router.use(aiRouter);
+router.use(voiceRouter);
 router.use(dashboardRouter);
 router.use(systemRouter);
 
