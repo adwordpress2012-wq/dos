@@ -3,6 +3,7 @@
     "name": "Directive OS",
     "slug": "directive-os-mobile",
     "version": "1.0.0",
+    "runtimeVersion": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "directive-os-mobile",
@@ -15,14 +16,30 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.directiveos.command"
+      "bundleIdentifier": "com.directiveos.command",
+      "buildNumber": "1"
     },
     "android": {
       "package": "com.directiveos.command",
+      "versionCode": 1,
+      "compileSdkVersion": 35,
+      "targetSdkVersion": 35,
+      "minSdkVersion": 24,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/icon.png",
         "backgroundColor": "#0a0e1a"
-      }
+      },
+      "permissions": [],
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            { "scheme": "https", "host": "directiveos.com.au" }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
     },
     "web": {
       "favicon": "./assets/images/icon.png"
@@ -40,6 +57,11 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "directive-os-command"
+      }
     }
   }
 }

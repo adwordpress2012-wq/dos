@@ -2,7 +2,42 @@ import { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { useGetMyAgency, useUpdateMyAgency, getGetMyAgencyQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Settings, Save, Bot, Phone, Globe } from "lucide-react";
+import { Settings, Save, Bot, Phone, Globe, Smartphone, Eye, EyeOff, Copy, Check } from "lucide-react";
+
+function MobileTokenCard({ token }: { token?: string }) {
+  const [visible, setVisible] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const copy = () => {
+    if (!token) return;
+    navigator.clipboard.writeText(token);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  if (!token) return <p className="text-sm text-muted-foreground">Token not yet generated. Contact support.</p>;
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2 bg-background border border-border rounded-lg px-3 py-2.5">
+        <code className="flex-1 text-xs font-mono text-foreground truncate">
+          {visible ? token : "•".repeat(32)}
+        </code>
+        <button onClick={() => setVisible(v => !v)} className="text-muted-foreground hover:text-foreground transition-colors p-1">
+          {visible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+        </button>
+        <button onClick={copy} className="text-muted-foreground hover:text-primary transition-colors p-1">
+          {copied ? <Check className="w-4 h-4 text-primary" /> : <Copy className="w-4 h-4" />}
+        </button>
+      </div>
+      <ol className="text-xs text-muted-foreground space-y-1 list-decimal list-inside">
+        <li>Download <strong className="text-foreground">Directive OS Command Bridge</strong> from the App Store or Google Play</li>
+        <li>Tap <strong className="text-foreground">Sign In</strong> and paste this token</li>
+        <li>Share with your agents — each person uses the same token</li>
+      </ol>
+    </div>
+  );
+}
 
 export default function SettingsPage() {
   const queryClient = useQueryClient();
@@ -147,6 +182,18 @@ export default function SettingsPage() {
           <div className="mt-4 bg-muted/30 rounded-lg p-3 text-xs text-muted-foreground">
             To modify AI behaviour, response scripts, or phone numbers, contact your Directive OS account manager or raise a support request.
           </div>
+        </div>
+
+        {/* Mobile Access */}
+        <div className="bg-card border border-border rounded-xl p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Smartphone className="w-4 h-4 text-primary" />
+            <h3 className="font-semibold text-foreground">Mobile Access — Command Bridge</h3>
+          </div>
+          <p className="text-sm text-muted-foreground mb-4">
+            Use this token to sign in to the Directive OS Command Bridge app on your phone. Keep it private — anyone with this token can view your agency data.
+          </p>
+          <MobileTokenCard token={(agency as any)?.mobileToken} />
         </div>
 
         {/* Legal */}

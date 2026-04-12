@@ -6,13 +6,14 @@ import {
   StyleSheet,
   Platform,
   RefreshControl,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
-import { ACTIVITY, ActivityItem } from "@/constants/mockData";
+import { useActivity, ActivityItem } from "@/hooks/useMobileApi";
 
-const ACTIVITY_ICONS: Record<ActivityItem["type"], { name: string; color: string }> = {
+const ACTIVITY_ICONS: Record<string, { name: string; color: string }> = {
   call_answered: { name: "call", color: "#00d1b2" },
   lead_captured: { name: "person-add", color: "#22c55e" },
   email_sent: { name: "mail", color: "#3b82f6" },
@@ -22,7 +23,7 @@ const ACTIVITY_ICONS: Record<ActivityItem["type"], { name: string; color: string
 };
 
 function ActivityRow({ item, colors }: { item: ActivityItem; colors: ReturnType<typeof useColors> }) {
-  const cfg = ACTIVITY_ICONS[item.type];
+  const cfg = ACTIVITY_ICONS[item.type] ?? { name: "flash-outline", color: colors.teal };
   const lineColor = item.channel === "voice" ? colors.teal : item.channel === "chat" ? "#a78bfa" : colors.navyLight;
 
   return (
@@ -53,15 +54,24 @@ function ActivityRow({ item, colors }: { item: ActivityItem; colors: ReturnType<
 export default function ActivityScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
+  const { data: activity, isLoading, refetch } = useActivity();
   const [refreshing, setRefreshing] = React.useState(false);
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
 
-  const onRefresh = () => {
+  const onRefresh = async () => {
     setRefreshing(true);
-    setTimeout(() => setRefreshing(false), 1200);
+    await refetch();
+    setRefreshing(false);
   };
+
+  const items = activity ?? [];
+  const todayCount = items.filter(i => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return true;
+  }).length;
 
   return (
     <View style={[styles.container, { backgroundColor: colors.navy }]}>
@@ -73,27 +83,35 @@ export default function ActivityScreen() {
         </View>
       </View>
 
-      <View style={[styles.dateBanner, { backgroundColor: colors.navyLight, marginHorizontal: 20, borderRadius: 10 }]}>
-        <Ionicons name="today-outline" size={14} color={colors.textSecondary} />
-        <Text style={[styles.dateText, { color: colors.textSecondary, fontFamily: "Inter_500Medium" }]}>Today — 10 actions by Sarah</Text>
-      </View>
+      {items.length > 0 && (
+        <View style={[styles.dateBanner, { backgroundColor: colors.navyLight, marginHorizontal: 20, borderRadius: 10 }]}>
+          <Ionicons name="today-outline" size={14} color={colors.textSecondary} />
+          <Text style={[styles.dateText, { color: colors.textSecondary, fontFamily: "Inter_500Medium" }]}>
+            Last 7 days — {items.length} actions by Sarah
+          </Text>
+        </View>
+      )}
 
-      <FlatList
-        data={ACTIVITY}
-        keyExtractor={item => item.id}
-        renderItem={({ item }) => <ActivityRow item={item} colors={colors} />}
-        contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 16, paddingBottom: bottomPad + 80 }}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.teal} />
-        }
-        ListEmptyComponent={
-          <View style={styles.empty}>
-            <Ionicons name="pulse-outline" size={40} color={colors.textSecondary} />
-            <Text style={[styles.emptyText, { color: colors.textSecondary, fontFamily: "Inter_400Regular" }]}>No activity yet today</Text>
-          </View>
-        }
-      />
+      {isLoading ? (
+        <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+          <ActivityIndicator color={colors.teal} />
+        </View>
+      ) : (
+        <FlatList
+          data={items}
+          keyExtractor={item => item.id}
+          renderItem={({ item }) => <ActivityRow item={item} colors={colors} />}
+          contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 16, paddingBottom: bottomPad + 80 }}
+          showsVerticalScrollIndicator={false}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.teal} />}
+          ListEmptyComponent={
+            <View style={styles.empty}>
+              <Ionicons name="pulse-outline" size={40} color={colors.textSecondary} />
+              <Text style={[styles.emptyText, { color: colors.textSecondary, fontFamily: "Inter_400Regular" }]}>No activity yet</Text>
+            </View>
+          }
+        />
+      )}
     </View>
   );
 }

@@ -8,12 +8,14 @@ import {
   Modal,
   ScrollView,
   Platform,
+  RefreshControl,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
-import { LEADS, Lead } from "@/constants/mockData";
+import { useLeads, useUpdateLeadStatus, Lead } from "@/hooks/useMobileApi";
 
 const FILTERS = ["All", "Buyer", "Vendor", "Tenant", "Landlord"] as const;
 type Filter = (typeof FILTERS)[number];
@@ -32,13 +34,28 @@ function statusColor(s: string) {
   return "#6b7280";
 }
 
+function timeAgo(dateStr: string) {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  return `${Math.floor(hrs / 24)}d ago`;
+}
+
 function LeadDetailModal({ lead, visible, onClose }: { lead: Lead | null; visible: boolean; onClose: () => void }) {
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  if (!lead) return null;
+  const updateStatus = useUpdateLeadStatus();
 
+  if (!lead) return null;
   const tc = typeColor(lead.leadType, colors);
   const sc = statusColor(lead.status);
+
+  const markContacted = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    updateStatus.mutate({ id: lead.id, status: "contacted" }, { onSuccess: onClose });
+  };
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
@@ -78,21 +95,21 @@ function LeadDetailModal({ lead, visible, onClose }: { lead: Lead | null; visibl
           <View style={[styles.detailSection, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <Text style={[styles.detailSectionTitle, { color: colors.textSecondary, fontFamily: "Inter_600SemiBold" }]}>CONTACT</Text>
             {lead.phone && (
-              <TouchableOpacity style={styles.contactRow} activeOpacity={0.7}>
+              <View style={styles.contactRow}>
                 <Ionicons name="call-outline" size={16} color={colors.teal} />
                 <Text style={[styles.contactText, { color: colors.teal, fontFamily: "Inter_500Medium" }]}>{lead.phone}</Text>
-              </TouchableOpacity>
+              </View>
             )}
             {lead.email && (
-              <TouchableOpacity style={styles.contactRow} activeOpacity={0.7}>
+              <View style={styles.contactRow}>
                 <Ionicons name="mail-outline" size={16} color={colors.teal} />
                 <Text style={[styles.contactText, { color: colors.teal, fontFamily: "Inter_500Medium" }]}>{lead.email}</Text>
-              </TouchableOpacity>
+              </View>
             )}
             <View style={styles.contactRow}>
               <Ionicons name={lead.channel === "voice" ? "call" : "chatbubble"} size={16} color={colors.textSecondary} />
               <Text style={[styles.contactText, { color: colors.textSecondary, fontFamily: "Inter_400Regular" }]}>
-                Via {lead.channel} · {lead.time}
+                Via {lead.channel} · {timeAgo(lead.createdAt)}
               </Text>
             </View>
           </View>
@@ -104,14 +121,17 @@ function LeadDetailModal({ lead, visible, onClose }: { lead: Lead | null; visibl
             </View>
           )}
 
-          <TouchableOpacity
-            style={[styles.actionBtn, { backgroundColor: colors.teal }]}
-            activeOpacity={0.85}
-            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); onClose(); }}
-          >
-            <Ionicons name="checkmark-circle" size={18} color="#0a0e1a" />
-            <Text style={[styles.actionBtnText, { color: "#0a0e1a", fontFamily: "Inter_700Bold" }]}>Mark as Contacted</Text>
-          </TouchableOpacity>
+          {lead.status !== "contacted" && (
+            <TouchableOpacity
+              style={[styles.actionBtn, { backgroundColor: colors.teal, opacity: updateStatus.isPending ? 0.7 : 1 }]}
+              activeOpacity={0.85}
+              onPress={markContacted}
+              disabled={updateStatus.isPending}
+            >
+              <Ionicons name="checkmark-circle" size={18} color="#0a0e1a" />
+              <Text style={[styles.actionBtnText, { color: "#0a0e1a", fontFamily: "Inter_700Bold" }]}>Mark as Contacted</Text>
+            </TouchableOpacity>
+          )}
         </ScrollView>
       </View>
     </Modal>
@@ -124,12 +144,24 @@ export default function LeadsScreen() {
   const [filter, setFilter] = useState<Filter>("All");
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
 
+  const { data: leads, isLoading, refetch } = useLeads();
+  const [refreshing, setRefreshing] = useState(false);
+
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
+  };
+
+  const allLeads = leads ?? [];
   const filtered = filter === "All"
-    ? LEADS
-    : LEADS.filter(l => l.leadType === filter.toLowerCase());
+    ? allLeads
+    : allLeads.filter(l => l.leadType === filter.toLowerCase());
+
+  const newCount = allLeads.filter(l => l.status === "new").length;
 
   const renderLead = ({ item }: { item: Lead }) => {
     const tc = typeColor(item.leadType, colors);
@@ -149,7 +181,7 @@ export default function LeadsScreen() {
             <Text style={[styles.leadName, { color: colors.textPrimary, fontFamily: "Inter_600SemiBold" }]}>{item.name}</Text>
             {item.hotLead && <Ionicons name="flame" size={14} color="#f97316" style={{ marginLeft: 4 }} />}
           </View>
-          <Text style={[styles.leadNote, { color: colors.textSecondary, fontFamily: "Inter_400Regular" }]} numberOfLines={2}>{item.notes}</Text>
+          <Text style={[styles.leadNote, { color: colors.textSecondary, fontFamily: "Inter_400Regular" }]} numberOfLines={2}>{item.notes ?? `${item.leadType} enquiry`}</Text>
           <View style={styles.leadTags}>
             <View style={[styles.tag, { backgroundColor: tc + "20" }]}>
               <Text style={[styles.tagText, { color: tc, fontFamily: "Inter_600SemiBold" }]}>{item.leadType}</Text>
@@ -164,7 +196,7 @@ export default function LeadsScreen() {
           </View>
         </View>
         <View style={styles.leadRight}>
-          <Text style={[styles.leadTime, { color: colors.textSecondary, fontFamily: "Inter_400Regular" }]}>{item.timeAgo}</Text>
+          <Text style={[styles.leadTime, { color: colors.textSecondary, fontFamily: "Inter_400Regular" }]}>{timeAgo(item.createdAt)}</Text>
           <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} style={{ marginTop: 8 }} />
         </View>
       </TouchableOpacity>
@@ -175,9 +207,11 @@ export default function LeadsScreen() {
     <View style={[styles.container, { backgroundColor: colors.navy }]}>
       <View style={[styles.topBar, { paddingTop: topPad + 16 }]}>
         <Text style={[styles.screenTitle, { color: colors.textPrimary, fontFamily: "Inter_700Bold" }]}>Lead Inbox</Text>
-        <View style={[styles.badge, { backgroundColor: colors.teal }]}>
-          <Text style={[styles.badgeText, { color: "#0a0e1a", fontFamily: "Inter_700Bold" }]}>{LEADS.filter(l => l.status === "new").length}</Text>
-        </View>
+        {newCount > 0 && (
+          <View style={[styles.badge, { backgroundColor: colors.teal }]}>
+            <Text style={[styles.badgeText, { color: "#0a0e1a", fontFamily: "Inter_700Bold" }]}>{newCount}</Text>
+          </View>
+        )}
       </View>
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filters}>
@@ -193,21 +227,27 @@ export default function LeadsScreen() {
         ))}
       </ScrollView>
 
-      <FlatList
-        data={filtered}
-        keyExtractor={item => item.id}
-        renderItem={renderLead}
-        contentContainerStyle={{ padding: 20, paddingBottom: bottomPad + 80 }}
-        showsVerticalScrollIndicator={false}
-        scrollEnabled={filtered.length > 0}
-        ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
-        ListEmptyComponent={
-          <View style={styles.empty}>
-            <Ionicons name="people-outline" size={40} color={colors.textSecondary} />
-            <Text style={[styles.emptyText, { color: colors.textSecondary, fontFamily: "Inter_400Regular" }]}>No leads here yet</Text>
-          </View>
-        }
-      />
+      {isLoading ? (
+        <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+          <ActivityIndicator color={colors.teal} />
+        </View>
+      ) : (
+        <FlatList
+          data={filtered}
+          keyExtractor={item => String(item.id)}
+          renderItem={renderLead}
+          contentContainerStyle={{ padding: 20, paddingBottom: bottomPad + 80 }}
+          showsVerticalScrollIndicator={false}
+          ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.teal} />}
+          ListEmptyComponent={
+            <View style={styles.empty}>
+              <Ionicons name="people-outline" size={40} color={colors.textSecondary} />
+              <Text style={[styles.emptyText, { color: colors.textSecondary, fontFamily: "Inter_400Regular" }]}>No leads here yet</Text>
+            </View>
+          }
+        />
+      )}
 
       <LeadDetailModal lead={selectedLead} visible={!!selectedLead} onClose={() => setSelectedLead(null)} />
     </View>
@@ -237,7 +277,6 @@ const styles = StyleSheet.create({
   leadTime: { fontSize: 11 },
   empty: { alignItems: "center", justifyContent: "center", paddingTop: 80, gap: 12 },
   emptyText: { fontSize: 15 },
-  // Modal
   modalContainer: { flex: 1 },
   modalHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 20, paddingBottom: 16 },
   closeBtn: { width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center" },
