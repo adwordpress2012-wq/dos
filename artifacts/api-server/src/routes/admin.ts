@@ -2,7 +2,7 @@ import { Router, type IRouter, type Request, type Response, type NextFunction } 
 import { eq, desc, sql, gte, and } from "drizzle-orm";
 import {
   db, agenciesTable, leadsTable, transcriptsTable, chatSessionsTable,
-  adminExpensesTable, adminPipelineTable,
+  adminExpensesTable, adminPipelineTable, listingsTable,
 } from "@workspace/db";
 
 const router: IRouter = Router();
@@ -207,6 +207,79 @@ router.put("/admin/pipeline/:id", adminAuth, async (req: Request, res: Response)
 
 router.delete("/admin/pipeline/:id", adminAuth, async (req: Request, res: Response): Promise<void> => {
   await db.delete(adminPipelineTable).where(eq(adminPipelineTable.id, Number(req.params.id)));
+  res.json({ ok: true });
+});
+
+router.get("/admin/listings", adminAuth, async (req: Request, res: Response): Promise<void> => {
+  const agencyId = req.query.agencyId ? Number(req.query.agencyId) : null;
+  if (!agencyId) {
+    const all = await db.select().from(listingsTable).orderBy(desc(listingsTable.createdAt));
+    res.json(all); return;
+  }
+  const listings = await db.select().from(listingsTable)
+    .where(eq(listingsTable.agencyId, agencyId))
+    .orderBy(desc(listingsTable.createdAt));
+  res.json(listings);
+});
+
+router.post("/admin/listings", adminAuth, async (req: Request, res: Response): Promise<void> => {
+  const { agencyId, address, suburb, state, postcode, price, listingType, listingMethod,
+    bedrooms, bathrooms, carSpaces, agentName, agentMobile, inspectionTimes,
+    auctionDate, auctionTime, status, photoUrl, description } = req.body;
+  if (!agencyId || !address || !suburb || !state || !postcode || !agentName || !agentMobile) {
+    res.status(400).json({ error: "Missing required fields" }); return;
+  }
+  const [listing] = await db.insert(listingsTable).values({
+    agencyId: Number(agencyId), address, suburb, state, postcode,
+    price: price || null,
+    listingType: listingType || "sale",
+    listingMethod: listingMethod || "private_treaty",
+    bedrooms: bedrooms ? Number(bedrooms) : null,
+    bathrooms: bathrooms ? Number(bathrooms) : null,
+    carSpaces: carSpaces ? Number(carSpaces) : null,
+    agentName, agentMobile,
+    inspectionTimes: inspectionTimes || [],
+    auctionDate: auctionDate || null,
+    auctionTime: auctionTime || null,
+    status: status || "active",
+    photoUrl: photoUrl || null,
+    description: description || null,
+  }).returning();
+  res.status(201).json(listing);
+});
+
+router.patch("/admin/listings/:id", adminAuth, async (req: Request, res: Response): Promise<void> => {
+  const id = Number(req.params.id);
+  const { address, suburb, state, postcode, price, listingType, listingMethod,
+    bedrooms, bathrooms, carSpaces, agentName, agentMobile, inspectionTimes,
+    auctionDate, auctionTime, status, photoUrl, description } = req.body;
+  const updates: Record<string, unknown> = {};
+  if (address !== undefined) updates.address = address;
+  if (suburb !== undefined) updates.suburb = suburb;
+  if (state !== undefined) updates.state = state;
+  if (postcode !== undefined) updates.postcode = postcode;
+  if (price !== undefined) updates.price = price;
+  if (listingType !== undefined) updates.listingType = listingType;
+  if (listingMethod !== undefined) updates.listingMethod = listingMethod;
+  if (bedrooms !== undefined) updates.bedrooms = bedrooms ? Number(bedrooms) : null;
+  if (bathrooms !== undefined) updates.bathrooms = bathrooms ? Number(bathrooms) : null;
+  if (carSpaces !== undefined) updates.carSpaces = carSpaces ? Number(carSpaces) : null;
+  if (agentName !== undefined) updates.agentName = agentName;
+  if (agentMobile !== undefined) updates.agentMobile = agentMobile;
+  if (inspectionTimes !== undefined) updates.inspectionTimes = inspectionTimes;
+  if (auctionDate !== undefined) updates.auctionDate = auctionDate;
+  if (auctionTime !== undefined) updates.auctionTime = auctionTime;
+  if (status !== undefined) updates.status = status;
+  if (photoUrl !== undefined) updates.photoUrl = photoUrl;
+  if (description !== undefined) updates.description = description;
+  const [listing] = await db.update(listingsTable).set(updates)
+    .where(eq(listingsTable.id, id)).returning();
+  if (!listing) { res.status(404).json({ error: "Listing not found" }); return; }
+  res.json(listing);
+});
+
+router.delete("/admin/listings/:id", adminAuth, async (req: Request, res: Response): Promise<void> => {
+  await db.delete(listingsTable).where(eq(listingsTable.id, Number(req.params.id)));
   res.json({ ok: true });
 });
 
