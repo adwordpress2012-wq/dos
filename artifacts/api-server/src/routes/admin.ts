@@ -29,6 +29,23 @@ router.post("/admin/auth", (req: Request, res: Response): void => {
   }
 });
 
+router.post("/admin/test-email", adminAuth, async (req: Request, res: Response): Promise<void> => {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) { res.status(500).json({ error: "RESEND_API_KEY not set" }); return; }
+  const result = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      from: "Directive OS | New Lead Captured <leads@directiveos.com.au>",
+      to: ["adwordpress2012@gmail.com", "jayson@directiveos.com.au"],
+      subject: "✅ DNS Verified — Directive OS Email Delivery Test",
+      html: `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0a0e1a;color:#f0f0f0;padding:32px;border-radius:8px"><div style="color:#00d1b2;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px">DIRECTIVE OS — SYSTEM TEST</div><h2 style="color:#fff;margin:0 0 16px">Email Delivery Confirmed ✓</h2><p style="color:#a0aec0">DNS records are verified. Directive OS is now live sending from <strong style="color:#00d1b2">leads@directiveos.com.au</strong>.</p><p style="color:#a0aec0">Every lead Sarah captures — voice call or chat — will arrive in your inbox from this address.</p><div style="background:#131929;border:1px solid #1e2d45;border-radius:6px;padding:20px;margin:24px 0"><div style="color:#a0aec0;font-size:13px;margin-bottom:4px">FROM ADDRESS</div><div style="color:#fff;font-weight:600;margin-bottom:12px">leads@directiveos.com.au</div><div style="color:#a0aec0;font-size:13px;margin-bottom:4px">DNS STATUS</div><div style="color:#00d1b2;font-weight:600">DKIM ✓ &nbsp;&nbsp; SPF ✓ &nbsp;&nbsp; MX ✓</div></div><p style="color:#718096;font-size:13px;margin-top:24px;border-top:1px solid #1e2d45;padding-top:16px">Sarah — Directive OS AI Receptionist &nbsp;|&nbsp; directiveos.com.au</p></div>`,
+    }),
+  });
+  const data = await result.json();
+  res.status(result.status).json(data);
+});
+
 router.get("/admin/overview", adminAuth, async (_req: Request, res: Response): Promise<void> => {
   const agencies = await db.select().from(agenciesTable).orderBy(desc(agenciesTable.createdAt));
 
