@@ -17,3 +17,9 @@ id = "Yk3RoQF5JcGegpKW9l_7P"
 uri = "file://directive-os-master-website.tar.gz"
 type = "unspecified"
 title = "Directive OS — Master Website Source Code"
+
+[[outputs]]
+id = "V2PAqrTnWXA6zXgBj-gPy"
+uri = "file://screenshots/gbp-cover.jpg"
+type = "image"
+title = "Google Business Profile — Cover Photo (1332×750)"
