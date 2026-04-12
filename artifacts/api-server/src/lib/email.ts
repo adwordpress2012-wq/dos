@@ -194,9 +194,23 @@ function buildEmailHtml(opts: {
     </table>
   </div>
 
-  <!-- Footer -->
-  <div style="padding:16px 28px;background:#f9fafb;border-top:1px solid #e5e7eb;font-size:11px;color:#9ca3af;">
-    Sent automatically by Sarah · Powered by Directive OS · <a href="https://directiveos.com.au" style="color:#00d1b2;text-decoration:none;">directiveos.com.au</a>
+  <!-- Footer / Sarah Signature -->
+  <div style="padding:20px 28px;background:#f9fafb;border-top:2px solid #e5e7eb;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+      <div style="background:#0a0e1a;border-radius:50%;width:38px;height:38px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">🤖</div>
+      <div>
+        <div style="font-size:14px;font-weight:700;color:#111;">Sarah</div>
+        <div style="font-size:12px;color:#6b7280;">AI Receptionist · ${opts.agencyName}</div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:#9ca3af;line-height:1.8;">
+      <a href="mailto:leads@directiveos.com.au" style="color:#00d1b2;text-decoration:none;">leads@directiveos.com.au</a>
+      &nbsp;·&nbsp;
+      <a href="https://directiveos.com.au" style="color:#00d1b2;text-decoration:none;">directiveos.com.au</a>
+    </div>
+    <div style="margin-top:8px;font-size:10px;color:#d1d5db;">
+      This message was sent automatically by your AI Receptionist. Sarah is available 24/7 to capture leads and answer enquiries on behalf of ${opts.agencyName}.
+    </div>
   </div>
 </div>`;
 }
