@@ -23,3 +23,9 @@ id = "V2PAqrTnWXA6zXgBj-gPy"
 uri = "file://screenshots/gbp-cover.jpg"
 type = "image"
 title = "Google Business Profile — Cover Photo (1332×750)"
+
+[[outputs]]
+id = "6k0x5v0X4qLH5iFG3irtW"
+uri = "file://screenshots/linkedin-banner.jpg"
+type = "image"
+title = "LinkedIn Profile Banner (1584×396)"
