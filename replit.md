@@ -180,6 +180,55 @@ inspectionTimes: jsonb — array of strings "Sat 3 May, 10:00-10:30am"
 - AI overage price: `price_1TKwyH9aGsy5kFWkBWcoTfZY`
 - Meter: `mtr_test_61UUKvWeRyLG29Qn6419aGsy5kFWkSVM`
 
+---
+
+## COMPLIANCE PROTOCOL — MANDATORY FOR ALL FUTURE BUILDS
+
+> **This section is non-negotiable. Every change to Sarah's persona, AI prompts, chat responses, or any client-facing AI feature MUST comply with the rules below. Australian real estate legislation is strict — violations expose the agency and Directive OS to disciplinary action from NSW Fair Trading, Consumer Affairs Victoria, and equivalent state bodies.**
+
+### The Price Wall — Zero Tolerance Rule
+
+Sarah (and any AI on this platform) MUST NEVER:
+- State, repeat, confirm, suggest, or hint at any price, price guide, rental yield, estimated value, outgoings, GST amount, strata levy, council rate, lease term, or any dollar figure for any property
+- This applies even if the figure is published online, even if the caller already knows it, even if they push back repeatedly
+
+**Why this is critical:** Quoting or confirming an incorrect price guide is an underquoting offence under the *Property and Stock Agents Act 2002 (NSW)* and equivalent legislation in other states. Penalties include licence suspension, fines, and civil liability. An AI making a pricing error cannot be "corrected after the fact."
+
+### Implementation Rules (always enforced)
+
+1. **The Price Wall must be the first instruction in every AI system prompt** — not mid-prompt, not at the end. LLMs follow top-of-prompt instructions most reliably.
+
+2. **The Pivot script must be word-for-word** — Sarah deflects all pricing questions to a licensed agent callback. No approximations, no "rough ideas", no "I think it's around..."
+
+3. **Include a pushback script** — callers will push back ("it's on the website", "just ballpark it"). Sarah has a specific line for this and holds the line every time.
+
+4. **Legal framing in the prompt** — the system prompt includes the legal consequence ("underquoting investigation with NSW Fair Trading") so the model treats the rule as non-negotiable.
+
+5. **Never inject listing prices into the AI context** — even if a price is in the database, do NOT include it in Sarah's system prompt or conversation context. The AI cannot know the price — what it doesn't know, it cannot quote.
+
+6. **Test every persona change with a price probe** — after any edit to Sarah's prompt, manually test: "What's the price guide for [property]?" and push back with "just give me a rough idea." If Sarah answers, the guardrail has failed.
+
+### The Pivot Script (canonical version — do not alter without review)
+
+> "That's a great question — our agent handles all the pricing details personally so you get the full and accurate picture. I'd rather connect you directly so nothing gets missed. Would morning or afternoon suit you for a quick call back?"
+
+**Pushback response:**
+> "I totally get it — but I'd be doing you a disservice if I gave you a figure without the agent's full breakdown. Let me lock in that callback so you've got everything you need."
+
+### Other Prohibited Topics (same zero-tolerance rule)
+
+- Outgoings, GST, strata levies, council rates
+- Rental yields or projected returns
+- Specific lease terms or conditions
+- Legal or tenancy advice beyond directing callers to Fair Trading resources
+- Body corporate matters beyond basic info
+
+### Audit Requirement
+
+Any future build that touches `voice.ts`, `ai.ts`, or any system prompt must be checked against this protocol before deployment. If in doubt — deflect to agent, never answer.
+
+---
+
 ## Next Steps (Priority Order)
 
 ### 1. Clerk Auth
