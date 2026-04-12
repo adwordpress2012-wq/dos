@@ -11,3 +11,9 @@ id = "3tw4imM4GX6cmyjOI2LeF"
 uri = "file://DIRECTIVE_OS_BUILD_DOCUMENT.md"
 type = "text"
 title = "Directive OS — Full Build Document"
+
+[[outputs]]
+id = "Yk3RoQF5JcGegpKW9l_7P"
+uri = "file://directive-os-master-website.tar.gz"
+type = "unspecified"
+title = "Directive OS — Master Website Source Code"
