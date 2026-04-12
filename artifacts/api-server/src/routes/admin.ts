@@ -30,8 +30,8 @@ router.post("/admin/auth", (req: Request, res: Response): void => {
 });
 
 router.post("/admin/test-email", adminAuth, async (req: Request, res: Response): Promise<void> => {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) { res.status(500).json({ error: "RESEND_API_KEY not set" }); return; }
+  const apiKey = process.env.DOS_RESEND_KEY || process.env.RESEND_API_KEY;
+  if (!apiKey) { res.status(500).json({ error: "DOS_RESEND_KEY / RESEND_API_KEY not set" }); return; }
   const result = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
