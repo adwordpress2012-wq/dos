@@ -466,6 +466,11 @@ router.post("/billing/charge-overage", async (req, res): Promise<void> => {
       customer: agency.stripeCustomerId,
       auto_advance: true,
       collection_method: "charge_automatically",
+      footer: "ABN 87 754 544 171 | GST Registered | Directive OS Pty Ltd | directiveos.com.au",
+      custom_fields: [
+        { name: "ABN", value: "87 754 544 171" },
+        { name: "GST", value: "Registered" },
+      ],
     });
     await stripe.invoices.finalizeInvoice(invoice.id);
 
