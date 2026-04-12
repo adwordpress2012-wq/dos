@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { Link } from "wouter";
-import { Phone, Mail, Calendar, ArrowRight, X } from "lucide-react";
+import { Phone, Mail, Calendar, ArrowRight, X, Menu } from "lucide-react";
 
 const CALENDLY = "https://calendly.com/adwordpress2012/directive-os-agency-onboarding";
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const [scrolled, setScrolled] = useState(false);
   const [barDismissed, setBarDismissed] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 700);
@@ -14,13 +15,19 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  useEffect(() => {
+    if (menuOpen) document.body.style.overflow = "hidden";
+    else document.body.style.overflow = "";
+    return () => { document.body.style.overflow = ""; };
+  }, [menuOpen]);
+
   const showBar = scrolled && !barDismissed;
 
   return (
     <div className="min-h-screen bg-background text-foreground selection:bg-primary/30">
       <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5">
+          <Link href="/" className="flex items-center gap-2.5" onClick={() => setMenuOpen(false)}>
             <img src="/logo.png" alt="Directive OS" className="w-9 h-9 object-contain" />
             <span className="font-bold text-xl tracking-tight">Directive OS</span>
           </Link>
@@ -51,11 +58,52 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             >
               Book a Call
             </a>
-            <Link href="/sign-up" className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90">
+            <Link href="/sign-up" className="hidden md:inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90">
               Get Started
             </Link>
+            {/* Hamburger — mobile only */}
+            <button
+              className="md:hidden p-2 rounded-lg hover:bg-white/10 transition-colors text-foreground"
+              onClick={() => setMenuOpen(v => !v)}
+              aria-label="Toggle menu"
+            >
+              {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
           </div>
         </div>
+
+        {/* Mobile menu */}
+        {menuOpen && (
+          <div className="md:hidden border-t border-border/50" style={{ background: "rgba(10,14,26,0.98)", backdropFilter: "blur(20px)" }}>
+            <nav className="container mx-auto px-4 py-4 flex flex-col gap-1">
+              <a href="/#templates" onClick={() => setMenuOpen(false)} className="px-3 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors">Templates</a>
+              <a href="/#demos" onClick={() => setMenuOpen(false)} className="px-3 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors">Live Demos</a>
+              <a href="/#pricing" onClick={() => setMenuOpen(false)} className="px-3 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors">Pricing</a>
+              <Link href="/resources" onClick={() => setMenuOpen(false)} className="px-3 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors">Resources</Link>
+              <Link href="/blog" onClick={() => setMenuOpen(false)} className="px-3 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors">Blog</Link>
+              <Link href="/sign-in" onClick={() => setMenuOpen(false)} className="px-3 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors">Sign In</Link>
+              <div className="pt-2 pb-1 flex flex-col gap-2">
+                <a
+                  href={CALENDLY}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setMenuOpen(false)}
+                  className="w-full text-center py-3 rounded-lg text-sm font-semibold transition-colors"
+                  style={{ background: "rgba(0,209,178,0.1)", border: "1px solid rgba(0,209,178,0.3)", color: "#00d1b2" }}
+                >
+                  Free Consultation
+                </a>
+                <Link
+                  href="/sign-up"
+                  onClick={() => setMenuOpen(false)}
+                  className="w-full text-center py-3 rounded-lg text-sm font-semibold bg-primary text-primary-foreground"
+                >
+                  Get Started
+                </Link>
+              </div>
+            </nav>
+          </div>
+        )}
       </header>
 
       <main>
