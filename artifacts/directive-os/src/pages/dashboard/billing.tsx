@@ -251,7 +251,7 @@ export default function Billing() {
           </div>
         )}
         <div className="px-6 py-3 border-t border-border bg-muted/20">
-          <p className="text-xs text-muted-foreground">All invoices include GST and comply with Australian Tax Invoice requirements. ABN: Available upon request.</p>
+          <p className="text-xs text-muted-foreground">All invoices include GST and comply with Australian Tax Invoice requirements. ABN: 87 754 544 171.</p>
         </div>
       </div>
     </DashboardLayout>

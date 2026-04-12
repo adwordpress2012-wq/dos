@@ -169,7 +169,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           </div>
 
           <div className="pt-6 border-t border-border/50 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
-            <p>© {new Date().getFullYear()} Directive OS. All rights reserved. Australian owned &amp; operated.</p>
+            <p>© {new Date().getFullYear()} Directive OS Pty Ltd. ABN 87 754 544 171. All rights reserved. Australian owned &amp; operated.</p>
             <p>Built for Australian Real Estate Agencies · NSW · VIC · QLD · WA · SA</p>
           </div>
         </div>

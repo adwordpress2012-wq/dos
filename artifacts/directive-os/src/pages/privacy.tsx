@@ -74,7 +74,7 @@ export default function Privacy() {
 
           <div className="bg-card border border-border rounded-xl p-6">
             <h2 className="text-foreground font-semibold text-lg mb-3">11. Contact</h2>
-            <p>Privacy Officer | Directive OS Pty Ltd | privacy@directiveos.com.au | ABN [000 000 000]</p>
+            <p>Privacy Officer | Directive OS Pty Ltd | privacy@directiveos.com.au | ABN 87 754 544 171</p>
           </div>
         </div>
       </div>
