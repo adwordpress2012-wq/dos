@@ -53,7 +53,7 @@ export default function Onboard() {
 
   const BASE_PRICE = 299;
   const SEAT_PRICE = 89;
-  const SETUP_FEE = 1500;
+  const SETUP_FEE = 1800;
   const monthly = BASE_PRICE + Math.max(0, form.seatCount - 1) * SEAT_PRICE;
 
   const handleNext = () => setStep(s => s + 1);

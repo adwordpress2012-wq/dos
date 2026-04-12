@@ -166,7 +166,7 @@ inspectionTimes: jsonb — array of strings "Sat 3 May, 10:00-10:30am"
 ## Pricing Model
 
 - Base: $299/mo (includes 1 seat) + $89/mo per additional seat
-- Setup/onboarding fee: $1,500 AUD (one-time) — NOT shown on site, deferred to strategy call
+- Setup/onboarding fee: $1,800 AUD (one-time) — charged at checkout
 - AI minutes: 100/month included, $25 per 10-min overage block
 - All prices ex-GST
 - Calendly: https://calendly.com/adwordpress2012/directive-os-agency-onboarding

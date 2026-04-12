@@ -139,7 +139,7 @@ export default function Billing() {
             </>
           ) : (
             <div className="space-y-4">
-              <p className="text-muted-foreground text-sm">No active license yet. Get started with a one-time onboarding fee of $1,500 AUD and a $299/mo subscription.</p>
+              <p className="text-muted-foreground text-sm">No active license yet. Get started with a one-time onboarding fee of $1,800 AUD and a $299/mo subscription.</p>
               <button
                 onClick={handleCheckout}
                 disabled={createCheckout.isPending}

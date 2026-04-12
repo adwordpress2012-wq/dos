@@ -413,7 +413,7 @@ router.get("/billing/invoices", async (req, res): Promise<void> => {
     {
       id: "inv_001",
       number: "DOS-2025-001",
-      amountAud: 1500,
+      amountAud: 1800,
       status: "paid",
       description: "Onboarding & Training Fee",
       pdfUrl: null,

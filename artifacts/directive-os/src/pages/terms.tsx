@@ -20,7 +20,7 @@ export default function Terms() {
 
           <div className="bg-card border border-border rounded-xl p-6">
             <h2 className="text-foreground font-semibold text-lg mb-3">3. Fees and Billing</h2>
-            <p><strong className="text-foreground">3.1 Setup Fee:</strong> A one-time onboarding and training fee of $1,500 AUD (excluding GST) is charged upon initial subscription.</p>
+            <p><strong className="text-foreground">3.1 Setup Fee:</strong> A one-time onboarding and training fee of $1,800 AUD (excluding GST) is charged upon initial subscription.</p>
             <p className="mt-2"><strong className="text-foreground">3.2 Monthly Subscription:</strong> A recurring monthly fee of $299 AUD (excluding GST) for the base license, which includes one (1) user seat. Each additional seat is charged at $89 AUD (excluding GST) per month per seat.</p>
             <p className="mt-2"><strong className="text-foreground">3.3 Usage-Based Charges:</strong> The Service includes 100 AI minutes per month. Usage exceeding this limit is billed at $25 AUD per 10-minute block, or part thereof.</p>
             <p className="mt-2"><strong className="text-foreground">3.4 GST:</strong> All prices exclude Goods and Services Tax (GST). GST will be added where applicable under the A New Tax System (Goods and Services Tax) Act 1999 (Cth).</p>

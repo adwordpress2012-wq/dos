@@ -11,7 +11,7 @@ import {
 
 const BASE_PRICE = 299;
 const SEAT_PRICE = 89;
-const SETUP_FEE = 1500;
+const SETUP_FEE = 1800;
 
 function PricingCalculator() {
   const [seats, setSeats] = useState(1);

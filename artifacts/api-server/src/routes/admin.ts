@@ -8,7 +8,7 @@ import {
 const router: IRouter = Router();
 
 const ADMIN_SECRET = process.env.ADMIN_SECRET || "directive-captain-2024";
-const SETUP_FEE_CENTS = 150000;
+const SETUP_FEE_CENTS = 180000;
 const MONTHLY_SUB_CENTS = 29900;
 
 function adminAuth(req: Request, res: Response, next: NextFunction) {
