@@ -79,6 +79,9 @@ Showcased in the master site under `/#templates` (nav: Templates → Live Demos 
 - 20 Western Sydney leads, 12 unique transcripts, 10 listings (3 auction, 5 sale, 2 rental)
 - VaultRE badge shows "VaultRE Connected" pill (not a banner)
 - `DATABASE_MODE=SIMULATION` enables mock VaultRE bridge
+- **VaultRE API support contact** (MRI Software): +61 1300 788 689 | support@proptech-group.zendesk.com
+- Base URL: `https://ap-southeast-2.api.vaultre.com.au/api/v1.3/`
+- Status: Awaiting API credentials — once received, replace mock data in `artifacts/api-server/src/lib/mockVault.ts`
 
 ## Key Routes
 
