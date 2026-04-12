@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { db, agenciesTable } from "@workspace/db";
 import Stripe from "stripe";
 import { logger } from "../lib/logger";
@@ -397,6 +397,81 @@ router.post("/billing/portal", async (req, res): Promise<void> => {
     const message = err instanceof Error ? err.message : "Unknown error";
     res.status(500).json({ error: `Failed to create portal session: ${message}` });
   }
+});
+
+// ─── /billing/charge-overage — bill overage blocks then reset counter ─────────
+// Call this at the end of each monthly billing period (per agency).
+// Creates a Stripe invoice item for every 10-min block above the 100-min included.
+// Immediately invoices the customer so the charge shows on their next statement.
+
+router.post("/billing/charge-overage", async (req, res): Promise<void> => {
+  const clerkOrgId = req.headers["x-clerk-org-id"] as string | undefined;
+  if (!clerkOrgId) { res.status(401).json({ error: "Unauthorized" }); return; }
+
+  const agency = await getAgency(clerkOrgId);
+  if (!agency) { res.status(404).json({ error: "Agency not found" }); return; }
+  if (!agency.stripeCustomerId) {
+    res.status(400).json({ error: "No Stripe customer for this agency." }); return;
+  }
+
+  const overageMinutes = Math.max(0, agency.aiMinutesUsed - agency.aiMinutesIncluded);
+  const overageBlocks = Math.ceil(overageMinutes / 10);
+
+  if (overageBlocks === 0) {
+    // Reset counter even if no overage
+    await db.update(agenciesTable)
+      .set({ aiMinutesUsed: 0 })
+      .where(eq(agenciesTable.clerkOrgId, clerkOrgId));
+    res.json({ charged: false, overageBlocks: 0, message: "No overage — usage reset to 0." });
+    return;
+  }
+
+  let stripe: Stripe;
+  try { stripe = getStripe(); } catch {
+    res.status(500).json({ error: "Stripe is not configured." }); return;
+  }
+
+  try {
+    // Create an invoice item ($25 × blocks) on the customer
+    await stripe.invoiceItems.create({
+      customer: agency.stripeCustomerId,
+      amount: overageBlocks * 2500,   // cents AUD
+      currency: "aud",
+      description: `Directive OS AI Overage — ${overageBlocks} × 10-min blocks (${overageMinutes} mins above included 100)`,
+    });
+
+    // Immediately finalise & send invoice so the client is charged
+    const invoice = await stripe.invoices.create({
+      customer: agency.stripeCustomerId,
+      auto_advance: true,
+      collection_method: "charge_automatically",
+    });
+    await stripe.invoices.finalizeInvoice(invoice.id);
+
+    // Reset usage counter for next period
+    await db.update(agenciesTable)
+      .set({ aiMinutesUsed: 0 })
+      .where(eq(agenciesTable.clerkOrgId, clerkOrgId));
+
+    logger.info({ clerkOrgId, overageBlocks, invoiceId: invoice.id }, "Overage charged and usage reset");
+    res.json({ charged: true, overageBlocks, overageCostAud: overageBlocks * 25, invoiceId: invoice.id });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    res.status(500).json({ error: `Failed to charge overage: ${message}` });
+  }
+});
+
+// ─── /billing/reset-usage — admin reset of AI minutes at period start ─────────
+
+router.post("/billing/reset-usage", async (req, res): Promise<void> => {
+  const clerkOrgId = req.headers["x-clerk-org-id"] as string | undefined;
+  if (!clerkOrgId) { res.status(401).json({ error: "Unauthorized" }); return; }
+
+  await db.update(agenciesTable)
+    .set({ aiMinutesUsed: 0 })
+    .where(eq(agenciesTable.clerkOrgId, clerkOrgId));
+
+  res.json({ success: true, message: "AI minutes usage reset to 0." });
 });
 
 router.get("/billing/success", async (req, res): Promise<void> => {

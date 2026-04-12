@@ -2,7 +2,7 @@ import { Router, type IRouter, type Request, type Response } from "express";
 import WebSocket from "ws";
 import Stripe from "stripe";
 import { db, agenciesTable, transcriptsTable, transcriptMessagesTable, leadsTable } from "@workspace/db";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { logger } from "../lib/logger";
 import { sendVoiceTranscriptEmail } from "../lib/email";
 
@@ -461,6 +461,15 @@ async function onCallEnd(session: CallSession): Promise<void> {
       } catch (err) {
         logger.warn({ err }, "Failed to send voice transcript email");
       }
+    }
+
+    // ── Increment aiMinutesUsed in DB ────────────────────────────────────────
+    if (session.agencyId > 0 && durationMinutes >= 1) {
+      const minutesToAdd = Math.ceil(durationMinutes);
+      await db.update(agenciesTable)
+        .set({ aiMinutesUsed: sql`${agenciesTable.aiMinutesUsed} + ${minutesToAdd}` })
+        .where(eq(agenciesTable.id, session.agencyId));
+      logger.info({ agencyId: session.agencyId, minutesToAdd }, "AI minutes usage updated in DB");
     }
 
     // Stripe usage billing — only for paying agencies
