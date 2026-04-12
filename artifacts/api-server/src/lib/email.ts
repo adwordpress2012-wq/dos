@@ -310,4 +310,183 @@ export async function sendChatTranscriptEmail(opts: {
   await sendViaResend(to, subject, html);
 }
 
+// ─── Tax Invoice Email ────────────────────────────────────────────────────────
+
+export interface InvoiceLineItem {
+  description: string;
+  quantity: number;
+  unitAmountAud: number;
+}
+
+function formatAud(cents: number): string {
+  return `A$${(cents / 100).toLocaleString("en-AU", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+function buildInvoiceHtml(opts: {
+  invoiceNumber: string;
+  invoiceDate: string;
+  agencyName: string;
+  agencyEmail: string;
+  agencyAbn?: string;
+  lineItems: InvoiceLineItem[];
+  notes?: string;
+}): string {
+  const subtotalCents = opts.lineItems.reduce((sum, i) => sum + i.quantity * i.unitAmountAud * 100, 0);
+  const gstCents = Math.round(subtotalCents / 11);
+  const totalCents = subtotalCents;
+  const exGstCents = subtotalCents - gstCents;
+
+  const rows = opts.lineItems.map(item => {
+    const total = item.quantity * item.unitAmountAud * 100;
+    return `
+      <tr>
+        <td style="padding:14px 20px;font-size:14px;color:#111;border-bottom:1px solid #f3f4f6;">${item.description}</td>
+        <td style="padding:14px 20px;font-size:14px;color:#111;border-bottom:1px solid #f3f4f6;text-align:center;">${item.quantity}</td>
+        <td style="padding:14px 20px;font-size:14px;color:#111;border-bottom:1px solid #f3f4f6;text-align:right;">${formatAud(item.unitAmountAud * 100)}</td>
+        <td style="padding:14px 20px;font-size:14px;font-weight:600;color:#111;border-bottom:1px solid #f3f4f6;text-align:right;">${formatAud(total)}</td>
+      </tr>`;
+  }).join("");
+
+  return `
+<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,sans-serif;max-width:680px;margin:auto;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;box-shadow:0 4px 24px rgba(0,0,0,0.07);">
+
+  <!-- Header -->
+  <div style="background:#0a0e1a;padding:32px 36px;display:flex;justify-content:space-between;align-items:flex-start;">
+    <div>
+      <img src="https://directiveos.com.au/logo.png" alt="Directive OS" style="height:40px;display:block;margin-bottom:6px;" />
+      <div style="font-size:11px;color:#6b7280;letter-spacing:0.5px;margin-top:4px;">directiveos.com.au</div>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-size:22px;font-weight:800;color:#00d1b2;letter-spacing:1px;text-transform:uppercase;">Tax Invoice</div>
+      <div style="font-size:13px;color:#9ca3af;margin-top:6px;">Invoice #&nbsp;<span style="color:#ffffff;font-weight:600;">${opts.invoiceNumber}</span></div>
+      <div style="font-size:13px;color:#9ca3af;margin-top:4px;">Date:&nbsp;<span style="color:#ffffff;">${opts.invoiceDate}</span></div>
+    </div>
+  </div>
+
+  <!-- From / To -->
+  <div style="display:flex;gap:0;border-bottom:2px solid #f3f4f6;">
+    <div style="flex:1;padding:28px 36px;border-right:1px solid #f3f4f6;">
+      <div style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">From</div>
+      <div style="font-size:15px;font-weight:700;color:#111;margin-bottom:4px;">Directive OS Pty Ltd</div>
+      <div style="font-size:13px;color:#6b7280;line-height:1.9;">
+        ABN 87 754 544 171<br/>
+        billing@directiveos.com.au<br/>
+        directiveos.com.au
+      </div>
+    </div>
+    <div style="flex:1;padding:28px 36px;">
+      <div style="font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">Bill To</div>
+      <div style="font-size:15px;font-weight:700;color:#111;margin-bottom:4px;">${opts.agencyName}</div>
+      <div style="font-size:13px;color:#6b7280;line-height:1.9;">
+        ${opts.agencyEmail}
+        ${opts.agencyAbn ? `<br/>ABN ${opts.agencyAbn}` : ""}
+      </div>
+    </div>
+  </div>
+
+  <!-- Line Items -->
+  <table style="width:100%;border-collapse:collapse;">
+    <thead>
+      <tr style="background:#f9fafb;">
+        <th style="padding:12px 20px;font-size:11px;font-weight:700;color:#9ca3af;text-align:left;text-transform:uppercase;letter-spacing:0.6px;">Description</th>
+        <th style="padding:12px 20px;font-size:11px;font-weight:700;color:#9ca3af;text-align:center;text-transform:uppercase;letter-spacing:0.6px;">Qty</th>
+        <th style="padding:12px 20px;font-size:11px;font-weight:700;color:#9ca3af;text-align:right;text-transform:uppercase;letter-spacing:0.6px;">Unit Price</th>
+        <th style="padding:12px 20px;font-size:11px;font-weight:700;color:#9ca3af;text-align:right;text-transform:uppercase;letter-spacing:0.6px;">Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${rows}
+    </tbody>
+  </table>
+
+  <!-- Totals -->
+  <div style="padding:24px 36px;background:#f9fafb;border-top:2px solid #e5e7eb;">
+    <table style="width:100%;max-width:300px;margin-left:auto;font-size:14px;border-collapse:collapse;">
+      <tr>
+        <td style="padding:6px 0;color:#6b7280;">Subtotal (excl. GST)</td>
+        <td style="padding:6px 0;text-align:right;color:#111;">${formatAud(exGstCents)}</td>
+      </tr>
+      <tr>
+        <td style="padding:6px 0;color:#6b7280;">GST (10%)</td>
+        <td style="padding:6px 0;text-align:right;color:#111;">${formatAud(gstCents)}</td>
+      </tr>
+      <tr style="border-top:2px solid #e5e7eb;">
+        <td style="padding:14px 0 6px;font-size:16px;font-weight:800;color:#111;">Total (AUD)</td>
+        <td style="padding:14px 0 6px;text-align:right;font-size:20px;font-weight:800;color:#00d1b2;">${formatAud(totalCents)}</td>
+      </tr>
+    </table>
+  </div>
+
+  ${opts.notes ? `
+  <!-- Notes -->
+  <div style="padding:20px 36px;border-top:1px solid #f3f4f6;">
+    <div style="font-size:12px;color:#9ca3af;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:6px;">Notes</div>
+    <div style="font-size:13px;color:#6b7280;line-height:1.7;">${opts.notes}</div>
+  </div>` : ""}
+
+  <!-- Footer -->
+  <div style="padding:24px 36px;background:#0a0e1a;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+    <div style="font-size:12px;color:#6b7280;line-height:1.8;">
+      <span style="color:#00d1b2;font-weight:700;">Directive OS Pty Ltd</span><br/>
+      ABN 87 754 544 171 &nbsp;·&nbsp; GST Registered<br/>
+      <a href="mailto:billing@directiveos.com.au" style="color:#6b7280;text-decoration:none;">billing@directiveos.com.au</a>
+    </div>
+    <div style="font-size:11px;color:#374151;text-align:right;">
+      This is a tax invoice for<br/>GST purposes under Australian law.
+    </div>
+  </div>
+
+</div>`;
+}
+
+export async function sendInvoiceEmail(opts: {
+  agencyName: string;
+  agencyEmail: string;
+  agencyAbn?: string;
+  invoiceNumber: string;
+  lineItems: InvoiceLineItem[];
+  notes?: string;
+}): Promise<void> {
+  const invoiceDate = new Date().toLocaleDateString("en-AU", { day: "2-digit", month: "short", year: "numeric" });
+
+  const totalAud = opts.lineItems.reduce((sum, i) => sum + i.quantity * i.unitAmountAud, 0);
+
+  const subject = `Tax Invoice ${opts.invoiceNumber} — A$${totalAud.toLocaleString("en-AU", { minimumFractionDigits: 2 })} — Directive OS`;
+
+  const html = buildInvoiceHtml({
+    invoiceNumber: opts.invoiceNumber,
+    invoiceDate,
+    agencyName: opts.agencyName,
+    agencyEmail: opts.agencyEmail,
+    agencyAbn: opts.agencyAbn,
+    lineItems: opts.lineItems,
+    notes: opts.notes,
+  });
+
+  const to = [...new Set([opts.agencyEmail, ...OWNER_EMAILS])];
+  const from = "Directive OS Billing <billing@directiveos.com.au>";
+
+  const apiKey = process.env.DOS_RESEND_CFG || process.env.DOS_RESEND_KEY || process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    logger.warn("Resend key not set — invoice email not sent");
+    return;
+  }
+
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ from, to, subject, html }),
+    });
+    if (!res.ok) {
+      const err = await res.text();
+      logger.warn({ err, status: res.status }, "Resend invoice email error");
+    } else {
+      logger.info({ to, invoiceNumber: opts.invoiceNumber }, "Invoice email sent");
+    }
+  } catch (err) {
+    logger.warn({ err }, "Failed to send invoice email");
+  }
+}
+
 export { OWNER_EMAILS, detectContact };

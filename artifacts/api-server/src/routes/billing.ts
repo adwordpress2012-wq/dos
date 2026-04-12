@@ -3,6 +3,7 @@ import { eq, sql } from "drizzle-orm";
 import { db, agenciesTable } from "@workspace/db";
 import Stripe from "stripe";
 import { logger } from "../lib/logger";
+import { sendInvoiceEmail } from "../lib/email";
 
 const router: IRouter = Router();
 
@@ -241,6 +242,26 @@ router.post("/billing/create-subscription", async (req, res): Promise<void> => {
       .set({ stripeCustomerId: customerId, subscriptionStatus: "active", setupFeePaid: true })
       .where(eq(agenciesTable.clerkOrgId, clerkOrgId));
 
+    // Send branded tax invoice email
+    if (agency?.contactEmail) {
+      const now = new Date();
+      const invoiceNumber = `DOS-${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}-${String(agency?.id ?? 0).padStart(4, "0")}`;
+      const lineItems = [
+        { description: "Directive OS Onboarding & Setup Fee", quantity: 1, unitAmountAud: 1800 },
+        { description: "Directive OS Monthly Licence — Month 1", quantity: 1, unitAmountAud: 299 },
+      ];
+      if (additionalSeats > 0) {
+        lineItems.push({ description: `Additional Seats — Month 1 (${additionalSeats} seat${additionalSeats > 1 ? "s" : ""})`, quantity: additionalSeats, unitAmountAud: 89 });
+      }
+      void sendInvoiceEmail({
+        agencyName: agency.name ?? "Your Agency",
+        agencyEmail: agency.contactEmail,
+        invoiceNumber,
+        lineItems,
+        notes: "Thank you for joining Directive OS. Your AI Receptionist (Sarah) is now active 24/7. Monthly subscription billing commences from Month 2. Includes 100 AI minutes per month.",
+      });
+    }
+
     res.json({ success: true, subscriptionId: subscription.id });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
@@ -452,6 +473,25 @@ router.post("/billing/charge-overage", async (req, res): Promise<void> => {
     await db.update(agenciesTable)
       .set({ aiMinutesUsed: 0 })
       .where(eq(agenciesTable.clerkOrgId, clerkOrgId));
+
+    // Send branded overage invoice email
+    if (agency.contactEmail) {
+      const now = new Date();
+      const invoiceNumber = `DOS-OVR-${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}-${String(agency.id).padStart(4, "0")}`;
+      void sendInvoiceEmail({
+        agencyName: agency.name,
+        agencyEmail: agency.contactEmail,
+        invoiceNumber,
+        lineItems: [
+          {
+            description: `AI Overage — 10-min blocks (${overageMinutes} mins above 100 included)`,
+            quantity: overageBlocks,
+            unitAmountAud: 25,
+          },
+        ],
+        notes: `This charge covers AI minutes used above your 100-minute monthly inclusion. Billed in 10-minute blocks at A$25 each. Usage counter has been reset for the new period.`,
+      });
+    }
 
     logger.info({ clerkOrgId, overageBlocks, invoiceId: invoice.id }, "Overage charged and usage reset");
     res.json({ charged: true, overageBlocks, overageCostAud: overageBlocks * 25, invoiceId: invoice.id });
