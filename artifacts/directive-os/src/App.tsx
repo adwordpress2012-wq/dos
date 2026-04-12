@@ -28,6 +28,7 @@ import AdminPipeline from "@/pages/admin/pipeline";
 import AdminActivity from "@/pages/admin/activity";
 import Blog from "@/pages/blog";
 import BlogPost from "@/pages/blog-post";
+import ThankYou from "@/pages/thank-you";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -52,6 +53,7 @@ function Router() {
       <Route path="/book" component={BookConsultation} />
       <Route path="/blog/:slug" component={BlogPost} />
       <Route path="/blog" component={Blog} />
+      <Route path="/thank-you" component={ThankYou} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/dashboard/leads" component={Leads} />
       <Route path="/dashboard/transcripts" component={Transcripts} />
