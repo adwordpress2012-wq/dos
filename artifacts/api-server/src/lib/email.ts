@@ -249,14 +249,19 @@ export async function sendVoiceTranscriptEmail(opts: {
   duration: number;
   messages: TranscriptMessage[];
   leadType?: string;
+  callbackNeeded?: boolean;
+  callerName?: string | null;
+  callerPhone?: string | null;
 }): Promise<void> {
   const fullText = opts.messages.map(m => m.content).join(" ");
   const { email, phone, name } = detectContact(fullText);
   const intel = detectLeadIntelligence(fullText);
 
-  const callerLabel = name ?? email ?? phone ?? "Unknown Caller";
-  const subjectPrefix = intel.hasPropertyToSell ? "[POTENTIAL LISTING] " : "";
-  const subject = `${subjectPrefix}New Lead: ${callerLabel} · ${opts.agencyName}`;
+  const callerLabel = opts.callerName ?? name ?? email ?? phone ?? "Unknown Caller";
+  const subjectPrefix = opts.callbackNeeded
+    ? "⚠️ CALLBACK NEEDED — Price Enquiry: "
+    : intel.hasPropertyToSell ? "[POTENTIAL LISTING] " : "";
+  const subject = `${subjectPrefix}${callerLabel} · ${opts.agencyName}`;
 
   const to = [...new Set([opts.agencyEmail, ...OWNER_EMAILS])];
 

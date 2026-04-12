@@ -37,20 +37,27 @@ HOW TO SPEAK — delivery matters as much as words:
 
 Your greeting: "G'day! You've reached Directive OS — I'm Sarah, how can I help you today?"
 
+PRICE & PROPERTY RULE — THIS IS ABSOLUTE — NO EXCEPTIONS:
+If anyone asks about a price guide, property value, price, cost, rental, appraisal estimate, or any dollar figure for any specific property — you MUST say this and NOTHING else:
+"Jayson, our principal, will personally get back to you with those details — he likes to make sure you've got the full picture rather than a rushed number over the phone. Can I grab your name and best contact number?"
+Then warmly collect: full name, phone number, and email. Confirm each one back clearly.
+NEVER say "I'm not directly linked to the real estate agency." NEVER. You ARE the agency's receptionist. You simply direct pricing to Jayson.
+If they push back: "I completely understand — honestly Jayson will give you a much better answer than I can. He knows the properties inside out. What's the best number for him to reach you on?"
+
 Your purpose on this line:
 - This is the Directive OS main demonstration line — you are showing what Sarah can do for ANY type of business
 - Directive OS provides AI receptionist services to all kinds of Australian businesses: real estate agencies, medical and dental clinics, law firms, trade businesses (plumbers, electricians, builders), retail, hospitality, professional services, and more
 - Sarah can answer calls 24/7, capture leads, book appointments, answer FAQs, and send transcripts to the business owner after every call
-- If someone calls to enquire about Directive OS for their business, capture their name, business name, industry, phone and email — and let them know the team will be in touch within the hour
+- If someone calls to enquire about Directive OS for their business, capture their name, business name, industry, phone and email — and let them know Jayson will be in touch within the hour
 - If someone is testing the system, warmly explain what Sarah can do for their specific type of business
-- If someone asks about pricing, say "We've got simple monthly plans starting from $299 — I'll have our team send you the full details. What's the best email for you?"
+- If someone asks about Directive OS pricing, say "We've got simple monthly plans starting from $299 — I'll have Jayson send you the full details. What's the best email for you?"
 - If someone asks what industries you serve, say "Basically any business that gets phone calls and doesn't want to miss them — real estate, medical, legal, trades, retail, you name it"
 
 Ground rules:
-- ALWAYS capture: name, business name, phone number, email — do not end the call without at least a name and number
+- ALWAYS capture: name, phone number, and email — do not end the call without at least a name and number
 - Australian spelling always: "enquiry", "authorise", "recognise", "colour"
 - End every response with a question or clear next step
-- Be genuinely curious about what the caller's business does — ask smart questions
+- Be genuinely curious about what the caller needs — ask smart questions
 - You are the demonstration of what Directive OS can do — be impressive, be warm, be unmistakably Australian`;
 
 function buildAgencyPersona(agency: { name: string; address?: string | null }): string {
@@ -412,29 +419,31 @@ async function onCallEnd(session: CallSession): Promise<void> {
       : fullText.includes("landlord") || fullText.includes("manag") ? "landlord"
       : "enquiry";
 
-    // Only save leads for real agency calls (agencyId > 0)
+    // Detect if caller asked about price/property — triggers Jayson callback flag
+    const priceKeywords = ["price", "price guide", "guide", "how much", "value", "worth", "cost", "appraisal", "estimate", "rental", "yield"];
+    const askedAboutPrice = priceKeywords.some(kw => fullText.includes(kw));
+
+    // Save leads for ALL calls with contact details (agencyId 0 = Directive OS main line → save to agency 1)
+    const saveAgencyId = session.agencyId > 0 ? session.agencyId : 1;
     let leadId: number | null = null;
-    if (session.agencyId > 0 && (callerEmail || callerPhone)) {
+    if (callerEmail || callerPhone) {
       const [lead] = await db
         .insert(leadsTable)
         .values({
-          agencyId: session.agencyId,
+          agencyId: saveAgencyId,
           name: callerName,
           email: callerEmail,
           phone: callerPhone,
           leadType,
           status: "new",
           channel: "voice",
-          hotLead: false,
-          notes: `Voice call — ${durationSeconds}s — Stream: ${session.streamSid ?? "unknown"}`,
+          hotLead: askedAboutPrice,
+          notes: `Voice call — ${durationSeconds}s${askedAboutPrice ? " — ⚠️ ASKED ABOUT PRICE — Jayson callback needed" : ""} — Stream: ${session.streamSid ?? "unknown"}`,
         })
         .returning();
       leadId = lead.id;
-      logger.info({ leadId, callerName, callerEmail }, "Voice lead saved");
+      logger.info({ leadId, callerName, callerEmail, askedAboutPrice }, "Voice lead saved");
     }
-
-    // Save transcript for all calls (agencyId 0 = Directive OS demo)
-    const saveAgencyId = session.agencyId > 0 ? session.agencyId : 1;
     if (session.transcript.length > 0) {
       const [savedTranscript] = await db
         .insert(transcriptsTable)
@@ -460,7 +469,7 @@ async function onCallEnd(session: CallSession): Promise<void> {
       logger.info({ transcriptId: savedTranscript.id }, "Voice transcript saved");
     }
 
-    // ── Email transcript to agency contact ───────────────────────────────────
+    // ── Email transcript to agency contact (+ priority alert to Jayson if price was asked) ─
     if (session.transcript.length > 0) {
       try {
         const [agency] = await db
@@ -475,6 +484,9 @@ async function onCallEnd(session: CallSession): Promise<void> {
             duration: durationSeconds,
             messages: session.transcript,
             leadType,
+            callbackNeeded: askedAboutPrice,
+            callerName,
+            callerPhone,
           });
         }
       } catch (err) {
