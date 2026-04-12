@@ -7,7 +7,7 @@ import { sendChatTranscriptEmail, OWNER_EMAILS } from "../lib/email";
 import Stripe from "stripe";
 import OpenAI from "openai";
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const openai = new OpenAI({ apiKey: process.env.DOS_API_KEY || process.env.OPENAI_API_KEY });
 
 async function reportAiUsage(customerId: string): Promise<void> {
   const key = process.env.STRIPE_KEY_ACTIVE;

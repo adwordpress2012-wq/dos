@@ -197,9 +197,10 @@ export function handleMediaStream(twilioWs: WebSocket): void {
   console.log("[VOICE] New Twilio media stream connection received");
   logger.info("New Twilio media stream connection received");
 
-  if (!process.env.OPENAI_API_KEY) {
-    console.error("[VOICE] FATAL: OPENAI_API_KEY is not set — closing connection");
-    logger.error("OPENAI_API_KEY is not set");
+  const OPENAI_KEY = process.env.DOS_API_KEY || process.env.OPENAI_API_KEY;
+  if (!OPENAI_KEY) {
+    console.error("[VOICE] FATAL: DOS_API_KEY / OPENAI_API_KEY is not set — closing connection");
+    logger.error("DOS_API_KEY / OPENAI_API_KEY is not set");
     twilioWs.close();
     return;
   }
@@ -214,7 +215,7 @@ export function handleMediaStream(twilioWs: WebSocket): void {
     transcript: [],
     openaiWs: new WebSocket(OPENAI_REALTIME_URL, {
       headers: {
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        Authorization: `Bearer ${OPENAI_KEY}`,
         "OpenAI-Beta": "realtime=v1",
       },
     }),
