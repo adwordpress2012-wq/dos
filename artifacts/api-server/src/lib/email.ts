@@ -1,11 +1,46 @@
 import { logger } from "./logger";
 
 const OWNER_EMAILS = ["adwordpress2012@gmail.com", "jayson@directiveos.com.au"];
-const FROM = "Sarah at Directive OS <sarah@directiveos.com.au>";
+const FROM = "Directive OS | New Lead Captured <leads@directiveos.com.au>";
 
 interface TranscriptMessage {
   role: "user" | "assistant";
   content: string;
+}
+
+export interface LeadIntelligence {
+  intent: "live_in" | "investment" | "unknown";
+  hasPropertyToSell: boolean;
+  financeApproved: "yes" | "no" | "working_on_it" | "unknown";
+}
+
+export function detectLeadIntelligence(text: string): LeadIntelligence {
+  const t = text.toLowerCase();
+
+  const hasPropertyToSell =
+    /(?:yes|yeah|yep|i do|we do|got one|need to sell|selling|have a property|property to sell|sell\s+(?:my|our|a)\s+(?:house|property|place|home))/i.test(t) &&
+    /(?:sell|property|house|place|home)/i.test(t);
+
+  const investmentKeywords = /\binvestment\b|\binvest\b|\brental\s+yield\b|\bincome\b|\bip\b|\bportfolio\b/i.test(t);
+  const liveInKeywords = /\blive\s+in\b|\blive\s+there\b|\bmove\s+in\b|\bown\s+home\b|\bppor\b|\bprincipal\s+place\b|\bfamily\s+home\b|\bhome\s+to\s+live\b/i.test(t);
+  const intent: LeadIntelligence["intent"] = investmentKeywords
+    ? "investment"
+    : liveInKeywords
+    ? "live_in"
+    : "unknown";
+
+  const financeYes = /(?:finance\s+is\s+(?:approved|done|sorted|ready|in\s+place)|pre.?approv|yes[,.]?\s*(?:my\s+)?finance|finance[,.]?\s*yes)/i.test(t);
+  const financeNo = /(?:finance\s+(?:not|isn.t|haven.t|no)\b|haven.t\s+(?:started|sorted|done)\s+(?:my\s+)?finance|no[,.]?\s*(?:my\s+)?finance\s+(?:is\s+)?not)/i.test(t);
+  const financeWorking = /(?:working\s+on|in\s+progress|still\s+(?:working|sorting|figuring)|looking\s+into\s+finance|getting\s+finance)/i.test(t);
+  const financeApproved: LeadIntelligence["financeApproved"] = financeYes
+    ? "yes"
+    : financeNo
+    ? "no"
+    : financeWorking
+    ? "working_on_it"
+    : "unknown";
+
+  return { intent, hasPropertyToSell, financeApproved };
 }
 
 function detectContact(text: string): { email: string | null; phone: string | null; name: string | null } {
@@ -31,6 +66,53 @@ function buildTranscriptRows(messages: TranscriptMessage[]): string {
   ).join("");
 }
 
+function intentLabel(intent: LeadIntelligence["intent"]): string {
+  if (intent === "investment") return "🏦 Investment";
+  if (intent === "live_in") return "🏡 Owner-Occupier";
+  return "❓ Unknown";
+}
+
+function financeLabel(f: LeadIntelligence["financeApproved"]): string {
+  if (f === "yes") return "✅ Approved";
+  if (f === "no") return "❌ Not Approved";
+  if (f === "working_on_it") return "⏳ In Progress";
+  return "❓ Unknown";
+}
+
+function buildLeadIntelBlock(intel: LeadIntelligence): string {
+  const potentialListingBanner = intel.hasPropertyToSell
+    ? `<div style="background:#fef3c7;border:2px solid #f59e0b;border-radius:8px;padding:12px 16px;margin-bottom:20px;display:flex;align-items:center;gap:10px;">
+        <span style="font-size:20px;">🏷️</span>
+        <div>
+          <div style="font-weight:700;color:#92400e;font-size:14px;">POTENTIAL LISTING OPPORTUNITY</div>
+          <div style="color:#78350f;font-size:12px;margin-top:2px;">This caller has a property to sell — prioritise follow-up immediately.</div>
+        </div>
+      </div>`
+    : "";
+
+  return `
+  ${potentialListingBanner}
+  <div style="padding:20px 28px;border-bottom:1px solid #e5e7eb;">
+    <div style="font-size:13px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">Lead Intelligence — Gold Questions</div>
+    <table style="width:100%;font-size:14px;border-collapse:collapse;">
+      <tr style="background:#f9fafb;">
+        <td style="padding:8px 12px;color:#6b7280;font-weight:600;width:180px;border-radius:6px 0 0 6px;">Finance Status</td>
+        <td style="padding:8px 12px;font-weight:700;color:#111;border-radius:0 6px 6px 0;">${financeLabel(intel.financeApproved)}</td>
+      </tr>
+      <tr>
+        <td style="padding:8px 12px;color:#6b7280;font-weight:600;">Intent</td>
+        <td style="padding:8px 12px;font-weight:700;color:#111;">${intentLabel(intel.intent)}</td>
+      </tr>
+      <tr style="background:#f9fafb;">
+        <td style="padding:8px 12px;color:#6b7280;font-weight:600;border-radius:6px 0 0 6px;">Property to Sell</td>
+        <td style="padding:8px 12px;font-weight:700;border-radius:0 6px 6px 0;" style="color:${intel.hasPropertyToSell ? "#dc2626" : "#111"};">
+          ${intel.hasPropertyToSell ? "🔴 YES — Potential Listing" : "No"}
+        </td>
+      </tr>
+    </table>
+  </div>`;
+}
+
 function buildEmailHtml(opts: {
   agencyName: string;
   channel: "voice" | "chat";
@@ -40,6 +122,7 @@ function buildEmailHtml(opts: {
   callerEmail: string | null;
   callerPhone: string | null;
   leadType?: string;
+  intel?: LeadIntelligence;
   messages: TranscriptMessage[];
 }): string {
   const channelLabel = opts.channel === "voice" ? "📞 Voice Call" : "💬 Chat Enquiry";
@@ -55,7 +138,7 @@ function buildEmailHtml(opts: {
     <div style="display:flex;align-items:center;gap:12px;">
       <div style="background:#00d1b2;border-radius:8px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:18px;">🤖</div>
       <div>
-        <div style="color:#00d1b2;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">Sarah AI Receptionist</div>
+        <div style="color:#00d1b2;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">Directive OS | New Lead Captured</div>
         <div style="color:#fff;font-size:18px;font-weight:700;margin-top:2px;">${opts.agencyName}</div>
       </div>
     </div>
@@ -99,6 +182,9 @@ function buildEmailHtml(opts: {
       </tr>
     </table>
   </div>
+
+  <!-- Lead Intelligence (Gold Questions) -->
+  ${opts.intel ? buildLeadIntelBlock(opts.intel) : ""}
 
   <!-- Transcript -->
   <div style="padding:20px 28px;">
@@ -152,9 +238,11 @@ export async function sendVoiceTranscriptEmail(opts: {
 }): Promise<void> {
   const fullText = opts.messages.map(m => m.content).join(" ");
   const { email, phone, name } = detectContact(fullText);
+  const intel = detectLeadIntelligence(fullText);
 
   const callerLabel = name ?? email ?? phone ?? "Unknown Caller";
-  const subject = `📞 Call Transcript — ${callerLabel} · ${opts.agencyName}`;
+  const subjectPrefix = intel.hasPropertyToSell ? "[POTENTIAL LISTING] " : "";
+  const subject = `${subjectPrefix}New Lead: ${callerLabel} · ${opts.agencyName}`;
 
   const to = [...new Set([opts.agencyEmail, ...OWNER_EMAILS])];
 
@@ -167,6 +255,7 @@ export async function sendVoiceTranscriptEmail(opts: {
     callerEmail: email,
     callerPhone: phone,
     leadType: opts.leadType,
+    intel,
     messages: opts.messages,
   });
 
@@ -182,9 +271,11 @@ export async function sendChatTranscriptEmail(opts: {
 }): Promise<void> {
   const fullText = opts.messages.map(m => m.content).join(" ");
   const { email, phone, name } = detectContact(fullText);
+  const intel = detectLeadIntelligence(fullText);
 
   const contactLabel = name ?? email ?? phone ?? "Website Visitor";
-  const subject = `💬 Chat Transcript — ${contactLabel} · ${opts.agencyName}`;
+  const subjectPrefix = intel.hasPropertyToSell ? "[POTENTIAL LISTING] " : "";
+  const subject = `${subjectPrefix}New Lead: ${contactLabel} · ${opts.agencyName}`;
 
   const to = opts.agencyEmail
     ? [...new Set([opts.agencyEmail, ...OWNER_EMAILS])]
@@ -198,6 +289,7 @@ export async function sendChatTranscriptEmail(opts: {
     callerEmail: email,
     callerPhone: phone,
     leadType: opts.leadType,
+    intel,
     messages: opts.messages,
   });
 
