@@ -162,14 +162,19 @@ function configureOpenAiSession(session: CallSession): void {
     JSON.stringify({
       type: "session.update",
       session: {
-        turn_detection: { type: "server_vad", silence_duration_ms: 800 },
+        turn_detection: {
+          type: "server_vad",
+          silence_duration_ms: 1200,
+          threshold: 0.45,
+          prefix_padding_ms: 400,
+        },
         input_audio_format: "g711_ulaw",
         output_audio_format: "g711_ulaw",
         input_audio_transcription: { model: "whisper-1" },
         voice: "shimmer",
         instructions: session.persona,
         modalities: ["text", "audio"],
-        temperature: 0.7,
+        temperature: 0.6,
       },
     })
   );
