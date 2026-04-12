@@ -29,6 +29,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <a href="/#demos" className="hover:text-foreground transition-colors">Live Demos</a>
             <a href="/#pricing" className="hover:text-foreground transition-colors">Pricing</a>
             <Link href="/resources" className="hover:text-foreground transition-colors">Resources</Link>
+            <Link href="/blog" className="hover:text-foreground transition-colors">Blog</Link>
             <a
               href={CALENDLY}
               target="_blank"
@@ -132,6 +133,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 <li><a href="/#pricing" className="hover:text-foreground transition-colors">Pricing</a></li>
                 <li><a href="/#demos" className="hover:text-foreground transition-colors">Live Demos</a></li>
                 <li><Link href="/resources" className="hover:text-foreground transition-colors">Resources</Link></li>
+                <li><Link href="/blog" className="hover:text-foreground transition-colors">Blog</Link></li>
               </ul>
             </div>
 
