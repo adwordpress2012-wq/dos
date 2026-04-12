@@ -405,12 +405,35 @@ async function onCallEnd(session: CallSession): Promise<void> {
 
   try {
     const fullText = session.transcript.map((m) => m.content).join(" ").toLowerCase();
-    const emailMatch = fullText.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
-    const phoneMatch = fullText.match(/(\+?61|0)[0-9 ]{8,12}/);
-    const nameMatch = fullText.match(/(?:my name is|i(?:'m| am)) ([a-z]+(?: [a-z]+)?)/i);
+    // Parse email — handles both standard format and spoken "X at Y dot com"
+    const parseSpokenEmail = (text: string): string | null => {
+      const std = text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+      if (std) return std[0];
+      const spoken = text.match(/\b([a-zA-Z0-9][a-zA-Z0-9._-]*(?:\s[a-zA-Z0-9])?)\s+at\s+([a-zA-Z0-9-]+)\s+dot\s+([a-zA-Z]{2,})\b/i);
+      if (spoken) return `${spoken[1].replace(/\s+/g, "")}@${spoken[2]}.${spoken[3]}`;
+      return null;
+    };
 
-    const callerName = nameMatch ? nameMatch[1].replace(/\b\w/g, (c) => c.toUpperCase()) : "Phone Caller";
-    const callerEmail = emailMatch?.[0] ?? null;
+    // Parse caller name — prefers "my name is / this is" over "I'm", blocks non-name phrases
+    const NAME_BLOCKLIST = /^(just|only|calling|inquiring|wondering|asking|checking|following|looking|not|also|actually|currently|really|probably|basically|honestly|here|great|good|fine|yes|no|sure|okay|alright|right|well|hey|hi|hello|morning|afternoon|evening|interested|happy|keen|after)$/i;
+    const parseCallerName = (text: string): string | null => {
+      const patterns = [
+        /(?:my name is|this is)\s+([a-z]+(?: [a-z]+)?)/gi,
+        /(?:i(?:'m| am))\s+([a-z]+(?: [a-z]+)?)/gi,
+      ];
+      for (const rx of patterns) {
+        for (const m of text.matchAll(rx)) {
+          const words = m[1].trim().split(/\s+/);
+          if (NAME_BLOCKLIST.test(words[0])) continue;
+          return m[1].replace(/\b\w/g, (c) => c.toUpperCase());
+        }
+      }
+      return null;
+    };
+
+    const phoneMatch = fullText.match(/(\+?61|0)[0-9 ]{8,12}/);
+    const callerName = parseCallerName(fullText) ?? "Phone Caller";
+    const callerEmail = parseSpokenEmail(fullText);
     const callerPhone = phoneMatch?.[0] ?? null;
 
     const leadType = fullText.includes("buy") || fullText.includes("purchas") ? "buyer"

@@ -43,12 +43,35 @@ export function detectLeadIntelligence(text: string): LeadIntelligence {
   return { intent, hasPropertyToSell, financeApproved };
 }
 
+function parseSpokenEmail(text: string): string | null {
+  const std = text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+  if (std) return std[0];
+  const spoken = text.match(/\b([a-zA-Z0-9][a-zA-Z0-9._-]*(?:\s[a-zA-Z0-9])?)\s+at\s+([a-zA-Z0-9-]+)\s+dot\s+([a-zA-Z]{2,})\b/i);
+  if (spoken) return `${spoken[1].replace(/\s+/g, "")}@${spoken[2]}.${spoken[3]}`;
+  return null;
+}
+
+const NAME_BLOCKLIST = /^(just|only|calling|inquiring|wondering|asking|checking|following|looking|not|also|actually|currently|really|probably|basically|honestly|here|great|good|fine|yes|no|sure|okay|alright|right|well|hey|hi|hello|morning|afternoon|evening|interested|happy|keen|after)$/i;
+
+function parseCallerName(text: string): string | null {
+  const patterns = [
+    /(?:my name is|this is)\s+([a-z]+(?: [a-z]+)?)/gi,
+    /(?:i(?:'m| am))\s+([a-z]+(?: [a-z]+)?)/gi,
+  ];
+  for (const rx of patterns) {
+    for (const m of text.matchAll(rx)) {
+      const words = m[1].trim().split(/\s+/);
+      if (NAME_BLOCKLIST.test(words[0])) continue;
+      return m[1].replace(/\b\w/g, c => c.toUpperCase());
+    }
+  }
+  return null;
+}
+
 function detectContact(text: string): { email: string | null; phone: string | null; name: string | null } {
-  const lower = text.toLowerCase();
-  const email = text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/)?.[0] ?? null;
+  const email = parseSpokenEmail(text);
   const phone = text.match(/(\+?61|0)[0-9 ]{8,12}/)?.[0] ?? null;
-  const nameMatch = lower.match(/(?:my name is|i(?:'m| am)|this is) ([a-z]+(?: [a-z]+)?)/i);
-  const name = nameMatch ? nameMatch[1].replace(/\b\w/g, c => c.toUpperCase()) : null;
+  const name = parseCallerName(text.toLowerCase());
   return { email, phone, name };
 }
 
