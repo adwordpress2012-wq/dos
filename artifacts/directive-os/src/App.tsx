@@ -29,6 +29,7 @@ import AdminActivity from "@/pages/admin/activity";
 import Blog from "@/pages/blog";
 import BlogPost from "@/pages/blog-post";
 import ThankYou from "@/pages/thank-you";
+import Demo from "@/pages/demo";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -54,6 +55,7 @@ function Router() {
       <Route path="/blog/:slug" component={BlogPost} />
       <Route path="/blog" component={Blog} />
       <Route path="/thank-you" component={ThankYou} />
+      <Route path="/demo" component={Demo} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/dashboard/leads" component={Leads} />
       <Route path="/dashboard/transcripts" component={Transcripts} />
