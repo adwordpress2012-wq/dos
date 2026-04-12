@@ -216,7 +216,7 @@ function buildEmailHtml(opts: {
 }
 
 async function sendViaResend(to: string[], subject: string, html: string): Promise<void> {
-  const apiKey = process.env.DOS_RESEND_KEY || process.env.RESEND_API_KEY;
+  const apiKey = process.env.DOS_RESEND_CFG || process.env.DOS_RESEND_KEY || process.env.RESEND_API_KEY;
   if (!apiKey) {
     logger.warn("DOS_RESEND_KEY / RESEND_API_KEY not set — transcript email not sent");
     return;
