@@ -36,6 +36,7 @@ import BoulevardGroup from "@/pages/boulevard-group";
 import EliteSydney from "@/pages/elite-sydney";
 import Demos from "@/pages/demos";
 import EliteProposal from "@/pages/proposals/elite";
+import VideoAd from "@/pages/video-ad";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -69,6 +70,7 @@ function Router() {
       <Route path="/elite-sydney" component={EliteSydney} />
       <Route path="/demos" component={Demos} />
       <Route path="/proposals/elite" component={EliteProposal} />
+      <Route path="/video-ad" component={VideoAd} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/dashboard/leads" component={Leads} />
       <Route path="/dashboard/transcripts" component={Transcripts} />
