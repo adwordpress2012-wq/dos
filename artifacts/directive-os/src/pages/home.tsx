@@ -979,6 +979,70 @@ export default function Home() {
               </div>
             </a>
 
+            {/* Nidus Real Estate — LIVE */}
+            <a
+              href="/nidus-re"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group relative rounded-2xl overflow-hidden border transition-all hover:scale-[1.02] hover:shadow-2xl"
+              style={{ borderColor: "rgba(231,13,115,0.25)", background: "rgba(255,255,255,0.03)", backdropFilter: "blur(10px)" }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.boxShadow = "0 0 40px rgba(231,13,115,0.12)"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow = "none"; }}
+            >
+              <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                Live Client
+              </div>
+              <div className="aspect-video overflow-hidden">
+                <img
+                  src="https://images.unsplash.com/photo-1582407947304-fd86f028f716?w=600&q=80"
+                  alt="Nidus Real Estate"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-60"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+              </div>
+              <div className="absolute bottom-0 left-0 right-0 p-5">
+                <div className="text-xs font-semibold uppercase tracking-widest mb-1.5" style={{ color: "#e70d73" }}>Real Estate · Mt Druitt</div>
+                <h3 className="font-bold text-white text-lg leading-tight mb-1">Nidus Real Estate</h3>
+                <p className="text-white/60 text-xs">Western Sydney · Sarah AI Receptionist · Leads, inspections & appraisals 24/7</p>
+                <div className="flex items-center gap-1.5 mt-3 text-xs font-medium" style={{ color: "#e70d73" }}>
+                  View Live Page <ArrowRight className="w-3.5 h-3.5" />
+                </div>
+              </div>
+            </a>
+
+            {/* Century 21 The Rana Group — LIVE */}
+            <a
+              href="/c21-rana"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group relative rounded-2xl overflow-hidden border transition-all hover:scale-[1.02] hover:shadow-2xl"
+              style={{ borderColor: "rgba(242,184,56,0.25)", background: "rgba(255,255,255,0.03)", backdropFilter: "blur(10px)" }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.boxShadow = "0 0 40px rgba(242,184,56,0.12)"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow = "none"; }}
+            >
+              <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                Live Client
+              </div>
+              <div className="aspect-video overflow-hidden">
+                <img
+                  src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&q=80"
+                  alt="Century 21 The Rana Group"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-60"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+              </div>
+              <div className="absolute bottom-0 left-0 right-0 p-5">
+                <div className="text-xs font-semibold uppercase tracking-widest mb-1.5" style={{ color: "#F2B838" }}>Real Estate · Seven Hills</div>
+                <h3 className="font-bold text-white text-lg leading-tight mb-1">Century 21 The Rana Group</h3>
+                <p className="text-white/60 text-xs">Blacktown & Western Sydney · Sarah AI Receptionist · Leads, inspections & appraisals 24/7</p>
+                <div className="flex items-center gap-1.5 mt-3 text-xs font-medium" style={{ color: "#F2B838" }}>
+                  View Live Page <ArrowRight className="w-3.5 h-3.5" />
+                </div>
+              </div>
+            </a>
+
             {/* Medical — Coming Soon */}
             {[
               {
