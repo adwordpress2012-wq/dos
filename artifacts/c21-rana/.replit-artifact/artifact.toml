@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/c21-rana/"
+title = "Century 21 The Rana Group — AI Receptionist Landing Page"
+version = "1.0.0"
+id = "artifacts/c21-rana"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/c21-rana/" ]
+localPort = 24549
+
+[services.development]
+run = "pnpm --filter @workspace/c21-rana run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/c21-rana", "run", "build" ]
+publicDir = "artifacts/c21-rana/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24549"
+BASE_PATH = "/c21-rana/"
