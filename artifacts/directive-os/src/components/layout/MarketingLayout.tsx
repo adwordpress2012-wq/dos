@@ -33,7 +33,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           </Link>
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
             <a href="/#templates" className="hover:text-foreground transition-colors">Templates</a>
-            <a href="/#demos" className="hover:text-foreground transition-colors">Live Demos</a>
+            <Link href="/demos" className="hover:text-foreground transition-colors">Live Demos</Link>
             <a href="/#pricing" className="hover:text-foreground transition-colors">Pricing</a>
             <Link href="/resources" className="hover:text-foreground transition-colors">Resources</Link>
             <Link href="/blog" className="hover:text-foreground transition-colors">Blog</Link>
@@ -77,7 +77,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           <div className="md:hidden border-t border-border/50" style={{ background: "rgba(10,14,26,0.98)", backdropFilter: "blur(20px)" }}>
             <nav className="container mx-auto px-4 py-4 flex flex-col gap-1">
               <a href="/#templates" onClick={() => setMenuOpen(false)} className="px-3 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors">Templates</a>
-              <a href="/#demos" onClick={() => setMenuOpen(false)} className="px-3 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors">Live Demos</a>
+              <Link href="/demos" onClick={() => setMenuOpen(false)} className="px-3 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors">Live Demos</Link>
               <a href="/#pricing" onClick={() => setMenuOpen(false)} className="px-3 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors">Pricing</a>
               <Link href="/resources" onClick={() => setMenuOpen(false)} className="px-3 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors">Resources</Link>
               <Link href="/blog" onClick={() => setMenuOpen(false)} className="px-3 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors">Blog</Link>
@@ -179,7 +179,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <ul className="space-y-2.5 text-sm text-muted-foreground">
                 <li><a href="/#templates" className="hover:text-foreground transition-colors">Website Templates</a></li>
                 <li><a href="/#pricing" className="hover:text-foreground transition-colors">Pricing</a></li>
-                <li><a href="/#demos" className="hover:text-foreground transition-colors">Live Demos</a></li>
+                <li><Link href="/demos" className="hover:text-foreground transition-colors">Live Demos</Link></li>
                 <li><Link href="/resources" className="hover:text-foreground transition-colors">Resources</Link></li>
                 <li><Link href="/blog" className="hover:text-foreground transition-colors">Blog</Link></li>
               </ul>

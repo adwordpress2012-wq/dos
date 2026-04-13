@@ -1043,76 +1043,87 @@ export default function Home() {
               </div>
             </a>
 
-            {/* Medical — Coming Soon */}
-            {[
-              {
-                industry: "Medical & Allied Health",
-                agency: "Northside Medical Centre",
-                desc: "GP clinic · Appointment booking · After-hours triage · Medicare queries",
-                img: "https://images.unsplash.com/photo-1538108149393-fbbd81895907?w=600&q=80",
-              },
-              {
-                industry: "Legal",
-                agency: "Whitmore & Associates",
-                desc: "Law firm · Client intake · Matter enquiries · After-hours message capture",
-                img: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=600&q=80",
-              },
-              {
-                industry: "Hospitality",
-                agency: "The Grand Pavilion Hotel",
-                desc: "Hotel · Reservations · Concierge · Event enquiries · Room upgrades",
-                img: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&q=80",
-              },
-              {
-                industry: "General Business",
-                agency: "Apex Trade Services",
-                desc: "Trade business · Job booking · After-hours dispatch · Quote requests",
-                img: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=600&q=80",
-              },
-            ].slice(0, 2).map((d) => (
-              <div
-                key={d.industry}
-                className="group relative rounded-2xl overflow-hidden border"
-                style={{ borderColor: "rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.02)" }}
-              >
-                {/* Coming soon badge */}
-                <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-white/8 border border-white/12 text-white/50">
-                  Coming Soon
-                </div>
-                <div className="aspect-video overflow-hidden">
-                  <img
-                    src={d.img}
-                    alt={d.industry}
-                    className="w-full h-full object-cover opacity-25"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
-                </div>
-                <div className="absolute bottom-0 left-0 right-0 p-5">
-                  <div className="text-xs font-semibold uppercase tracking-widest mb-1.5 text-white/40">{d.industry}</div>
-                  <h3 className="font-bold text-white/60 text-lg leading-tight mb-1">{d.agency}</h3>
-                  <p className="text-white/35 text-xs">{d.desc}</p>
-                  <div className="flex items-center gap-1.5 mt-3 text-xs font-medium text-white/30">
-                    Launching Soon
-                  </div>
+            {/* The Boulevard Group — LIVE */}
+            <Link
+              href="/boulevard-group"
+              className="group relative rounded-2xl overflow-hidden border transition-all hover:scale-[1.02] hover:shadow-2xl"
+              style={{ borderColor: "rgba(240,184,73,0.25)", background: "rgba(255,255,255,0.03)", backdropFilter: "blur(10px)" }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.boxShadow = "0 0 40px rgba(240,184,73,0.12)"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow = "none"; }}
+            >
+              <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                Live Demo
+              </div>
+              <div className="aspect-video relative overflow-hidden">
+                <img
+                  src="https://images.unsplash.com/photo-1516156008625-3a9d6067fab5?w=600&q=80"
+                  alt="The Boulevard Group"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-60"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+              </div>
+              <div className="absolute bottom-0 left-0 right-0 p-5">
+                <div className="text-xs font-semibold uppercase tracking-widest mb-1.5" style={{ color: "#f0b849" }}>Real Estate · Sydney Metro</div>
+                <h3 className="font-bold text-white text-lg leading-tight mb-1">The Boulevard Group</h3>
+                <p className="text-white/60 text-xs">Sydney boutique agency · Sarah AI Receptionist · Featured listings & QR signboard</p>
+                <div className="flex items-center gap-1.5 mt-3 text-xs font-medium" style={{ color: "#f0b849" }}>
+                  View Live Demo <ArrowRight className="w-3.5 h-3.5" />
                 </div>
               </div>
-            ))}
+            </Link>
+
+            {/* Elite Sydney Property — LIVE */}
+            <Link
+              href="/elite-sydney"
+              className="group relative rounded-2xl overflow-hidden border transition-all hover:scale-[1.02] hover:shadow-2xl"
+              style={{ borderColor: "rgba(0,67,145,0.35)", background: "rgba(255,255,255,0.03)", backdropFilter: "blur(10px)" }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.boxShadow = "0 0 40px rgba(251,183,1,0.12)"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow = "none"; }}
+            >
+              <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                Live Demo
+              </div>
+              <div className="aspect-video relative overflow-hidden">
+                <img
+                  src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&q=80"
+                  alt="Elite Sydney Property"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-60"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+              </div>
+              <div className="absolute bottom-0 left-0 right-0 p-5">
+                <div className="text-xs font-semibold uppercase tracking-widest mb-1.5" style={{ color: "#fbb701" }}>Real Estate · Liverpool & Hinchinbrook</div>
+                <h3 className="font-bold text-white text-lg leading-tight mb-1">Elite Sydney Property</h3>
+                <p className="text-white/60 text-xs">SW Sydney agency · Sarah AI Receptionist · VaultRE sync · 24/7 enquiries</p>
+                <div className="flex items-center gap-1.5 mt-3 text-xs font-medium" style={{ color: "#fbb701" }}>
+                  View Live Demo <ArrowRight className="w-3.5 h-3.5" />
+                </div>
+              </div>
+            </Link>
           </div>
 
           {/* CTA */}
-          <div className="text-center">
-            <p className="text-muted-foreground text-sm mb-4">
-              Want to see Directive OS inside your own industry? Get in touch.
-            </p>
-            <a
-              href="https://calendly.com/adwordpress2012/directive-os-agency-onboarding"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all"
-              style={{ background: "rgba(0,209,178,0.1)", border: "1px solid rgba(0,209,178,0.25)", color: "#00d1b2" }}
-            >
-              Book a Discovery Call <ArrowRight className="w-4 h-4" />
-            </a>
+          <div className="text-center mt-4">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <Link
+                href="/demos"
+                className="inline-flex items-center gap-2 px-7 py-3 rounded-xl font-semibold text-sm transition-all hover:opacity-90"
+                style={{ background: "#00d1b2", color: "#0a0e1a" }}
+              >
+                View All 5 Live Demos <ArrowRight className="w-4 h-4" />
+              </Link>
+              <a
+                href="https://calendly.com/adwordpress2012/directive-os-agency-onboarding"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all"
+                style={{ background: "rgba(0,209,178,0.08)", border: "1px solid rgba(0,209,178,0.2)", color: "#00d1b2" }}
+              >
+                Book a Discovery Call
+              </a>
+            </div>
           </div>
         </div>
       </section>
