@@ -33,6 +33,7 @@ import Demo from "@/pages/demo";
 import Pay from "@/pages/pay";
 import Welcome from "@/pages/welcome";
 import BoulevardGroup from "@/pages/boulevard-group";
+import EliteSydney from "@/pages/elite-sydney";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -63,6 +64,7 @@ function Router() {
       <Route path="/pay" component={Pay} />
       <Route path="/welcome" component={Welcome} />
       <Route path="/boulevard-group" component={BoulevardGroup} />
+      <Route path="/elite-sydney" component={EliteSydney} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/dashboard/leads" component={Leads} />
       <Route path="/dashboard/transcripts" component={Transcripts} />
