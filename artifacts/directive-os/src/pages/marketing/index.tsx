@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { Download, CreditCard, FileText, Mail, PenLine, ClipboardList } from "lucide-react";
+import { Download, CreditCard, FileText, Mail, PenLine, ClipboardList, Globe } from "lucide-react";
 
 export default function MarketingHub() {
   return (
@@ -39,6 +39,7 @@ export default function MarketingHub() {
             { href: "/marketing/email-campaign", icon: <Mail size={22} />, title: "Email Campaign", desc: "3-part cold outreach sequence · copy & paste ready" },
             { href: "/marketing/email-signature", icon: <PenLine size={22} />, title: "Email Signature", desc: "Branded HTML signature · Gmail & Outlook compatible" },
             { href: "/marketing/proposal", icon: <ClipboardList size={22} />, title: "Proposal Template", desc: "Editable client proposal · 3 plan options · print to PDF" },
+            { href: "/marketing/web-quote", icon: <Globe size={22} />, title: "Website Quote Builder", desc: "New build & rebuild · live price calculator · print to PDF" },
           ].map((item) => (
             <Link key={item.href} href={item.href}>
               <div style={{ background: "#111827", border: "1px solid #1e293b", borderRadius: 16, padding: "20px 24px", display: "flex", alignItems: "center", gap: 20, cursor: "pointer", transition: "border-color 0.2s" }}
