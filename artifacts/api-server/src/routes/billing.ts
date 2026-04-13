@@ -445,7 +445,6 @@ router.post("/billing/checkout/subscription", async (req, res): Promise<void> =>
   const sessionParams: Stripe.Checkout.SessionCreateParams = {
     mode: "subscription",
     payment_method_types: ["card", "klarna"],
-    automatic_tax: { enabled: true },
     line_items: lineItems,
     success_url: `${YOUR_DOMAIN}/dashboard?subscribed=true`,
     cancel_url: `${YOUR_DOMAIN}/onboard`,
@@ -506,7 +505,6 @@ router.post("/billing/checkout", async (req, res): Promise<void> => {
   const sessionParams: Stripe.Checkout.SessionCreateParams = {
     mode: "subscription",
     payment_method_types: ["card", "klarna"],
-    automatic_tax: { enabled: true },
     line_items: lineItems,
     subscription_data: {
       add_invoice_items: [{ price: priceOnboarding, quantity: 1 }],
