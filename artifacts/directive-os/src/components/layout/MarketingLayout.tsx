@@ -37,12 +37,12 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <div className="flex flex-col leading-tight gap-0.5">
               <span className="font-extrabold text-xl tracking-wide text-white" style={{ letterSpacing: "0.04em" }}>Directive OS</span>
               {/* Running LED strip */}
-              <div className="flex items-center gap-[3px] py-[2px]">
-                {[0,1,2,3,4,5,6,7,8,9,10,11].map((i) => (
+              <div className="flex items-center justify-between w-full py-[2px]">
+                {[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15].map((i) => (
                   <span
                     key={i}
                     className={i % 2 === 0 ? "led-dot-teal" : "led-dot-white"}
-                    style={{ animationDelay: `${i * 0.12}s` }}
+                    style={{ animationDelay: `${i * 0.09}s` }}
                   />
                 ))}
               </div>
