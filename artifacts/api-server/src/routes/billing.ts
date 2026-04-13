@@ -154,6 +154,61 @@ router.post("/billing/checkout/setup", async (req, res): Promise<void> => {
   }
 });
 
+// ─── PUBLIC: Prospect checkout — no Clerk auth, called from client landing pages ─
+// Collects contact info, creates a Stripe checkout for setup + month 1.
+// Success URL lands on directiveos.com.au/welcome which shows a thank-you message.
+
+router.post("/billing/checkout/prospect", async (req, res): Promise<void> => {
+  const { agencySlug, agencyName, contactName, email, phone } = req.body as {
+    agencySlug?: string; agencyName?: string; contactName?: string; email?: string; phone?: string;
+  };
+
+  if (!email || !agencyName) {
+    res.status(400).json({ error: "email and agencyName are required" }); return;
+  }
+
+  const priceOnboarding = process.env.ONBOARDING_PRICE_ID ?? process.env.STRIPE_PRICE_ONBOARDING;
+  if (!priceOnboarding) { res.status(500).json({ error: "Stripe not configured." }); return; }
+
+  let stripe: Stripe;
+  try { stripe = getStripe(); } catch {
+    res.status(500).json({ error: "Stripe not configured." }); return;
+  }
+
+  try {
+    const session = await stripe.checkout.sessions.create({
+      mode: "payment",
+      payment_method_types: ["card", "klarna"],
+      customer_email: email,
+      payment_intent_data: {
+        setup_future_usage: "off_session",
+        metadata: { agencySlug: agencySlug ?? "", agencyName, contactName: contactName ?? "", phone: phone ?? "" },
+      },
+      line_items: [
+        { price: priceOnboarding, quantity: 1 },
+        {
+          price_data: {
+            currency: "aud",
+            product_data: {
+              name: "Directive OS Licence — Month 1",
+              description: "Then A$299/month from month 2 onwards. Dedicated AI phone line included.",
+            },
+            unit_amount: 29900,
+          },
+          quantity: 1,
+        },
+      ],
+      metadata: { agencySlug: agencySlug ?? "", agencyName, contactName: contactName ?? "", phone: phone ?? "", source: "landing_page" },
+      success_url: `${YOUR_DOMAIN}/welcome?name=${encodeURIComponent(contactName ?? agencyName)}&agency=${encodeURIComponent(agencyName)}`,
+      cancel_url: req.headers.referer ?? `${YOUR_DOMAIN}`,
+    });
+    res.json({ url: session.url });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    res.status(500).json({ error: `Failed to create checkout: ${message}` });
+  }
+});
+
 // ─── Create subscription programmatically after payment checkout completes ─────
 // Called by the bridge page (/onboard/subscribe) with the Stripe session ID.
 // Retrieves the completed payment session, extracts the saved payment method,

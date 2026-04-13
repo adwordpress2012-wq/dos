@@ -116,9 +116,94 @@ function ChatWidget() {
   );
 }
 
+interface GetStartedProps {
+  agencySlug: string; agencyName: string; accentColor: string;
+  textColor: string; bgColor: string; borderColor: string; dark?: boolean;
+}
+function GetStartedCTA({ agencySlug, agencyName, accentColor, textColor, bgColor, dark }: GetStartedProps) {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!name || !email) { setError("Please enter your name and email."); return; }
+    setLoading(true); setError("");
+    try {
+      const res = await fetch(`${API_BASE}/billing/checkout/prospect`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ agencySlug, agencyName, contactName: name, email, phone }),
+      });
+      const data = await res.json();
+      if (data.url) { window.location.href = data.url; }
+      else { setError(data.error || "Something went wrong. Please try again."); setLoading(false); }
+    } catch { setError("Connection error. Please try again."); setLoading(false); }
+  }
+
+  const inputStyle: React.CSSProperties = {
+    flex: 1, minWidth: 160, padding: "11px 14px", fontSize: 14,
+    background: dark ? "rgba(255,255,255,0.06)" : "#f5f5f5",
+    border: `1px solid ${dark ? "rgba(255,255,255,0.12)" : "#ddd"}`,
+    color: dark ? "#fff" : "#111", outline: "none", borderRadius: 4,
+  };
+
+  return (
+    <section style={{ padding: "64px 32px", background: bgColor, borderTop: `2px solid ${accentColor}` }}>
+      <div style={{ maxWidth: 780, margin: "0 auto" }}>
+        <div style={{ textAlign: "center", marginBottom: 36 }}>
+          <div style={{ display: "inline-block", background: `${accentColor}22`, border: `1px solid ${accentColor}66`, color: accentColor, padding: "4px 16px", fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", marginBottom: 16 }}>
+            Activate Your AI Receptionist
+          </div>
+          <h2 style={{ fontSize: 28, fontWeight: 900, color: textColor, marginBottom: 10 }}>Get Started with Sarah Today</h2>
+          <p style={{ color: dark ? "#888" : "#666", fontSize: 15, lineHeight: 1.6 }}>
+            A$1,800 setup · A$299/month · Dedicated phone line · Custom-trained for your agency
+          </p>
+        </div>
+        <form onSubmit={handleSubmit}>
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 12 }}>
+            <input style={inputStyle} placeholder="Your Name *" value={name} onChange={e => setName(e.target.value)} required />
+            <input style={inputStyle} type="email" placeholder="Email Address *" value={email} onChange={e => setEmail(e.target.value)} required />
+            <input style={inputStyle} type="tel" placeholder="Phone Number" value={phone} onChange={e => setPhone(e.target.value)} />
+          </div>
+          {error && <p style={{ color: "#f87171", fontSize: 13, marginBottom: 10 }}>{error}</p>}
+          <div style={{ textAlign: "center" }}>
+            <button type="submit" disabled={loading} style={{
+              background: accentColor, color: dark ? "#fff" : "#111",
+              padding: "14px 48px", fontSize: 16, fontWeight: 800, border: "none",
+              cursor: loading ? "not-allowed" : "pointer", borderRadius: 4,
+              opacity: loading ? 0.7 : 1, letterSpacing: 0.5,
+              boxShadow: `0 4px 20px ${accentColor}44`
+            }}>
+              {loading ? "Redirecting to payment…" : "Activate Sarah — Pay $1,800 Setup Fee →"}
+            </button>
+            <p style={{ fontSize: 12, color: dark ? "#555" : "#999", marginTop: 10 }}>
+              Secure payment via Stripe · Card, Apple Pay, Google Pay · No lock-in contract
+            </p>
+          </div>
+        </form>
+      </div>
+    </section>
+  );
+}
+
 export default function LandingPage() {
   return (
     <div style={{ minHeight: "100vh", background: DARK, color: "#fff" }}>
+
+      {/* DEMO WATERMARK BANNER */}
+      <div style={{
+        background: "#0d0617", color: "#bbb", textAlign: "center",
+        padding: "9px 16px", fontSize: 12, fontWeight: 500, letterSpacing: 0.5,
+        borderBottom: `2px solid ${PINK}`, position: "relative", zIndex: 200
+      }}>
+        <span style={{ background: PINK, color: "#fff", padding: "2px 8px", fontWeight: 800, fontSize: 11, marginRight: 10, letterSpacing: 1, borderRadius: 2 }}>DEMO</span>
+        This page is a live preview — dedicated phone line setup pending. Contact{" "}
+        <a href="https://directiveos.com.au" target="_blank" rel="noreferrer" style={{ color: PINK, fontWeight: 700, textDecoration: "none" }}>Directive OS</a>
+        {" "}to activate your official AI receptionist.
+      </div>
 
       {/* NAV */}
       <nav style={{
@@ -308,6 +393,17 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* GET STARTED — PAYMENT CTA */}
+      <GetStartedCTA
+        agencySlug="nidus-re"
+        agencyName="Nidus Real Estate"
+        accentColor={PINK}
+        textColor="#fff"
+        bgColor="#0d0617"
+        borderColor="rgba(231,13,115,0.25)"
+        dark
+      />
 
       {/* FOOTER */}
       <footer style={{ padding: "40px 24px", borderTop: `1px solid rgba(255,255,255,0.06)` }}>
