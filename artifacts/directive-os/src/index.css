@@ -232,3 +232,27 @@
     inset: -1px;
   }
 }
+
+/* Running LED dot animation */
+@keyframes led-run-teal {
+  0%, 100% { opacity: 0.2; box-shadow: 0 0 2px rgba(0,209,178,0.2); }
+  50% { opacity: 1; box-shadow: 0 0 6px 2px rgba(0,209,178,0.9), 0 0 10px rgba(0,209,178,0.5); }
+}
+@keyframes led-run-white {
+  0%, 100% { opacity: 0.15; box-shadow: 0 0 2px rgba(255,255,255,0.15); }
+  50% { opacity: 0.9; box-shadow: 0 0 6px 2px rgba(255,255,255,0.8), 0 0 10px rgba(255,255,255,0.4); }
+}
+.led-dot-teal {
+  width: 4px;
+  height: 4px;
+  border-radius: 1px;
+  background: #00d1b2;
+  animation: led-run-teal 1.4s ease-in-out infinite;
+}
+.led-dot-white {
+  width: 4px;
+  height: 4px;
+  border-radius: 1px;
+  background: #ffffff;
+  animation: led-run-white 1.4s ease-in-out infinite;
+}

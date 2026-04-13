@@ -27,16 +27,26 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-background text-foreground selection:bg-primary/30">
       <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5" onClick={() => setMenuOpen(false)}>
+          <Link href="/" className="flex items-center gap-2" onClick={() => setMenuOpen(false)}>
             <img
               src="/logo.png"
               alt="Directive OS"
-              className="w-12 h-12 object-contain"
-              style={{ filter: "drop-shadow(0 0 8px rgba(0,209,178,0.55))" }}
+              className="w-14 h-14 object-contain flex-shrink-0"
+              style={{ filter: "drop-shadow(0 0 10px rgba(0,209,178,0.65))" }}
             />
-            <div className="flex flex-col leading-tight">
-              <span className="font-extrabold text-lg tracking-wide text-white">Directive OS</span>
-              <span className="text-[10px] font-semibold tracking-[0.18em] uppercase" style={{ color: "#00d1b2" }}>AI Receptionist</span>
+            <div className="flex flex-col leading-tight gap-0.5">
+              <span className="font-extrabold text-xl tracking-wide text-white" style={{ letterSpacing: "0.04em" }}>Directive OS</span>
+              {/* Running LED strip */}
+              <div className="flex items-center gap-[3px] py-[2px]">
+                {[0,1,2,3,4,5,6,7,8,9,10,11].map((i) => (
+                  <span
+                    key={i}
+                    className={i % 2 === 0 ? "led-dot-teal" : "led-dot-white"}
+                    style={{ animationDelay: `${i * 0.12}s` }}
+                  />
+                ))}
+              </div>
+              <span className="text-[10px] font-bold tracking-[0.2em] uppercase" style={{ color: "#00d1b2" }}>24/7 Business Assistant</span>
             </div>
           </Link>
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
