@@ -42,6 +42,7 @@ import BusinessCard from "@/pages/marketing/business-card";
 import OnePager from "@/pages/marketing/one-pager";
 import EmailCampaign from "@/pages/marketing/email-campaign";
 import EmailSignature from "@/pages/marketing/email-signature";
+import ProposalTemplate from "@/pages/marketing/proposal";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -81,6 +82,7 @@ function Router() {
       <Route path="/marketing/one-pager" component={OnePager} />
       <Route path="/marketing/email-campaign" component={EmailCampaign} />
       <Route path="/marketing/email-signature" component={EmailSignature} />
+      <Route path="/marketing/proposal" component={ProposalTemplate} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/dashboard/leads" component={Leads} />
       <Route path="/dashboard/transcripts" component={Transcripts} />
