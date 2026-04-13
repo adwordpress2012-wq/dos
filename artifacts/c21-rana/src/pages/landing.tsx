@@ -140,9 +140,9 @@ export default function LandingPage() {
         <C21Logo size={40} />
         <div style={{ display: "flex", gap: 32, fontSize: 14 }}>
           {[
-            { label: "Buy",      url: "https://theranagroup.century21.com.au/buy/" },
+            { label: "Buy",      url: "https://theranagroup.century21.com.au/local-properties-for-sale?searchtype=sale" },
             { label: "Sell",     url: "https://theranagroup.century21.com.au/sell/" },
-            { label: "Rent",     url: "https://theranagroup.century21.com.au/rent/" },
+            { label: "Rent",     url: "https://theranagroup.century21.com.au/local-properties-for-sale?searchtype=rent" },
             { label: "About Us", url: "https://theranagroup.century21.com.au/about-us/" },
           ].map(l => (
             <a key={l.label} href={l.url} target="_blank" rel="noreferrer" style={{ color: "#aaa", textDecoration: "none", fontWeight: 500 }}
