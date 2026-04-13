@@ -209,6 +209,90 @@ router.post("/billing/checkout/prospect", async (req, res): Promise<void> => {
   }
 });
 
+// ─── PUBLIC: Direct pay link — GET redirect for email buttons ─────────────────
+// Creates a Stripe checkout session and immediately redirects to it.
+// URL structure: GET /api/billing/pay?agency=c21-rana&name=John&email=john@email.com
+// Jayson includes this URL as the CTA button in service agreement emails.
+// Agency name is inferred from the slug if not provided.
+
+const AGENCY_DISPLAY_NAMES: Record<string, string> = {
+  "c21-rana": "Century 21 The Rana Group",
+  "nidus-re": "Nidus Real Estate",
+};
+
+router.get("/billing/pay", async (req, res): Promise<void> => {
+  const {
+    agency: agencySlug = "",
+    name: contactName = "",
+    email = "",
+  } = req.query as Record<string, string>;
+
+  const agencyName = AGENCY_DISPLAY_NAMES[agencySlug] ?? agencySlug ?? "Your Agency";
+
+  const priceOnboarding = process.env.ONBOARDING_PRICE_ID ?? process.env.STRIPE_PRICE_ONBOARDING;
+  if (!priceOnboarding) {
+    res.status(500).send("Stripe is not configured — please contact jayson@directiveos.com.au");
+    return;
+  }
+
+  let stripe: Stripe;
+  try { stripe = getStripe(); } catch {
+    res.status(500).send("Stripe is not configured — please contact jayson@directiveos.com.au");
+    return;
+  }
+
+  try {
+    const sessionParams: Stripe.Checkout.SessionCreateParams = {
+      mode: "payment",
+      payment_method_types: ["card", "klarna"],
+      payment_intent_data: {
+        setup_future_usage: "off_session",
+        metadata: {
+          agencySlug,
+          agencyName,
+          contactName,
+          phone: "",
+          source: "landing_page",
+        },
+      },
+      line_items: [
+        { price: priceOnboarding, quantity: 1 },
+        {
+          price_data: {
+            currency: "aud",
+            product_data: {
+              name: "Directive OS Licence — Month 1",
+              description: "Then A$299/month from month 2 onwards. Dedicated AI phone line included.",
+            },
+            unit_amount: 29900,
+          },
+          quantity: 1,
+        },
+      ],
+      metadata: {
+        agencySlug,
+        agencyName,
+        contactName,
+        phone: "",
+        source: "landing_page",
+      },
+      success_url: `${YOUR_DOMAIN}/welcome?name=${encodeURIComponent(contactName || agencyName)}&agency=${encodeURIComponent(agencyName)}`,
+      cancel_url: agencySlug ? `${YOUR_DOMAIN}/${agencySlug}/` : YOUR_DOMAIN,
+    };
+
+    if (email) {
+      sessionParams.customer_email = email;
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionParams);
+    res.redirect(303, session.url ?? YOUR_DOMAIN);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    logger.error({ err, agencySlug }, "Failed to create direct pay session");
+    res.status(500).send(`Payment setup failed: ${message}. Please contact jayson@directiveos.com.au`);
+  }
+});
+
 // ─── Create subscription programmatically after payment checkout completes ─────
 // Called by the bridge page (/onboard/subscribe) with the Stripe session ID.
 // Retrieves the completed payment session, extracts the saved payment method,

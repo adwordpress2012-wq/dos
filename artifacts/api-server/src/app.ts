@@ -1,10 +1,101 @@
-import express, { type Express } from "express";
+import express, { type Express, type Request, type Response } from "express";
 import cors from "cors";
 import pinoHttp from "pino-http";
+import Stripe from "stripe";
 import router from "./routes";
 import { logger } from "./lib/logger";
+import { sendNewClientNotification, sendClientWelcomeEmail } from "./lib/email";
+import { db, agenciesTable } from "@workspace/db";
+import { eq } from "drizzle-orm";
 
 const app: Express = express();
+
+// ─── Stripe Webhook (MUST be before express.json() — needs raw body) ──────────
+app.post("/api/billing/webhook", express.raw({ type: "application/json" }), async (req: Request, res: Response): Promise<void> => {
+  const sig = req.headers["stripe-signature"] as string | undefined;
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+  if (!webhookSecret) {
+    logger.warn("STRIPE_WEBHOOK_SECRET not set — webhook ignored");
+    res.status(200).json({ received: true, warning: "Webhook secret not configured" });
+    return;
+  }
+
+  const stripeKey = process.env.STRIPE_KEY_ACTIVE;
+  if (!stripeKey) { res.status(500).json({ error: "Stripe not configured" }); return; }
+  const stripe = new Stripe(stripeKey, { apiVersion: "2025-03-31.basil" });
+
+  let event: Stripe.Event;
+  try {
+    event = stripe.webhooks.constructEvent(req.body, sig ?? "", webhookSecret);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Unknown error";
+    logger.warn({ msg }, "Stripe webhook signature verification failed");
+    res.status(400).json({ error: `Webhook error: ${msg}` });
+    return;
+  }
+
+  logger.info({ type: event.type }, "Stripe webhook received");
+
+  if (event.type === "checkout.session.completed") {
+    const session = event.data.object as Stripe.Checkout.Session;
+    const meta = session.metadata ?? {};
+
+    // Handle landing page prospect payments
+    if (meta.source === "landing_page") {
+      const { agencyName, agencySlug, contactName, phone } = meta;
+      const clientEmail = session.customer_email ?? meta.email ?? "";
+      const amountPaid = (session.amount_total ?? 0) / 100;
+
+      logger.info({ agencyName, clientEmail }, "New prospect payment from landing page");
+
+      // 1 — Notify Jayson immediately
+      void sendNewClientNotification({
+        agencyName: agencyName ?? "Unknown Agency",
+        agencySlug: agencySlug ?? "",
+        contactName: contactName ?? "",
+        email: clientEmail,
+        phone: phone ?? "",
+        amountPaid,
+        stripeSessionId: session.id,
+      });
+
+      // 2 — Welcome email to client
+      if (clientEmail) {
+        void sendClientWelcomeEmail({
+          contactName: contactName ?? agencyName ?? "there",
+          agencyName: agencyName ?? "",
+          email: clientEmail,
+          agencySlug: agencySlug ?? "",
+        });
+      }
+
+      // 3 — Create pending agency record if it doesn't exist
+      try {
+        const slug = agencySlug ?? agencyName?.toLowerCase().replace(/\s+/g, "-") ?? "unknown";
+        const existing = await db.select().from(agenciesTable)
+          .where(eq(agenciesTable.clerkOrgId, `prospect_${slug}`));
+        if (existing.length === 0) {
+          await db.insert(agenciesTable).values({
+            clerkOrgId: `prospect_${slug}`,
+            name: agencyName ?? "Pending Agency",
+            contactEmail: clientEmail,
+            subscriptionStatus: "pending_setup",
+            setupFeePaid: true,
+            seatCount: 1,
+            aiMinutesIncluded: 100,
+            aiMinutesUsed: 0,
+          });
+          logger.info({ slug, clientEmail }, "Pending agency record created");
+        }
+      } catch (dbErr) {
+        logger.warn({ dbErr }, "Could not create pending agency record");
+      }
+    }
+  }
+
+  res.json({ received: true });
+});
 
 app.use(
   pinoHttp({

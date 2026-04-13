@@ -287,11 +287,25 @@ All client pages show a DEMO banner until officially activated.
 To remove: delete `{/* DEMO WATERMARK BANNER */}` block in `landing.tsx`.
 To go live: swap `PHONE` constant + remove banner + redeploy.
 
-### Automation Gap (build next)
+### Stripe Webhook — BUILT ✅
 
-Missing: Stripe webhook on `checkout.session.completed` (source: "landing_page")
-Should: notify Jayson instantly, create pending agency record, send welcome email.
-Endpoint to build: `POST /api/billing/webhook` + `STRIPE_WEBHOOK_SECRET` env var.
+`POST /api/billing/webhook` — live in `artifacts/api-server/src/app.ts` (mounted BEFORE express.json() for raw body).
+On `checkout.session.completed` where `metadata.source === "landing_page"`:
+1. Sends instant payment notification email to Jayson (beautiful HTML, Stripe link + Admin button)
+2. Sends welcome email to the client
+3. Creates `pending_setup` agency DB record
+
+**SETUP REQUIRED**: Register webhook in Stripe dashboard → Developers → Webhooks.
+- Endpoint URL: `https://directiveos.com.au/api/billing/webhook`
+- Event: `checkout.session.completed`
+- Copy "Signing secret" (starts `whsec_`) → add as `STRIPE_WEBHOOK_SECRET` secret in Replit
+
+### Direct Pay Link — BUILT ✅
+
+`GET /api/billing/pay?agency=<slug>&name=<name>&email=<email>` — creates Stripe session and redirects immediately.
+Use this URL as the CTA button in service agreement emails.
+Example: `https://directiveos.com.au/api/billing/pay?agency=c21-rana&name=John+Smith&email=john@c21rana.com.au`
+Maps `c21-rana` → "Century 21 The Rana Group", `nidus-re` → "Nidus Real Estate" (add more in `AGENCY_DISPLAY_NAMES` in billing.ts).
 
 ### Skill
 

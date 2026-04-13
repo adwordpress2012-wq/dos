@@ -517,4 +517,219 @@ export async function sendInvoiceEmail(opts: {
   }
 }
 
+// ─── New client payment notification (to Jayson) ──────────────────────────────
+
+interface NewClientNotificationOpts {
+  agencyName: string;
+  agencySlug: string;
+  contactName: string;
+  email: string;
+  phone: string;
+  amountPaid: number;
+  stripeSessionId: string;
+}
+
+export async function sendNewClientNotification(opts: NewClientNotificationOpts): Promise<void> {
+  const apiKey = process.env.DOS_RESEND_CFG || process.env.DOS_RESEND_KEY || process.env.RESEND_API_KEY;
+  if (!apiKey) { logger.warn("Resend key not set — new client notification not sent"); return; }
+
+  const stripeLink = `https://dashboard.stripe.com/payments/${opts.stripeSessionId}`;
+  const adminLink = `https://directiveos.com.au/admin`;
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>New Client Payment</title>
+</head>
+<body style="margin:0;padding:0;background:#0f172a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#0f172a;padding:40px 0;">
+  <tr><td align="center">
+    <table width="600" cellpadding="0" cellspacing="0" style="background:#1e293b;border-radius:12px;overflow:hidden;max-width:600px;">
+
+      <!-- Header -->
+      <tr><td style="background:linear-gradient(135deg,#00d1b2,#0891b2);padding:32px 40px;text-align:center;">
+        <p style="margin:0 0 8px;color:rgba(255,255,255,0.8);font-size:12px;letter-spacing:2px;text-transform:uppercase;">Directive OS</p>
+        <h1 style="margin:0;color:#ffffff;font-size:28px;font-weight:800;">🎉 New Client Payment!</h1>
+        <p style="margin:12px 0 0;color:rgba(255,255,255,0.9);font-size:16px;">Someone just paid — Sarah is needed!</p>
+      </td></tr>
+
+      <!-- Amount Banner -->
+      <tr><td style="padding:24px 40px;background:#0f172a;text-align:center;border-bottom:1px solid #334155;">
+        <p style="margin:0 0 4px;color:#94a3b8;font-size:12px;text-transform:uppercase;letter-spacing:1px;">Amount Paid</p>
+        <p style="margin:0;color:#00d1b2;font-size:42px;font-weight:800;">A$${opts.amountPaid.toFixed(2)}</p>
+        <p style="margin:4px 0 0;color:#64748b;font-size:12px;">Setup + Month 1 via Stripe</p>
+      </td></tr>
+
+      <!-- Client Details -->
+      <tr><td style="padding:32px 40px;">
+        <h2 style="margin:0 0 20px;color:#e2e8f0;font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Client Details</h2>
+        <table width="100%" cellpadding="0" cellspacing="0">
+          ${[
+            ["Agency", opts.agencyName],
+            ["Contact Name", opts.contactName || "—"],
+            ["Email", opts.email],
+            ["Phone", opts.phone || "—"],
+            ["Slug", opts.agencySlug ? `directiveos.com.au/${opts.agencySlug}/` : "—"],
+          ].map(([label, value], i) => `
+          <tr style="background:${i % 2 === 0 ? "#0f172a" : "#1e293b"};">
+            <td style="padding:12px 16px;color:#64748b;font-size:13px;font-weight:600;width:140px;border-radius:6px 0 0 6px;">${label}</td>
+            <td style="padding:12px 16px;color:#e2e8f0;font-size:13px;border-radius:0 6px 6px 0;">${value}</td>
+          </tr>`).join("")}
+        </table>
+      </td></tr>
+
+      <!-- Action Checklist -->
+      <tr><td style="padding:0 40px 24px;">
+        <h2 style="margin:0 0 16px;color:#e2e8f0;font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:1px;">⚡ Do These Now</h2>
+        ${[
+          "Create Clerk org + invite client as owner",
+          "Buy dedicated Australian Twilio number",
+          "Remove DEMO banner from landing page",
+          "Swap PHONE to their dedicated Twilio number",
+          "Redeploy — Sarah goes live!",
+        ].map((step, i) => `
+        <div style="display:flex;align-items:flex-start;margin-bottom:10px;padding:12px 16px;background:#0f172a;border-radius:8px;border-left:3px solid #00d1b2;">
+          <span style="color:#00d1b2;font-weight:800;font-size:14px;margin-right:12px;min-width:20px;">${i + 1}.</span>
+          <span style="color:#cbd5e1;font-size:13px;line-height:1.5;">${step}</span>
+        </div>`).join("")}
+      </td></tr>
+
+      <!-- CTA Buttons -->
+      <tr><td style="padding:8px 40px 32px;text-align:center;">
+        <a href="${stripeLink}" style="display:inline-block;margin:8px;padding:14px 28px;background:#00d1b2;color:#0f172a;text-decoration:none;font-weight:700;font-size:14px;border-radius:8px;">View in Stripe →</a>
+        <a href="${adminLink}" style="display:inline-block;margin:8px;padding:14px 28px;background:#1e40af;color:#ffffff;text-decoration:none;font-weight:700;font-size:14px;border-radius:8px;">Admin Dashboard →</a>
+      </td></tr>
+
+      <!-- Footer -->
+      <tr><td style="padding:20px 40px;background:#0a0f1a;text-align:center;border-top:1px solid #1e293b;">
+        <p style="margin:0;color:#475569;font-size:11px;">Directive OS — Internal Notification · directiveos.com.au · ABN 87 754 544 171</p>
+      </td></tr>
+
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>`;
+
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        from: "Directive OS Payments <billing@directiveos.com.au>",
+        to: OWNER_EMAILS,
+        subject: `🎉 New Client Paid — ${opts.agencyName} · A$${opts.amountPaid.toFixed(2)}`,
+        html,
+      }),
+    });
+    if (!res.ok) {
+      logger.warn({ status: res.status, err: await res.text() }, "Failed to send new client notification");
+    } else {
+      logger.info({ agencyName: opts.agencyName, email: opts.email }, "New client notification sent to Jayson");
+    }
+  } catch (err) {
+    logger.warn({ err }, "Error sending new client notification");
+  }
+}
+
+// ─── Welcome email (to new client after payment) ──────────────────────────────
+
+interface ClientWelcomeEmailOpts {
+  contactName: string;
+  agencyName: string;
+  email: string;
+  agencySlug: string;
+}
+
+export async function sendClientWelcomeEmail(opts: ClientWelcomeEmailOpts): Promise<void> {
+  const apiKey = process.env.DOS_RESEND_CFG || process.env.DOS_RESEND_KEY || process.env.RESEND_API_KEY;
+  if (!apiKey) { logger.warn("Resend key not set — client welcome email not sent"); return; }
+
+  const landingPageUrl = opts.agencySlug
+    ? `https://directiveos.com.au/${opts.agencySlug}/`
+    : "https://directiveos.com.au";
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Welcome to Directive OS</title>
+</head>
+<body style="margin:0;padding:0;background:#f8fafc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f8fafc;padding:40px 0;">
+  <tr><td align="center">
+    <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;max-width:600px;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+
+      <!-- Header -->
+      <tr><td style="background:linear-gradient(135deg,#0a0e1a,#0f2040);padding:36px 40px;text-align:center;">
+        <p style="margin:0 0 6px;color:#00d1b2;font-size:12px;letter-spacing:3px;text-transform:uppercase;font-weight:600;">Directive OS</p>
+        <h1 style="margin:0;color:#ffffff;font-size:26px;font-weight:800;">You're all set, ${opts.contactName}!</h1>
+        <p style="margin:12px 0 0;color:rgba(255,255,255,0.75);font-size:15px;">Sarah is being set up for ${opts.agencyName} right now.</p>
+      </td></tr>
+
+      <!-- What Happens Next -->
+      <tr><td style="padding:36px 40px;">
+        <h2 style="margin:0 0 20px;color:#0a0e1a;font-size:16px;font-weight:700;">What happens next</h2>
+
+        ${[
+          ["Within 2 business days", "Your dedicated Australian phone number is provisioned and Sarah goes live on your line."],
+          ["Your branded page goes live", `Your landing page at ${landingPageUrl} has the DEMO watermark removed and Sarah's number updated.`],
+          ["Dashboard access", "You'll receive a login link to your Directive OS dashboard — track every lead, transcript, and booking from there."],
+          ["You're covered 24/7", "From the moment Sarah is live, every call to your number is answered — even at midnight, weekends, and public holidays."],
+        ].map(([title, body], i) => `
+        <div style="display:flex;margin-bottom:20px;padding:16px;background:${i % 2 === 0 ? "#f8fafc" : "#ffffff"};border-radius:10px;border:1px solid #e2e8f0;">
+          <div style="background:#00d1b2;color:#0a0e1a;font-weight:800;font-size:16px;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-right:16px;text-align:center;line-height:32px;">${i + 1}</div>
+          <div>
+            <p style="margin:0 0 4px;color:#0a0e1a;font-size:14px;font-weight:700;">${title}</p>
+            <p style="margin:0;color:#64748b;font-size:13px;line-height:1.5;">${body}</p>
+          </div>
+        </div>`).join("")}
+      </td></tr>
+
+      <!-- Questions? -->
+      <tr><td style="padding:0 40px 32px;">
+        <div style="background:#0a0e1a;border-radius:10px;padding:24px;text-align:center;">
+          <p style="margin:0 0 8px;color:#ffffff;font-size:15px;font-weight:700;">Questions? I'm here.</p>
+          <p style="margin:0 0 16px;color:#94a3b8;font-size:13px;">Reach out directly — happy to chat anytime.</p>
+          <a href="mailto:jayson@directiveos.com.au" style="display:inline-block;padding:12px 24px;background:#00d1b2;color:#0a0e1a;text-decoration:none;font-weight:700;font-size:13px;border-radius:8px;">jayson@directiveos.com.au</a>
+        </div>
+      </td></tr>
+
+      <!-- Footer -->
+      <tr><td style="padding:20px 40px;background:#f1f5f9;text-align:center;border-top:1px solid #e2e8f0;">
+        <p style="margin:0 0 4px;color:#64748b;font-size:12px;">Directive OS — AI Receptionist Platform</p>
+        <p style="margin:0;color:#94a3b8;font-size:11px;">directiveos.com.au · ABN 87 754 544 171 · jayson@directiveos.com.au</p>
+      </td></tr>
+
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>`;
+
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        from: "Jayson at Directive OS <jayson@directiveos.com.au>",
+        to: [opts.email],
+        bcc: OWNER_EMAILS,
+        subject: `Welcome to Directive OS — Sarah is being set up for ${opts.agencyName}`,
+        html,
+      }),
+    });
+    if (!res.ok) {
+      logger.warn({ status: res.status, err: await res.text() }, "Failed to send client welcome email");
+    } else {
+      logger.info({ to: opts.email, agencyName: opts.agencyName }, "Client welcome email sent");
+    }
+  } catch (err) {
+    logger.warn({ err }, "Error sending client welcome email");
+  }
+}
+
 export { OWNER_EMAILS, detectContact };
