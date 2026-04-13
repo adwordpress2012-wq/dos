@@ -29,3 +29,9 @@ id = "6k0x5v0X4qLH5iFG3irtW"
 uri = "file://screenshots/linkedin-banner.jpg"
 type = "image"
 title = "LinkedIn Profile Banner (1584×396)"
+
+[[outputs]]
+id = "DnhZCl-cCUJILkdCv4s8q"
+uri = "file://Directive-OS-Playbook.pdf"
+type = "pdf"
+title = "Directive OS — Platform & Process Playbook"
