@@ -239,6 +239,26 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* TRY SARAH BY PHONE */}
+      <section style={{ padding: "48px 32px", background: "#0d0d0d", borderTop: `1px solid rgba(242,184,56,0.15)`, borderBottom: `1px solid rgba(242,184,56,0.15)` }}>
+        <div style={{ maxWidth: 680, margin: "0 auto", display: "flex", flexWrap: "wrap", alignItems: "center", gap: 24, justifyContent: "space-between" }}>
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+              <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#22c55e", boxShadow: "0 0 8px #22c55e", animation: "blink 1.5s infinite" }} />
+              <span style={{ fontSize: 13, color: "#22c55e", fontWeight: 700, textTransform: "uppercase", letterSpacing: 1 }}>Sarah is live now</span>
+            </div>
+            <h3 style={{ fontSize: 22, fontWeight: 800, marginBottom: 6 }}>Want to hear Sarah's voice?</h3>
+            <p style={{ fontSize: 14, color: "#666", lineHeight: 1.6 }}>Call the demo line and experience exactly what your callers will hear — 24/7, no scripts, no hold music.</p>
+          </div>
+          <a href="tel:0258504038" style={{
+            background: GOLD, color: BLACK, padding: "16px 32px",
+            textDecoration: "none", fontSize: 18, fontWeight: 900, letterSpacing: 0.5,
+            whiteSpace: "nowrap", boxShadow: `0 4px 20px ${GOLD}44`, flexShrink: 0
+          }}>📞 02 5850 4038</a>
+        </div>
+        <style>{`@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }`}</style>
+      </section>
+
       {/* FEATURES */}
       <section style={{ padding: "88px 32px", background: BLACK }}>
         <div style={{ maxWidth: 960, margin: "0 auto" }}>
