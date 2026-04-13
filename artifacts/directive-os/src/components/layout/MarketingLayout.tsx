@@ -35,7 +35,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               style={{ filter: "drop-shadow(0 0 10px rgba(0,209,178,0.65))" }}
             />
             <div className="flex flex-col leading-tight gap-0.5">
-              <span className="font-extrabold text-2xl text-white" style={{ letterSpacing: "0.05em" }}>Directive OS</span>
+              <span className="font-extrabold text-lg text-white" style={{ letterSpacing: "0.04em" }}>Directive OS</span>
               {/* Running LED strip */}
               <div className="flex items-center justify-between w-full py-[2px]">
                 {[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15].map((i) => (
@@ -46,16 +46,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                   />
                 ))}
               </div>
-              <span
-                className="text-[8px] font-bold uppercase"
-                style={{
-                  color: "#00d1b2",
-                  display: "block",
-                  width: "100%",
-                  textAlign: "justify",
-                  textAlignLast: "justify",
-                }}
-              >24/7 Business Assistant</span>
+              <span className="text-[9px] font-semibold uppercase tracking-[0.13em]" style={{ color: "#00d1b2" }}>24/7 Business Assistant</span>
             </div>
           </Link>
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
