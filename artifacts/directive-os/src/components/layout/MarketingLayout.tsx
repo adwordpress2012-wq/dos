@@ -28,8 +28,16 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5" onClick={() => setMenuOpen(false)}>
-            <img src="/logo.png" alt="Directive OS" className="w-9 h-9 object-contain" />
-            <span className="font-bold text-xl tracking-tight">Directive OS</span>
+            <img
+              src="/logo.png"
+              alt="Directive OS"
+              className="w-12 h-12 object-contain"
+              style={{ filter: "drop-shadow(0 0 8px rgba(0,209,178,0.55))" }}
+            />
+            <div className="flex flex-col leading-tight">
+              <span className="font-extrabold text-lg tracking-wide text-white">Directive OS</span>
+              <span className="text-[10px] font-semibold tracking-[0.18em] uppercase" style={{ color: "#00d1b2" }}>AI Receptionist</span>
+            </div>
           </Link>
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
             <a href="/#templates" className="hover:text-foreground transition-colors">Templates</a>
