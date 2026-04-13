@@ -64,8 +64,13 @@ function ChatWidget() {
         body: JSON.stringify({ sessionId: sessionId.current, message: t, agencyId: 1 }),
       });
       const d = await res.json();
-      setMsgs(p => [...p, { role: "assistant", content: d.message || d.reply || `Call us on ${PHONE}.` }]);
+      const reply = d.message || d.reply || `Call us on ${PHONE}.`;
+      // Natural typing delay — proportional to response length, capped at 2.5 s
+      const words = reply.trim().split(/\s+/).length;
+      await new Promise(r => setTimeout(r, Math.min(2500, Math.max(900, words * 35))));
+      setMsgs(p => [...p, { role: "assistant", content: reply }]);
     } catch {
+      await new Promise(r => setTimeout(r, 900));
       setMsgs(p => [...p, { role: "assistant", content: `Sorry! Please call us on ${PHONE}.` }]);
     }
     setLoading(false);

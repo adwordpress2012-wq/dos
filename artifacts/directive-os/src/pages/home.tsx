@@ -122,22 +122,29 @@ function DemoChatWidget() {
     { role: "assistant", content: "Hey! Running an agency is full-on, yeah? I'm Sarah from Directive OS. Quick one to kick things off — when a call comes in after hours or while your agents are out on inspections, what happens to it? Voicemail, or does someone always have to be on call?" }
   ]);
   const [input, setInput] = useState("");
+  const [typing, setTyping] = useState(false);
   const [sessionId] = useState(`dos_${Date.now()}`);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chat = useAiChat();
 
   const send = async () => {
-    if (!input.trim() || chat.isPending) return;
+    if (!input.trim() || chat.isPending || typing) return;
     const userMsg = input.trim();
     setInput("");
     setMessages(prev => [...prev, { role: "user", content: userMsg }]);
+    setTyping(true);
     try {
       const result = await chat.mutateAsync({ data: { sessionId, message: userMsg, agencyId: null } });
-      setMessages(prev => [...prev, { role: "assistant", content: result.reply }]);
+      const reply = result.reply;
+      const words = reply.trim().split(/\s+/).length;
+      await new Promise(r => setTimeout(r, Math.min(2500, Math.max(900, words * 35))));
+      setMessages(prev => [...prev, { role: "assistant", content: reply }]);
       setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
     } catch {
+      await new Promise(r => setTimeout(r, 900));
       setMessages(prev => [...prev, { role: "assistant", content: "Thank you for your message. One of our agents will be in touch shortly." }]);
     }
+    setTyping(false);
   };
 
   return (
@@ -183,7 +190,7 @@ function DemoChatWidget() {
                 </div>
               </div>
             ))}
-            {chat.isPending && (
+            {typing && (
               <div className="flex justify-start">
                 <div className="rounded-xl px-3 py-2 text-sm text-muted-foreground flex items-center gap-1.5"
                   style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}>
@@ -205,7 +212,7 @@ function DemoChatWidget() {
               className="flex-1 rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1"
               style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", focusRingColor: "#00d1b2" } as React.CSSProperties}
             />
-            <button onClick={send} disabled={chat.isPending || !input.trim()}
+            <button onClick={send} disabled={typing || !input.trim()}
               className="rounded-lg p-2 transition-all hover:scale-105 disabled:opacity-40"
               style={{ background: "linear-gradient(135deg, #00d1b2, #00b89c)" }}>
               <Send className="w-4 h-4 text-black" />

@@ -55,8 +55,12 @@ function ChatWidget() {
         body: JSON.stringify({ sessionId: sessionId.current, message: text, agencyId: 1 }),
       });
       const data = await res.json();
-      setMessages(p => [...p, { role: "assistant", content: data.message || data.reply || `Please call us on ${PHONE}.` }]);
+      const reply = data.message || data.reply || `Please call us on ${PHONE}.`;
+      const words = reply.trim().split(/\s+/).length;
+      await new Promise(r => setTimeout(r, Math.min(2500, Math.max(900, words * 35))));
+      setMessages(p => [...p, { role: "assistant", content: reply }]);
     } catch {
+      await new Promise(r => setTimeout(r, 900));
       setMessages(p => [...p, { role: "assistant", content: `Sorry about that! Please call us on ${PHONE}.` }]);
     }
     setLoading(false);

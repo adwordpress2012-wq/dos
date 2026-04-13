@@ -73,29 +73,41 @@ Conversation rules:
 }
 
 function buildRealEstateSarahPrompt(agencyName: string): string {
-  return `You are Sarah, a Class 2 licensed real estate agent and AI receptionist for ${agencyName}, a boutique agency in Western Sydney, powered by Directive OS.
+  return `You are Sarah, a Class 2 licensed real estate agent and AI receptionist for ${agencyName}, powered by Directive OS.
+
+CRITICAL ANTI-REPETITION RULES — READ FIRST:
+- NEVER repeat, paraphrase, or echo anything you have already said in this conversation
+- NEVER ask a question you have already asked — if they haven't answered, gently acknowledge and move on
+- NEVER use the same opening phrase twice ("Great!", "Perfect!", "Wonderful!" — vary them every single response)
+- Read the full conversation history above before each reply — if you already introduced yourself, DO NOT introduce yourself again
+- Keep every reply fresh — one new idea, one new question, forward momentum only
+
+EMAIL COLLECTION — CRITICAL:
+- When collecting an email address, ask the user to type it carefully
+- Accept email in any format: "john@gmail.com", "john at gmail dot com", "john(at)gmail.com"
+- When you receive what looks like an email, read it back to confirm: "Just confirming — that's john@gmail.com, is that right?"
+- If they spell it out letter by letter, piece it together: "j-o-h-n at g-m-a-i-l dot c-o-m" = john@gmail.com
+- Never say "I didn't catch that" — always try to interpret what they gave you
 
 Personality & Style:
-- Warm, confident, and genuinely expert — you are a highly skilled real estate professional, not just a call-taker
+- Warm, confident, genuinely expert — a skilled real estate professional, not a script-reader
 - Natural Australian tone: friendly, approachable, knowledgeable — never stiff or corporate
-- You know the Hills District and Western Sydney property market inside and out
 - Your prime directive: Never miss a lead. Every conversation must end with at minimum a name and phone number captured
 
 Your role:
 1. Immediately identify whether the enquiry is from a buyer, tenant, vendor, or landlord
-2. Buyers: Understand their requirements (suburb, budget, bedrooms, timeline). Offer to book an inspection or arrange an agent callback. Do not let them go without a name, phone, and email.
-3. Tenants: Assist with rental enquiries, offer to email the NSW Fair Trading Standard Tenancy Application Form (ask for their email), try to lock in a viewing time
+2. Buyers: Understand their requirements (suburb, budget, bedrooms, timeline). Offer to book an inspection or arrange an agent callback
+3. Tenants: Assist with rental enquiries, offer to email the NSW Fair Trading Standard Tenancy Application Form (ask for their email)
 4. Vendors: Offer a free property appraisal — "I can lock one in with our principal agent right now, takes about 20 minutes — when suits you?"
-5. Landlords: Property management enquiries — offer to have our PM contact them within the hour
-6. Hot leads: Anyone ready to make an offer or wanting an agent urgently — tell them you'll flag it as a priority and arrange an immediate callback
+5. Landlords: Offer to have our PM contact them within the hour
+6. Hot leads: Anyone ready to make an offer — flag as priority and arrange immediate callback
 
 Rules:
-- Keep responses to 2–3 sentences max — concise, warm, and action-oriented
+- Keep responses to 2–3 sentences max — concise, warm, action-oriented
 - Never make up specific property addresses, prices, or availability — say "I'll have our agent confirm that with you directly"
 - ALWAYS try to collect: name, phone number, email — do not let the conversation close without at least a name and number
 - Australian spelling always: "enquiry", "authorise", "colour", "recognise"
-- End every response with a question or a clear next step to keep the lead engaged and moving forward
-- You are a licensed professional — be confident and knowledgeable, never just a message-taker`;
+- End every response with ONE question or ONE clear next step — never two questions at once`;
 }
 
 function buildSystemPrompt(agencyName: string | null): string {
@@ -103,6 +115,29 @@ function buildSystemPrompt(agencyName: string | null): string {
   return buildRealEstateSarahPrompt(agencyName);
 }
 
+
+function parseSpokenEmail(text: string): string | null {
+  // Standard format: john@gmail.com
+  const std = text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+  if (std) return std[0].toLowerCase();
+
+  // Spoken format: "john at gmail dot com" or "john dot smith at outlook dot com dot au"
+  const spoken = text.match(
+    /\b([a-zA-Z0-9][a-zA-Z0-9._\- ]*?)\s+at\s+([a-zA-Z0-9-]+(?:\s+dot\s+[a-zA-Z0-9-]+)*)\s+dot\s+([a-zA-Z]{2,}(?:\s+dot\s+[a-zA-Z]{2,})?)\b/i
+  );
+  if (spoken) {
+    const local = spoken[1].trim().replace(/\s+dot\s+/gi, ".").replace(/\s+/g, "");
+    const domain = spoken[2].trim().replace(/\s+dot\s+/gi, ".").replace(/\s+/g, "");
+    const tld = spoken[3].trim().replace(/\s+dot\s+/gi, ".").replace(/\s+/g, "");
+    return `${local}@${domain}.${tld}`.toLowerCase();
+  }
+
+  // Alternative: "john(at)gmail.com" or "john[at]gmail.com"
+  const alt = text.match(/([a-zA-Z0-9._%+-]+)\s*[\[(]at[\])]\s*([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/i);
+  if (alt) return `${alt[1]}@${alt[2]}`.toLowerCase();
+
+  return null;
+}
 
 function detectAction(message: string, history: ChatMessage[]): { action: string | null; leadData?: Record<string, string> } {
   const lower = message.toLowerCase();
@@ -115,14 +150,14 @@ function detectAction(message: string, history: ChatMessage[]): { action: string
     return { action: "transfer_call" };
   }
 
-  // Simple lead detection
-  const emailMatch = allText.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+  // Lead detection with spoken email support
+  const email = parseSpokenEmail(allText) ?? "";
   const phoneMatch = allText.match(/(\+?61|0)[0-9 ]{8,12}/);
-  if (emailMatch || phoneMatch) {
+  if (email || phoneMatch) {
     return {
       action: "collect_lead",
       leadData: {
-        email: emailMatch?.[0] ?? "",
+        email,
         phone: phoneMatch?.[0] ?? "",
       },
     };
@@ -154,8 +189,19 @@ router.post("/ai/chat", async (req, res): Promise<void> => {
   // Build AI response using OpenAI GPT-4o-mini
   let reply = "";
   try {
+    // Seed a greeting context when this is the first user message, so OpenAI knows
+    // the introduction has already happened and won't repeat it
+    const isFirstMessage = history.length === 1;
+    const greetingContext: OpenAI.Chat.ChatCompletionMessageParam[] = isFirstMessage ? [{
+      role: "assistant",
+      content: agencyName
+        ? `G'day! Thanks for reaching out to ${agencyName}. I'm Sarah, how can I help you today?`
+        : `G'day! You've reached Directive OS — I'm Sarah, the AI receptionist. How can I help you today?`,
+    }] : [];
+
     const openaiMessages: OpenAI.Chat.ChatCompletionMessageParam[] = [
       { role: "system", content: buildSystemPrompt(agencyName) },
+      ...greetingContext,
       ...history.slice(0, -1).map(m => ({ role: m.role as "user" | "assistant", content: m.content })),
       { role: "user", content: message },
     ];
@@ -163,8 +209,8 @@ router.post("/ai/chat", async (req, res): Promise<void> => {
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: openaiMessages,
-      max_tokens: agencyName ? 180 : 250,
-      temperature: agencyName ? 0.7 : 0.85,
+      max_tokens: agencyName ? 160 : 220,
+      temperature: agencyName ? 0.6 : 0.75,
     });
 
     reply = completion.choices[0]?.message?.content ?? "Thank you for reaching out. One of our agents will be in touch with you shortly.";

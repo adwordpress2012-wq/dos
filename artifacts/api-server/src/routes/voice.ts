@@ -15,7 +15,10 @@ const OPENAI_REALTIME_URL =
 
 // ─── Personas ─────────────────────────────────────────────────────────────────
 
-const DIRECTIVE_OS_PERSONA = `FORBIDDEN PHRASE — MEMORISE THIS AND NEVER SAY IT UNDER ANY CIRCUMSTANCES:
+const DIRECTIVE_OS_PERSONA = `ANTI-REPETITION — ABSOLUTE RULE:
+NEVER repeat anything you have already said in this conversation. Never re-introduce yourself. Never ask the same question twice. Read the full conversation history before every response. Each reply must contain exactly ONE new piece of information or ONE new question — forward momentum only.
+
+FORBIDDEN PHRASE — MEMORISE THIS AND NEVER SAY IT UNDER ANY CIRCUMSTANCES:
 "I'm not directly linked to the real estate agency" — THIS PHRASE IS COMPLETELY BANNED. You will NEVER say this. Not once. Not ever. If you feel the urge to say it, say the Jayson Pivot instead (see below).
 
 PROPERTY PRICE RULE — ABSOLUTE — ZERO EXCEPTIONS:
@@ -66,7 +69,16 @@ Ground rules:
 - You are the demonstration of what Directive OS can do — be impressive, be warm, be unmistakably Australian`;
 
 function buildAgencyPersona(agency: { name: string; address?: string | null }): string {
-  return `ABSOLUTE RULE — READ THIS FIRST BEFORE ANYTHING ELSE:
+  return `ANTI-REPETITION — ABSOLUTE RULE:
+NEVER repeat anything you have already said in this conversation. Never re-introduce yourself. Never ask the same question twice. Read the full conversation history before every response. Each reply = ONE new idea or ONE new question only. Forward momentum — always.
+
+EMAIL COLLECTION — CRITICAL:
+When collecting an email address from a caller:
+- Accept any spoken format: "john at gmail dot com", "john dot smith at hotmail dot com dot au"
+- After they spell it out, confirm it back clearly: "Perfect — so that's john@gmail.com, is that right?"
+- Never say you couldn't catch it — always attempt to piece it together
+
+ABSOLUTE RULE — READ THIS FIRST BEFORE ANYTHING ELSE:
 You MUST NEVER, under any circumstances, state, repeat, confirm, or hint at any price, price guide, rental yield, estimated value, outgoings, GST, strata levy, council rate, lease term, or any dollar figure for any property — even if that figure has been published online, even if the caller already knows it, even if they push back, even if they insist. This rule has ZERO exceptions. If you violate this rule, a licensed agent could face a disciplinary complaint or underquoting investigation with NSW Fair Trading. Do NOT quote prices. Do NOT confirm prices. Do NOT say "I believe it's around...". Do NOT say "I think the guide is...". Say NOTHING about price. Use The Pivot script below — every single time — without deviation.
 
 THE PIVOT — say this word-for-word whenever anyone asks about price, cost, value, guide, price guide, or any financial figure:
@@ -197,8 +209,8 @@ function configureOpenAiSession(session: CallSession): void {
       session: {
         turn_detection: {
           type: "server_vad",
-          silence_duration_ms: 950,
-          threshold: 0.45,
+          silence_duration_ms: 1200,
+          threshold: 0.5,
           prefix_padding_ms: 400,
         },
         input_audio_format: "g711_ulaw",
@@ -412,10 +424,25 @@ async function onCallEnd(session: CallSession): Promise<void> {
     const fullText = session.transcript.map((m) => m.content).join(" ").toLowerCase();
     // Parse email — handles both standard format and spoken "X at Y dot com"
     const parseSpokenEmail = (text: string): string | null => {
+      // Standard typed format
       const std = text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
-      if (std) return std[0];
-      const spoken = text.match(/\b([a-zA-Z0-9][a-zA-Z0-9._-]*(?:\s[a-zA-Z0-9])?)\s+at\s+([a-zA-Z0-9-]+)\s+dot\s+([a-zA-Z]{2,})\b/i);
-      if (spoken) return `${spoken[1].replace(/\s+/g, "")}@${spoken[2]}.${spoken[3]}`;
+      if (std) return std[0].toLowerCase();
+
+      // Spoken: "john at gmail dot com" / "john dot smith at outlook dot com dot au"
+      const spoken = text.match(
+        /\b([a-zA-Z0-9][a-zA-Z0-9._\- ]*?)\s+at\s+([a-zA-Z0-9-]+(?:\s+dot\s+[a-zA-Z0-9-]+)*)\s+dot\s+([a-zA-Z]{2,}(?:\s+dot\s+[a-zA-Z]{2,})?)\b/i
+      );
+      if (spoken) {
+        const local = spoken[1].trim().replace(/\s+dot\s+/gi, ".").replace(/\s+/g, "");
+        const domain = spoken[2].trim().replace(/\s+dot\s+/gi, ".").replace(/\s+/g, "");
+        const tld = spoken[3].trim().replace(/\s+dot\s+/gi, ".").replace(/\s+/g, "");
+        return `${local}@${domain}.${tld}`.toLowerCase();
+      }
+
+      // Alternative bracket format: john(at)gmail.com
+      const alt = text.match(/([a-zA-Z0-9._%+-]+)\s*[\[(]at[\])]\s*([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/i);
+      if (alt) return `${alt[1]}@${alt[2]}`.toLowerCase();
+
       return null;
     };
 
