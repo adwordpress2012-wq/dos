@@ -219,7 +219,7 @@ export default function Onboard() {
                   <span className="text-foreground">Due today</span>
                   <span className="text-foreground">${(SETUP_FEE + monthly).toLocaleString()}</span>
                 </div>
-                <div className="text-xs text-muted-foreground">All prices shown exclude GST · Paid securely via Stripe</div>
+                <div className="text-xs text-muted-foreground">All prices in AUD · Paid securely via Stripe</div>
               </div>
               {/* Training included */}
               <div className="rounded-xl p-4 mb-6"
@@ -315,7 +315,7 @@ export default function Onboard() {
               {/* Accepted payment methods */}
               <div className="flex items-start gap-2 text-xs text-muted-foreground mb-4 bg-muted/50 rounded-lg p-3">
                 <Shield className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-                <span>Accepted: Visa, Mastercard, Amex, Apple Pay, Google Pay, and Klarna (pay in instalments). Processed securely by Stripe — all amounts in AUD ex. GST.</span>
+                <span>Accepted: Visa, Mastercard, Amex, Apple Pay, Google Pay, and Klarna (pay in instalments). Processed securely by Stripe — all amounts in AUD.</span>
               </div>
 
               <div className="flex items-center justify-between rounded-xl p-3 mb-6"

@@ -39,7 +39,7 @@ export default function Privacy() {
 
           <div className="bg-card border border-border rounded-xl p-6">
             <h2 className="text-foreground font-semibold text-lg mb-3">4. How We Use Personal Information</h2>
-            <p>We use personal information to: provide and improve the Service; process payments; send GST-compliant tax invoices; enable real estate agencies to manage leads and listings; deliver automated tenancy application forms; comply with legal obligations; and communicate service updates.</p>
+            <p>We use personal information to: provide and improve the Service; process payments; send tax invoices; enable real estate agencies to manage leads and listings; deliver automated tenancy application forms; comply with legal obligations; and communicate service updates.</p>
           </div>
 
           <div className="bg-card border border-border rounded-xl p-6">

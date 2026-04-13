@@ -93,7 +93,7 @@ export default function Staff() {
       </div>
 
       <div className="bg-muted/30 border border-border rounded-lg px-4 py-3 mb-6 text-sm text-muted-foreground">
-        Billing: Base $299/mo (1st seat) + {Math.max(0, totalSeats - 1)} additional seat{totalSeats > 2 ? "s" : ""} × $89/mo = <strong className="text-foreground">${monthlyTotal}/mo + GST</strong>. Each new seat is billed automatically on your next invoice.
+        Billing: Base $299/mo (1st seat) + {Math.max(0, totalSeats - 1)} additional seat{totalSeats > 2 ? "s" : ""} × $89/mo = <strong className="text-foreground">${monthlyTotal}/mo</strong>. Each new seat is billed automatically on your next invoice.
       </div>
 
       <div className="bg-card border border-border rounded-xl overflow-hidden">
@@ -167,7 +167,7 @@ export default function Staff() {
                 </select>
               </div>
               <div className="bg-muted/50 rounded-lg p-3 text-xs text-muted-foreground">
-                Adding a seat costs an additional $89/mo + GST, billed on your next invoice.
+                Adding a seat costs an additional $89/mo, billed on your next invoice.
               </div>
             </div>
             <div className="flex gap-3 px-6 py-4 border-t border-border">

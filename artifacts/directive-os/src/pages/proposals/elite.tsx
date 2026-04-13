@@ -235,7 +235,7 @@ export default function EliteProposal() {
                     <div className="option-pricing-item">
                       <label>One-Time Setup</label>
                       <div className="price">$12,800</div>
-                      <div className="price-sub">excl. GST</div>
+                      <div className="price-sub">AUD · no lock-in</div>
                     </div>
                     <div className="option-pricing-item">
                       <label>Monthly Ongoing</label>
@@ -262,7 +262,7 @@ export default function EliteProposal() {
                     <div className="option-pricing-item">
                       <label>One-Time Setup</label>
                       <div className="price">$7,300</div>
-                      <div className="price-sub">excl. GST</div>
+                      <div className="price-sub">AUD · no lock-in</div>
                     </div>
                     <div className="option-pricing-item">
                       <label>Monthly Ongoing</label>
@@ -289,7 +289,7 @@ export default function EliteProposal() {
                     <div className="option-pricing-item">
                       <label>One-Time Setup</label>
                       <div className="price">$1,800</div>
-                      <div className="price-sub">excl. GST</div>
+                      <div className="price-sub">AUD · no lock-in</div>
                     </div>
                     <div className="option-pricing-item">
                       <label>Monthly Ongoing</label>
@@ -411,7 +411,7 @@ export default function EliteProposal() {
           <div className="footer-left">
             <div className="brand">Directive OS</div>
             hello@directiveos.com.au · 02 5850 4038<br />
-            directiveos.com.au · ABN registered · GST included where applicable
+            directiveos.com.au · ABN registered · Australian owned &amp; operated
           </div>
           <div className="footer-right">
             Confidential — prepared for Elite Sydney Property only<br />

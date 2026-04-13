@@ -191,7 +191,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 <li><Link href="/terms" className="hover:text-foreground transition-colors">Terms of Service</Link></li>
                 <li><Link href="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link></li>
                 <li><span>NSW Privacy Act Compliant</span></li>
-                <li><span>GST Registered · Australia</span></li>
+                <li><span>Australian Owned &amp; Operated</span></li>
               </ul>
             </div>
 

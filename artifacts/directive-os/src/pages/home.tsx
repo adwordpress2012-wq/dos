@@ -72,7 +72,6 @@ function PricingCalculator() {
           <span className="font-bold text-foreground text-lg">Monthly Total</span>
           <div className="text-right">
             <div className="text-4xl font-bold text-primary">${monthly}<span className="text-xl font-normal text-muted-foreground">/mo</span></div>
-            <div className="text-xs text-muted-foreground">+ GST</div>
           </div>
         </div>
       </div>
@@ -1168,7 +1167,7 @@ export default function Home() {
                     "Hot lead call transfers",
                     "Command Bridge dashboard",
                     "Full call recordings & transcripts",
-                    "GST-compliant tax invoices",
+                    "Automated tax invoices via Stripe",
                     "Australian-hosted infrastructure",
                     "NSW Privacy Act compliant",
                   ].map(f => (
@@ -1242,7 +1241,7 @@ export default function Home() {
             </button>
           </Link>
           <p className="text-muted-foreground text-sm mt-6">
-            From $299/mo + GST — no lock-in contracts — Australian-hosted infrastructure
+            From $299/mo — no lock-in contracts — Australian-hosted infrastructure
           </p>
         </div>
       </section>
