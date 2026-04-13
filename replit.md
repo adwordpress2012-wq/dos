@@ -235,6 +235,70 @@ Any future build that touches `voice.ts`, `ai.ts`, or any system prompt must be 
 
 ---
 
+## Client Onboarding Workflow
+
+### Full Journey (what happens after a client signs & pays)
+
+```
+STEP 1 — Agreement
+  Jayson sends service agreement email to prospect.
+  Client replies "I agree" + full name + business name → binding acceptance.
+
+STEP 2 — Payment
+  Client clicks "Activate Sarah" on their landing page.
+  → Stripe checkout: $1,800 setup + $299 Month 1 (card/Apple Pay/Klarna)
+  → Tax invoice auto-emailed to client
+  → Month 2+ billing automatic via Stripe subscription
+  → API endpoint: POST /api/billing/checkout/prospect (no auth required)
+
+STEP 3 — Jayson activates (takes ~15 mins)
+  a. Create their Clerk org + invite client as owner
+  b. Insert agency record in DB: contact_email = their nominated email
+  c. Purchase + assign dedicated Twilio number
+  d. Remove DEMO banner from landing page (delete the banner div in landing.tsx)
+  e. Swap PHONE constant from placeholder to their Twilio number
+  f. Redeploy
+
+STEP 4 — Client is live
+  Dashboard login: directiveos.com.au/dashboard (Clerk auth)
+  Sarah live on dedicated number + landing page chat
+  All leads → their nominated email, 24/7
+```
+
+### Lead Email Forwarding
+
+Every call/chat fires emails to: `[agency.contactEmail, jayson@, adwordpress2012@]`
+
+Each email includes: caller name/phone/email, finance status, buyer intent,
+🔴 POTENTIAL LISTING flag, full colour-coded transcript.
+
+File: `artifacts/api-server/src/lib/email.ts`
+- `sendVoiceTranscriptEmail()` — end of every voice call
+- `sendChatTranscriptEmail()` — when chat session closes
+
+Change nominated email:
+```sql
+UPDATE agencies SET contact_email = 'new@email.com' WHERE id = <id>;
+```
+
+### DEMO Watermark
+
+All client pages show a DEMO banner until officially activated.
+To remove: delete `{/* DEMO WATERMARK BANNER */}` block in `landing.tsx`.
+To go live: swap `PHONE` constant + remove banner + redeploy.
+
+### Automation Gap (build next)
+
+Missing: Stripe webhook on `checkout.session.completed` (source: "landing_page")
+Should: notify Jayson instantly, create pending agency record, send welcome email.
+Endpoint to build: `POST /api/billing/webhook` + `STRIPE_WEBHOOK_SECRET` env var.
+
+### Skill
+
+Full onboarding reference: `.agents/skills/dos-onboarding/SKILL.md`
+
+---
+
 ## Client Landing Page System
 
 Each paying client gets a standalone branded landing page hosted at `directiveos.com.au/<slug>/`. These are NOT full replacement websites — they are AI receptionist showcase pages only.
