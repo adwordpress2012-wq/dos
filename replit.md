@@ -235,6 +235,33 @@ Any future build that touches `voice.ts`, `ai.ts`, or any system prompt must be 
 
 ---
 
+## Client Landing Page System
+
+Each paying client gets a standalone branded landing page hosted at `directiveos.com.au/<slug>/`. These are NOT full replacement websites — they are AI receptionist showcase pages only.
+
+### Rules (locked in)
+1. **Nav links forward to client's existing website** — Buy, Sell, Rent, About all open `target="_blank"` to the client's own domain. We never build or duplicate their existing pages.
+2. **Landing page scope** — Hero + stats bar + live Sarah chat demo + feature cards + service areas + CTA + footer. That's it.
+3. **Sarah chat widget** — Always in the bottom-right corner, pulsing. Connects to `/api/ai/chat` with the client's agencyId.
+4. **"Powered by Directive OS"** — Small teal credit in the footer. Non-negotiable, always present.
+5. **Branding** — Extracted directly from the client's existing website (logo URL, primary hex colour, font). Never invent colours.
+6. **Phone number** — Featured prominently in the nav and CTA. Use the client's existing number until a dedicated Twilio number is provisioned.
+
+### Live Client Pages
+
+| Client | Slug | Brand | Phone | Areas |
+|---|---|---|---|---|
+| Nidus Real Estate | `/nidus-re/` | Hot pink `#e70d73` + dark purple `#2f1655` | TBC (placeholder `02 9625 0000`) | Mt Druitt, Western Sydney |
+| Century 21 The Rana Group | `/c21-rana/` | Gold `#F2B838` + black `#111111` | `0410 567 777` | Seven Hills, Blacktown, Toongabbie, Pendle Hill |
+
+### Adding a New Client Page
+1. Run `createArtifact({ slug: "agency-slug", previewPath: "/agency-slug", ... })`
+2. Copy the `nidus-re` or `c21-rana` template (whichever colour style fits best)
+3. Swap: logo URL, primary colour, phone, suburb list, nav external links
+4. Deploy — live at `directiveos.com.au/<slug>/`
+
+---
+
 ## Next Steps (Priority Order)
 
 ### 1. Clerk Auth
