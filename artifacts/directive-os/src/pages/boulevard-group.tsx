@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { QRCodeCanvas } from "qrcode.react";
 
 const NAVY    = "#1a2442";
 const GOLD    = "#f0b849";
@@ -147,6 +148,204 @@ function ChatWidget() {
         @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} }
       `}</style>
     </>
+  );
+}
+
+// ─── Featured Listing ─────────────────────────────────────────────────────────
+const DEMO_LISTING = {
+  address: "12 Ridgeline Circuit, Bella Vista NSW 2153",
+  price: "$1,495,000",
+  beds: 4, baths: 2, cars: 2, sqm: 612,
+  type: "House",
+  status: "For Sale",
+  link: "https://www.theboulevardgroup.com.au/buy/",
+  agentName: "The Boulevard Group",
+  features: ["Freshly painted interior", "Stone benchtops", "Ducted air conditioning", "Double lock-up garage"],
+};
+
+function FeaturedListing() {
+  const [imgError, setImgError] = useState(false);
+  const listing = DEMO_LISTING;
+  return (
+    <section style={{ background: WHITE, padding: "72px 20px" }}>
+      <div style={{ maxWidth: 1000, margin: "0 auto" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32, flexWrap: "wrap", gap: 12 }}>
+          <div>
+            <div style={{ display: "inline-block", background: `${GOLD}22`, border: `1px solid ${GOLD}66`, borderRadius: 20, padding: "3px 14px", marginBottom: 10 }}>
+              <span style={{ color: GOLD, fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>Featured Listing</span>
+            </div>
+            <h2 style={{ color: NAVY, fontSize: 28, fontWeight: 800, margin: 0, fontFamily: "Georgia, serif" }}>Latest Property</h2>
+          </div>
+          <div style={{ background: `${GOLD}18`, border: `1px solid ${GOLD}44`, borderRadius: 8, padding: "6px 14px", fontSize: 12, color: NAVY, fontWeight: 600 }}>
+            ✦ DEMO — Updated at activation
+          </div>
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 0, borderRadius: 16, overflow: "hidden", boxShadow: "0 8px 40px rgba(26,36,66,0.12)", border: `1px solid ${GOLD}33` }}>
+          {/* Photo */}
+          <div style={{ position: "relative", minHeight: 340, background: `linear-gradient(135deg, ${DNAVY} 0%, ${NAVY} 100%)`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            {!imgError ? (
+              <img
+                src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80"
+                alt="Featured property"
+                onError={() => setImgError(true)}
+                style={{ width: "100%", height: "100%", objectFit: "cover", position: "absolute", top: 0, left: 0 }}
+              />
+            ) : (
+              <div style={{ textAlign: "center", color: "rgba(255,255,255,0.5)" }}>
+                <div style={{ fontSize: 48, marginBottom: 8 }}>🏠</div>
+                <div style={{ fontSize: 13 }}>Photo coming soon</div>
+              </div>
+            )}
+            <div style={{ position: "absolute", top: 16, left: 16, display: "flex", gap: 8 }}>
+              <span style={{ background: GOLD, color: NAVY, fontWeight: 800, fontSize: 11, padding: "4px 12px", borderRadius: 4 }}>{listing.status}</span>
+              <span style={{ background: "rgba(0,0,0,0.55)", color: WHITE, fontWeight: 600, fontSize: 11, padding: "4px 12px", borderRadius: 4 }}>{listing.type}</span>
+            </div>
+          </div>
+
+          {/* Details */}
+          <div style={{ background: WHITE, padding: 36, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+            <div>
+              <div style={{ fontSize: 28, fontWeight: 900, color: NAVY, marginBottom: 8 }}>{listing.price}</div>
+              <div style={{ fontSize: 15, color: "#6b7280", marginBottom: 20, lineHeight: 1.4 }}>{listing.address}</div>
+
+              {/* Stats */}
+              <div style={{ display: "flex", gap: 20, marginBottom: 24, paddingBottom: 24, borderBottom: `1px solid #f0f0f0` }}>
+                {[
+                  { icon: "🛏", val: listing.beds, label: "Beds" },
+                  { icon: "🚿", val: listing.baths, label: "Baths" },
+                  { icon: "🚗", val: listing.cars, label: "Cars" },
+                  { icon: "📐", val: `${listing.sqm}m²`, label: "Land" },
+                ].map(({ icon, val, label }) => (
+                  <div key={label} style={{ textAlign: "center" }}>
+                    <div style={{ fontSize: 18, fontWeight: 800, color: NAVY }}>{val}</div>
+                    <div style={{ fontSize: 11, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Features */}
+              <div style={{ marginBottom: 24 }}>
+                {listing.features.map(f => (
+                  <div key={f} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                    <div style={{ width: 6, height: 6, borderRadius: "50%", background: GOLD, flexShrink: 0 }} />
+                    <span style={{ fontSize: 13, color: "#4b5563" }}>{f}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ display: "flex", gap: 10 }}>
+              <a href={listing.link} target="_blank" rel="noopener" style={{
+                flex: 1, textAlign: "center", padding: "13px 0", background: NAVY, color: WHITE,
+                fontWeight: 700, fontSize: 14, borderRadius: 8, textDecoration: "none",
+              }}>View Listing →</a>
+              <a href="#activate" style={{
+                flex: 1, textAlign: "center", padding: "13px 0", background: GOLD, color: NAVY,
+                fontWeight: 700, fontSize: 14, borderRadius: 8, textDecoration: "none",
+              }}>Chat with Sarah</a>
+            </div>
+          </div>
+        </div>
+
+        <p style={{ textAlign: "center", color: "#9ca3af", fontSize: 12, marginTop: 14 }}>
+          ✦ This listing is updated by The Boulevard Group team. <a href="#activate" style={{ color: GOLD, textDecoration: "none" }}>Activate to feature your latest property.</a>
+        </p>
+      </div>
+    </section>
+  );
+}
+
+// ─── QR Code Download ─────────────────────────────────────────────────────────
+const LANDING_URL = "https://directiveos.com.au/boulevard-group";
+
+function QRCodeSection() {
+  const download = useCallback((label: string, sizePx: number) => {
+    const source = document.getElementById("qr-canvas") as HTMLCanvasElement | null;
+    if (!source) return;
+
+    const out = document.createElement("canvas");
+    out.width = sizePx; out.height = sizePx;
+    const ctx = out.getContext("2d")!;
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, sizePx, sizePx);
+    ctx.drawImage(source, 0, 0, sizePx, sizePx);
+
+    const a = document.createElement("a");
+    a.download = `boulevard-group-qr-${label}.png`;
+    a.href = out.toDataURL("image/png");
+    a.click();
+  }, []);
+
+  return (
+    <section style={{ background: LGREY, padding: "72px 20px", borderTop: `1px solid ${GOLD}22` }}>
+      <div style={{ maxWidth: 900, margin: "0 auto" }}>
+        <div style={{ textAlign: "center", marginBottom: 40 }}>
+          <div style={{ display: "inline-block", background: `${GOLD}22`, border: `1px solid ${GOLD}55`, borderRadius: 20, padding: "4px 16px", marginBottom: 14 }}>
+            <span style={{ color: GOLD, fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>QR Code — Print Ready</span>
+          </div>
+          <h2 style={{ color: NAVY, fontSize: 28, fontWeight: 800, margin: "0 0 12px", fontFamily: "Georgia, serif" }}>Put Sarah on Your Signboard</h2>
+          <p style={{ color: "#6b7280", fontSize: 15, maxWidth: 520, margin: "0 auto", lineHeight: 1.7 }}>
+            Add this QR code to your for-sale signs, DL flyers, and open home materials. Buyers scan it → Sarah answers their questions 24/7.
+          </p>
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: 48, alignItems: "center", background: WHITE, borderRadius: 16, padding: 40, border: `1px solid ${GOLD}33`, boxShadow: "0 4px 24px rgba(26,36,66,0.07)" }}>
+          {/* QR Code */}
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
+            <div style={{ background: WHITE, padding: 16, borderRadius: 12, border: `2px solid ${GOLD}44`, display: "inline-block" }}>
+              <QRCodeCanvas
+                id="qr-canvas"
+                value={LANDING_URL}
+                size={160}
+                fgColor={NAVY}
+                bgColor={WHITE}
+                level="H"
+              />
+            </div>
+            <div style={{ fontSize: 11, color: "#9ca3af", textAlign: "center", maxWidth: 180, lineHeight: 1.5 }}>
+              Scan to visit<br /><span style={{ color: NAVY, fontWeight: 600 }}>The Boulevard Group</span><br />AI Receptionist
+            </div>
+          </div>
+
+          {/* Downloads */}
+          <div>
+            <h3 style={{ color: NAVY, fontSize: 17, fontWeight: 700, margin: "0 0 8px" }}>Download for Print</h3>
+            <p style={{ color: "#6b7280", fontSize: 13, margin: "0 0 24px", lineHeight: 1.6 }}>
+              High-resolution PNG files ready for your signwriter or printer. Drop them into any design or send directly.
+            </p>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {[
+                { label: "Signboard (Large Format)", sub: "1200 × 1200px · Corflute / A-frame / Banners", size: 1200, icon: "🪧" },
+                { label: "DL Flyer (99 × 210mm)", sub: "1169 × 2480px · 300dpi · Letterbox drop / Open home", size: 1169, icon: "📄" },
+                { label: "Social Media Square", sub: "1080 × 1080px · Instagram / Facebook ready", size: 1080, icon: "📱" },
+              ].map(({ label, sub, size, icon }) => (
+                <div key={label} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 18px", border: `1px solid ${GOLD}33`, borderRadius: 10, background: LGREY }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    <span style={{ fontSize: 22 }}>{icon}</span>
+                    <div>
+                      <div style={{ fontWeight: 700, color: NAVY, fontSize: 14 }}>{label}</div>
+                      <div style={{ fontSize: 12, color: "#9ca3af" }}>{sub}</div>
+                    </div>
+                  </div>
+                  <button onClick={() => download(label.toLowerCase().replace(/\s+/g, "-"), size)} style={{
+                    background: GOLD, color: NAVY, fontWeight: 700, fontSize: 12,
+                    padding: "8px 16px", border: "none", borderRadius: 7, cursor: "pointer", whiteSpace: "nowrap",
+                  }}>
+                    ↓ Download
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <p style={{ color: "#9ca3af", fontSize: 11, marginTop: 16 }}>
+              QR code links to: <span style={{ color: NAVY, fontWeight: 600 }}>{LANDING_URL}</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -320,6 +519,9 @@ export default function BoulevardGroupLanding() {
         </div>
       </section>
 
+      {/* ── FEATURED LISTING ── */}
+      <FeaturedListing />
+
       {/* ── CHAT DEMO SECTION ── */}
       <section style={{ background: LGREY, padding: "80px 20px" }}>
         <div style={{ maxWidth: 800, margin: "0 auto", textAlign: "center" }}>
@@ -404,6 +606,9 @@ export default function BoulevardGroupLanding() {
           </div>
         </div>
       </section>
+
+      {/* ── QR CODE ── */}
+      <QRCodeSection />
 
       {/* ── GET STARTED CTA ── */}
       <GetStartedCTA />
