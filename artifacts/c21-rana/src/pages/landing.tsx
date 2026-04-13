@@ -139,10 +139,15 @@ export default function LandingPage() {
       }}>
         <C21Logo size={40} />
         <div style={{ display: "flex", gap: 32, fontSize: 14 }}>
-          {["Buy", "Sell", "Rent", "About Us"].map(l => (
-            <a key={l} href="#" style={{ color: "#aaa", textDecoration: "none", fontWeight: 500 }}
+          {[
+            { label: "Buy",      url: "https://theranagroup.century21.com.au/buy/" },
+            { label: "Sell",     url: "https://theranagroup.century21.com.au/sell/" },
+            { label: "Rent",     url: "https://theranagroup.century21.com.au/rent/" },
+            { label: "About Us", url: "https://theranagroup.century21.com.au/about-us/" },
+          ].map(l => (
+            <a key={l.label} href={l.url} target="_blank" rel="noreferrer" style={{ color: "#aaa", textDecoration: "none", fontWeight: 500 }}
               onMouseOver={e => (e.currentTarget.style.color = GOLD)}
-              onMouseOut={e => (e.currentTarget.style.color = "#aaa")}>{l}</a>
+              onMouseOut={e => (e.currentTarget.style.color = "#aaa")}>{l.label}</a>
           ))}
         </div>
         <a href={`tel:${PHONE.replace(/\s/g, "")}`} style={{

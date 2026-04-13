@@ -128,10 +128,15 @@ export default function LandingPage() {
       }}>
         <img src={LOGO} alt="Nidus Real Estate" style={{ height: 36, objectFit: "contain" }} />
         <div style={{ display: "flex", gap: 32, fontSize: 14, color: "#ccc" }}>
-          {["Buy", "Sell", "Rent", "About"].map(l => (
-            <a key={l} href="#" style={{ color: "#ccc", textDecoration: "none" }}
+          {[
+            { label: "Buy",   url: "https://www.nidusre.com.au/buy/" },
+            { label: "Sell",  url: "https://www.nidusre.com.au/sell/" },
+            { label: "Rent",  url: "https://www.nidusre.com.au/rent/" },
+            { label: "About", url: "https://www.nidusre.com.au/about/" },
+          ].map(l => (
+            <a key={l.label} href={l.url} target="_blank" rel="noreferrer" style={{ color: "#ccc", textDecoration: "none" }}
               onMouseOver={e => (e.currentTarget.style.color = PINK)}
-              onMouseOut={e => (e.currentTarget.style.color = "#ccc")}>{l}</a>
+              onMouseOut={e => (e.currentTarget.style.color = "#ccc")}>{l.label}</a>
           ))}
         </div>
         <a href={`tel:${PHONE}`} style={{
