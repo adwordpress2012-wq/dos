@@ -218,6 +218,7 @@ router.post("/billing/checkout/prospect", async (req, res): Promise<void> => {
 const AGENCY_DISPLAY_NAMES: Record<string, string> = {
   "c21-rana": "Century 21 The Rana Group",
   "nidus-re": "Nidus Real Estate",
+  "boulevard-group": "The Boulevard Group",
 };
 
 router.get("/billing/pay", async (req, res): Promise<void> => {

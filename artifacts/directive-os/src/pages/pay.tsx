@@ -4,6 +4,7 @@ import { useLocation } from "wouter";
 const AGENCY_NAMES: Record<string, string> = {
   "c21-rana": "Century 21 The Rana Group",
   "nidus-re": "Nidus Real Estate",
+  "boulevard-group": "The Boulevard Group",
 };
 
 const FEATURES = [
