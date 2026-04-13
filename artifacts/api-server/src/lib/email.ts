@@ -1,4 +1,5 @@
 import { logger } from "./logger";
+import { generateListingServicesPDF } from "./listing-pdf";
 
 const OWNER_EMAILS = ["adwordpress2012@gmail.com", "jayson@directiveos.com.au"];
 const FROM = "Directive OS | New Lead Captured <leads@directiveos.com.au>";
@@ -711,6 +712,18 @@ export async function sendClientWelcomeEmail(opts: ClientWelcomeEmailOpts): Prom
 </html>`;
 
   try {
+    // Generate the listing services PDF to attach
+    let attachments: { filename: string; content: string }[] = [];
+    try {
+      const pdfBuffer = await generateListingServicesPDF();
+      attachments = [{
+        filename: "Directive-OS-Listing-Services.pdf",
+        content: pdfBuffer.toString("base64"),
+      }];
+    } catch (pdfErr) {
+      logger.warn({ pdfErr }, "Could not generate listing services PDF — sending email without attachment");
+    }
+
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
@@ -720,12 +733,13 @@ export async function sendClientWelcomeEmail(opts: ClientWelcomeEmailOpts): Prom
         bcc: OWNER_EMAILS,
         subject: `Welcome to Directive OS — Sarah is being set up for ${opts.agencyName}`,
         html,
+        attachments,
       }),
     });
     if (!res.ok) {
       logger.warn({ status: res.status, err: await res.text() }, "Failed to send client welcome email");
     } else {
-      logger.info({ to: opts.email, agencyName: opts.agencyName }, "Client welcome email sent");
+      logger.info({ to: opts.email, agencyName: opts.agencyName }, "Client welcome email sent with listing services PDF");
     }
   } catch (err) {
     logger.warn({ err }, "Error sending client welcome email");
