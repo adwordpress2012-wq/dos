@@ -125,6 +125,18 @@ export default function LandingPage() {
   return (
     <div style={{ minHeight: "100vh", background: "#fff", color: BLACK }}>
 
+      {/* DEMO WATERMARK BANNER */}
+      <div style={{
+        background: "#1a1a1a", color: "#ccc", textAlign: "center",
+        padding: "9px 16px", fontSize: 12, fontWeight: 500, letterSpacing: 0.5,
+        borderBottom: `2px solid ${GOLD}`, position: "relative", zIndex: 200
+      }}>
+        <span style={{ background: GOLD, color: BLACK, padding: "2px 8px", fontWeight: 800, fontSize: 11, marginRight: 10, letterSpacing: 1 }}>DEMO</span>
+        This page is a live preview — dedicated phone line setup pending. Contact{" "}
+        <a href="https://directiveos.com.au" target="_blank" rel="noreferrer" style={{ color: GOLD, fontWeight: 700, textDecoration: "none" }}>Directive OS</a>
+        {" "}to activate your official AI receptionist.
+      </div>
+
       {/* NAV */}
       <nav style={{
         position: "sticky", top: 0, zIndex: 100, background: "#fffffff5", backdropFilter: "blur(12px)",
