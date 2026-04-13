@@ -35,6 +35,7 @@ import Welcome from "@/pages/welcome";
 import BoulevardGroup from "@/pages/boulevard-group";
 import EliteSydney from "@/pages/elite-sydney";
 import Demos from "@/pages/demos";
+import EliteProposal from "@/pages/proposals/elite";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -67,6 +68,7 @@ function Router() {
       <Route path="/boulevard-group" component={BoulevardGroup} />
       <Route path="/elite-sydney" component={EliteSydney} />
       <Route path="/demos" component={Demos} />
+      <Route path="/proposals/elite" component={EliteProposal} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/dashboard/leads" component={Leads} />
       <Route path="/dashboard/transcripts" component={Transcripts} />
