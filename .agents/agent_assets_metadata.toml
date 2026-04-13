@@ -35,3 +35,9 @@ id = "DnhZCl-cCUJILkdCv4s8q"
 uri = "file://Directive-OS-Playbook.pdf"
 type = "pdf"
 title = "Directive OS — Platform & Process Playbook"
+
+[[outputs]]
+id = "mWo-fJhYYaT6fHFsWDzBi"
+uri = "file://Directive-OS-Agreement-Email.pdf"
+type = "pdf"
+title = "Directive OS — Service Agreement Email Template"

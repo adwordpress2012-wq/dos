@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Directive OS — Service Agreement Email Template</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; padding: 40px 20px; }
+
+  /* ── Instruction banner ── */
+  .instructions {
+    max-width: 680px; margin: 0 auto 28px;
+    background: #0a0e1a; border-radius: 12px; padding: 20px 24px;
+    display: flex; align-items: flex-start; gap: 14px;
+  }
+  .instructions-icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
+  .instructions h2 { color: #00d1b2; font-size: 14px; font-weight: 700; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .instructions p { color: #94a3b8; font-size: 13px; line-height: 1.6; }
+  .instructions strong { color: #e2e8f0; }
+
+  .fields-grid { max-width: 680px; margin: 0 auto 28px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .field { background: #fff; border-radius: 10px; padding: 14px 16px; border: 1px solid #e2e8f0; }
+  .field label { display: block; color: #64748b; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+  .field input { width: 100%; border: none; outline: none; font-size: 14px; color: #0f172a; font-family: inherit; background: transparent; }
+
+  .preview-label { max-width: 680px; margin: 0 auto 10px; color: #64748b; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+
+  /* ── Email card ── */
+  .email-card {
+    max-width: 680px; margin: 0 auto;
+    background: #fff; border-radius: 16px; overflow: hidden;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+  }
+
+  /* Email header */
+  .email-meta {
+    background: #f8fafc; border-bottom: 1px solid #e2e8f0;
+    padding: 16px 28px;
+  }
+  .email-meta-row { display: flex; gap: 8px; align-items: baseline; margin-bottom: 4px; }
+  .email-meta-row:last-child { margin-bottom: 0; }
+  .email-meta-label { color: #94a3b8; font-size: 12px; font-weight: 600; width: 60px; flex-shrink: 0; }
+  .email-meta-val { color: #334155; font-size: 13px; }
+  .email-subject { font-weight: 700; color: #0f172a; font-size: 14px; }
+
+  /* Email body */
+  .email-body { padding: 36px 40px; }
+  .email-body p { color: #374151; font-size: 14px; line-height: 1.8; margin-bottom: 16px; }
+  .email-body h3 { color: #0a0e1a; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin: 28px 0 12px; }
+
+  .pricing-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+  .pricing-table td { padding: 10px 12px; font-size: 13px; border-bottom: 1px solid #f1f5f9; }
+  .pricing-table tr:last-child td { border-bottom: none; font-weight: 700; }
+  .pricing-table .label { color: #374151; }
+  .pricing-table .amount { color: #0f172a; font-weight: 600; text-align: right; }
+  .pricing-table .total-label { color: #0f172a; }
+  .pricing-table .total-amount { color: #00d1b2; font-size: 15px; }
+
+  .terms-list { list-style: none; margin-bottom: 20px; }
+  .terms-list li { color: #374151; font-size: 13px; line-height: 1.7; padding: 4px 0 4px 20px; position: relative; }
+  .terms-list li::before { content: "→"; position: absolute; left: 0; color: #00d1b2; font-weight: 700; }
+
+  /* CTA button */
+  .cta-wrapper { text-align: center; margin: 32px 0 28px; }
+  .cta-btn {
+    display: inline-block;
+    background: linear-gradient(135deg, #00d1b2, #0891b2);
+    color: #0a0e1a;
+    font-size: 16px; font-weight: 800;
+    padding: 18px 44px;
+    border-radius: 12px;
+    text-decoration: none;
+    letter-spacing: -0.01em;
+  }
+  .cta-sub { color: #94a3b8; font-size: 12px; margin-top: 10px; }
+
+  .divider { border: none; border-top: 1px solid #f1f5f9; margin: 24px 0; }
+
+  .reply-box {
+    background: #f8fafc; border: 1px solid #e2e8f0; border-left: 3px solid #00d1b2;
+    border-radius: 10px; padding: 16px 20px; margin: 24px 0;
+  }
+  .reply-box p { color: #475569; font-size: 13px; margin: 0; }
+  .reply-box strong { color: #0f172a; }
+
+  .sig { color: #374151; font-size: 14px; line-height: 1.8; }
+  .sig-name { font-weight: 700; color: #0a0e1a; }
+  .sig-teal { color: #00d1b2; }
+
+  /* Footer */
+  .email-footer {
+    background: #f8fafc; border-top: 1px solid #e2e8f0;
+    padding: 16px 28px; text-align: center;
+  }
+  .email-footer p { color: #94a3b8; font-size: 11px; }
+
+  /* Copy helper */
+  .copy-bar { max-width: 680px; margin: 24px auto 0; background: #fff; border-radius: 12px; padding: 20px 24px; border: 1px solid #e2e8f0; }
+  .copy-bar h3 { color: #0f172a; font-size: 13px; font-weight: 700; margin-bottom: 12px; }
+  .copy-bar p { color: #64748b; font-size: 12px; line-height: 1.7; }
+  .copy-bar code { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 12px; color: #0891b2; }
+
+  @media print {
+    body { background: #fff; padding: 0; }
+    .instructions, .fields-grid, .preview-label, .copy-bar { display: none; }
+    .email-card { box-shadow: none; border-radius: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Instructions -->
+<div class="instructions">
+  <div class="instructions-icon">💡</div>
+  <div>
+    <h2>How to use this template</h2>
+    <p>
+      <strong>Fill in the fields below</strong> — the email preview updates automatically.<br>
+      Then <strong>copy the email body</strong> and paste into Gmail. Add the client's email in the To field.<br>
+      The payment button links directly to your branded Directive OS checkout page.
+    </p>
+  </div>
+</div>
+
+<!-- Dynamic fields -->
+<div class="fields-grid">
+  <div class="field">
+    <label>Client Name</label>
+    <input type="text" id="clientName" value="John Smith" oninput="update()" placeholder="John Smith">
+  </div>
+  <div class="field">
+    <label>Agency Name</label>
+    <input type="text" id="agencyName" value="Century 21 The Rana Group" oninput="update()" placeholder="Ray White Parramatta">
+  </div>
+  <div class="field">
+    <label>Agency Slug (for pay link)</label>
+    <input type="text" id="agencySlug" value="c21-rana" oninput="update()" placeholder="ray-white-parramatta">
+  </div>
+  <div class="field">
+    <label>Client Email</label>
+    <input type="email" id="clientEmail" value="john@c21rana.com.au" oninput="update()" placeholder="john@agency.com.au">
+  </div>
+</div>
+
+<div class="preview-label">Email Preview</div>
+
+<!-- Email Card -->
+<div class="email-card">
+
+  <!-- Meta -->
+  <div class="email-meta">
+    <div class="email-meta-row">
+      <span class="email-meta-label">From</span>
+      <span class="email-meta-val">Jayson &lt;jayson@directiveos.com.au&gt;</span>
+    </div>
+    <div class="email-meta-row">
+      <span class="email-meta-label">To</span>
+      <span class="email-meta-val" id="preview-to">john@c21rana.com.au</span>
+    </div>
+    <div class="email-meta-row">
+      <span class="email-meta-label">Subject</span>
+      <span class="email-meta-val email-subject" id="preview-subject">Your Directive OS AI Receptionist — Service Agreement &amp; Activation</span>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="email-body">
+
+    <p>Hi <span id="b-name">John</span>,</p>
+
+    <p>
+      Thank you for your interest in Directive OS. I'm excited to get Sarah set up and working for
+      <strong id="b-agency">Century 21 The Rana Group</strong>.
+    </p>
+
+    <p>
+      This email is your Service Agreement — please read through and reply
+      <strong>"I agree"</strong> along with your full name and business name to confirm.
+      Once confirmed, you can activate Sarah instantly using the button below.
+    </p>
+
+    <hr class="divider">
+
+    <h3>What you're getting</h3>
+
+    <p>Sarah — your dedicated AI receptionist — will be custom-trained for
+    <strong id="b-agency2">Century 21 The Rana Group</strong> and will:</p>
+
+    <ul class="terms-list">
+      <li>Answer every inbound call 24/7 — no voicemail, no missed leads</li>
+      <li>Book property inspections and schedule appraisals on the spot</li>
+      <li>Capture buyer and tenant details — name, number, email, intent, finance status</li>
+      <li>Qualify every lead and flag hot opportunities to your team in real time</li>
+      <li>Operate on a dedicated Australian phone number assigned to your agency</li>
+      <li>Branded landing page included — directiveos.com.au/<span id="b-slug">c21-rana</span>/</li>
+    </ul>
+
+    <h3>Pricing</h3>
+
+    <table class="pricing-table">
+      <tr>
+        <td class="label">Setup &amp; Onboarding (once-off)</td>
+        <td class="amount">A$1,800</td>
+      </tr>
+      <tr>
+        <td class="label">Monthly Licence — Base (1 seat, 100 AI mins)</td>
+        <td class="amount">A$299/month</td>
+      </tr>
+      <tr>
+        <td class="label">Additional Team Seats</td>
+        <td class="amount">A$89/seat/month</td>
+      </tr>
+      <tr>
+        <td class="label">AI Overage (above 100 mins/month)</td>
+        <td class="amount">A$25 per 10-min block</td>
+      </tr>
+      <tr>
+        <td class="total-label">Due today (Setup + Month 1)</td>
+        <td class="amount total-amount">A$2,099</td>
+      </tr>
+    </table>
+
+    <h3>Terms</h3>
+
+    <ul class="terms-list">
+      <li>No lock-in contract — cancel with 30 days written notice</li>
+      <li>Setup fee is non-refundable once onboarding has commenced</li>
+      <li>Dedicated phone number active within 2 business days of payment</li>
+      <li>All call data stored securely — we never share or sell your client data</li>
+      <li>Monthly billing from Month 2 via Stripe (card charged automatically)</li>
+      <li>"Powered by Directive OS" appears as a small footer badge on your landing page</li>
+    </ul>
+
+    <div class="reply-box">
+      <p>
+        <strong>To accept:</strong> Simply reply to this email with
+        <strong>"I agree — [Your Full Name], [Business Name]"</strong><br>
+        Your reply constitutes binding electronic acceptance of this agreement.
+      </p>
+    </div>
+
+    <hr class="divider">
+
+    <h3>Ready to activate?</h3>
+
+    <p>Once you've replied to confirm, click below to pay securely and Sarah will be live within 2 business days.</p>
+
+    <!-- CTA Button -->
+    <div class="cta-wrapper">
+      <a class="cta-btn" id="pay-btn" href="https://directiveos.com.au/pay/c21-rana?name=John+Smith&email=john%40c21rana.com.au">
+        Activate Sarah — Pay A$2,099 →
+      </a>
+      <p class="cta-sub">Secured by Stripe · Card, Apple Pay, Google Pay, Klarna available</p>
+    </div>
+
+    <hr class="divider">
+
+    <div class="sig">
+      <p><span class="sig-name">Jayson</span><br>
+      <span class="sig-teal">Directive OS</span><br>
+      jayson@directiveos.com.au<br>
+      directiveos.com.au<br>
+      ABN 87 754 544 171</p>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="email-footer">
+    <p>Directive OS Pty Ltd · ABN 87 754 544 171 · directiveos.com.au · This email and its contents are confidential.</p>
+  </div>
+
+</div>
+
+<!-- Copy helper -->
+<div class="copy-bar">
+  <h3>Payment link for this client</h3>
+  <p>Copy and paste this into any email or SMS:<br>
+  <code id="pay-link">https://directiveos.com.au/pay/c21-rana?name=John+Smith&amp;email=john%40c21rana.com.au</code></p>
+</div>
+
+<script>
+function encEmail(email) {
+  return encodeURIComponent(email);
+}
+function slugify(text) {
+  return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
+function update() {
+  const name = document.getElementById('clientName').value || 'Client';
+  const agency = document.getElementById('agencyName').value || 'Your Agency';
+  const slug = document.getElementById('agencySlug').value || slugify(agency);
+  const email = document.getElementById('clientEmail').value || '';
+
+  const encodedName = encodeURIComponent(name);
+  const encodedEmail = encEmail(email);
+  const payUrl = `https://directiveos.com.au/pay/${slug}?name=${encodedName}&email=${encodedEmail}`;
+  const payUrlDisplay = payUrl.replace(/%40/g, '%40');
+
+  // Update preview
+  document.getElementById('preview-to').textContent = email || 'client@agency.com.au';
+  document.getElementById('b-name').textContent = name.split(' ')[0];
+  document.getElementById('b-agency').textContent = agency;
+  document.getElementById('b-agency2').textContent = agency;
+  document.getElementById('b-slug').textContent = slug;
+  document.getElementById('pay-btn').href = payUrl;
+  document.getElementById('pay-link').textContent = payUrlDisplay;
+}
+update();
+</script>
+
+</body>
+</html>
