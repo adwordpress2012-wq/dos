@@ -13,18 +13,18 @@ function buildEmails(agency: string, contact: string, website: string, score: st
   return [
     {
       id: 1,
-      label: "Email 1 — The Observation",
-      subject: `${wb} — quick website note`,
+      label: "Email 1 — The Intro",
+      subject: `${wb} — a quick health check`,
       body:
 `Hi ${co},
 
-I was doing some research on real estate agencies in your area and ran a quick check on ${wb}.
+My name is Jayson — I run Directive OS, a small digital team that helps property businesses perform better online.
 
-One thing stood out straight away — ${f1 || "page speed on mobile is well below the 3-second threshold that Google uses to rank sites"}. That usually means a chunk of your enquiries are dropping off before they even hit your contact form.
+I came across ${ag} while doing some research and spent a few minutes reviewing ${wb}. I put together a quick health check — attached as a PDF.
 
-Anyway — thought it was worth a mention. Is this something you're already looking at fixing?
+Short version: ${sc}/10. The biggest opportunity I can see is ${f1 || "after-hours lead capture — your site has no way to respond to enquiries when your team is unavailable"}.
 
-Not trying to sell anything just yet — just a genuine observation.
+No pitch here — just thought it was worth sharing.
 
 Jayson
 Directive OS
@@ -32,35 +32,37 @@ Directive OS
 
 Not interested? Just reply and I won't contact you again.`,
       tips: [
-        "Send Tuesday–Thursday, 9–11am",
-        "No attachments on Email 1 — keeps it out of spam",
-        "Personalise the finding to something specific you actually noticed",
-        "Subject line uses their domain — high open rate",
+        "Attach the Health Check PDF to this email — lead with value",
+        "Send Tuesday–Thursday, 9–11am for best open rates",
+        "Keep it short — 5 sentences max before the sign-off",
+        "Subject line uses their domain — consistently high open rate",
+        "The score creates curiosity and opens the conversation",
       ],
     },
     {
       id: 2,
-      label: "Email 2 — The Audit Report",
-      subject: `Your free Website Health Check — ${ag}`,
+      label: "Email 2 — The Concept",
+      subject: `Re: ${wb} — also put together a concept`,
       body:
 `Hi ${co},
 
-Following up on my last note — I went ahead and ran a full audit on ${wb}.
+Just following up on my last email — wanted to share one more thing.
+
+I put together a rough homepage concept for ${wb} to show what a redesign direction could look like. It's attached as an image — just a visual idea, no obligation at all.
+
+In case you missed the audit:
 
 Overall score: ${sc}/10
 
-Three things standing out:
+Top three things I'd address:
+1. ${f1 || "After-hours lead capture — no way to respond to enquiries outside business hours"}
+2. ${f2 || "Trust signals buried below the fold — your biggest credibility markers aren't visible to most visitors"}
+3. ${f3 || "Page speed on mobile — loading slowly, which directly affects Google rankings"}
 
-1. ${f1 || "Page speed on mobile — loading well above 3 seconds, which hurts Google rankings and drops off enquiries"}
-2. ${f2 || "No testimonials or Google Reviews visible above the fold — trust signals are missing on the homepage"}
-3. ${f3 || "reCAPTCHA on all enquiry forms — adds friction and typically reduces form completions by 20–30%"}
-
-The full report is attached as a PDF.
-
-I've also put together a no-obligation quote based on what I found — you can view it here:
+I've put together a no-obligation quote based on what I found:
 ${q}
 
-Happy to walk through it on a 15-minute call if that's easier.
+Happy to jump on a 15-minute call to walk through it if that's easier.
 
 Jayson
 Directive OS
@@ -68,10 +70,11 @@ Directive OS
 
 Not interested? Just reply and I won't follow up again.`,
       tips: [
-        "Attach the Health Check PDF to this email",
-        "Include the pre-filled quote link from the Health Check tool",
-        "Send 3–4 days after Email 1",
-        "If they reply to Email 1, skip this and go straight to the quote",
+        "Attach the homepage redesign concept image (screenshot from the canvas)",
+        "Also re-attach the Health Check PDF if they haven't replied to Email 1",
+        "Send 4–5 days after Email 1 with no reply",
+        "The concept image is the hook — people respond to seeing something made for them",
+        "If they replied to Email 1, skip this and go straight to the quote call",
       ],
     },
     {
@@ -83,12 +86,12 @@ Not interested? Just reply and I won't follow up again.`,
 
 Last note from me — I know your inbox is busy.
 
-I've sent through a free website audit and a quote for ${ag} over the past couple of weeks. If the timing isn't right, that's completely fine — I won't keep following up.
+Over the past couple of weeks I've sent through a free health check, a homepage redesign concept, and a quote for ${ag}. If the timing isn't right, that's completely fine.
 
 The quote stays open for 30 days if you want to revisit it:
 ${q}
 
-And if things change down the track — new financial year, new goals, or you just decide the website needs a refresh — feel free to reach out any time.
+And if things change down the track — new financial year, new goals, or you simply decide the site needs a refresh — feel free to reach out any time.
 
 Wishing you all the best with ${ag}.
 
@@ -96,10 +99,11 @@ Jayson
 Founder · Directive OS
 02 5850 4038 · jayson@directiveos.com.au · directiveos.com.au`,
       tips: [
-        "Send 5–7 days after Email 2",
-        '"Last one from me" subject lines have higher open rates',
+        "Send 5–7 days after Email 2 with no reply",
+        '"Last one from me" subject lines have higher open rates than any other follow-up',
         "Leave the door open — don't burn the relationship",
-        "Some replies come from Email 3 weeks or months later",
+        "Many replies come from Email 3 weeks or even months later",
+        "After this, mark as cold and move on — don't send a 4th",
       ],
     },
   ];
@@ -270,22 +274,22 @@ export default function EmailCampaign() {
         <div className="np" style={{ marginTop: 20, padding: "18px 24px", background: "#111827", border: "1px solid #1e293b", borderRadius: 12 }}>
           <div style={{ fontWeight: 700, marginBottom: 6, fontSize: 13 }}>Recommended Schedule</div>
           <div style={{ color: "#64748b", fontSize: 12, lineHeight: 1.8 }}>
-            <strong style={{ color: "#94a3b8" }}>Day 1</strong> → Email 1 (the observation — no attachment) &nbsp;·&nbsp;
-            <strong style={{ color: "#94a3b8" }}>Day 4</strong> → Email 2 (attach the Health Check PDF + quote link) &nbsp;·&nbsp;
-            <strong style={{ color: "#94a3b8" }}>Day 9</strong> → Email 3 (soft close)<br />
+            <strong style={{ color: "#94a3b8" }}>Day 1</strong> → Email 1 (intro + attach Health Check PDF) &nbsp;·&nbsp;
+            <strong style={{ color: "#94a3b8" }}>Day 5</strong> → Email 2 (attach homepage concept image + quote link) &nbsp;·&nbsp;
+            <strong style={{ color: "#94a3b8" }}>Day 10</strong> → Email 3 (soft close — last one)<br />
             Best send times: <strong style={{ color: "#94a3b8" }}>Tue–Thu, 9–11am or 1–3pm</strong> &nbsp;·&nbsp; Send from jayson@directiveos.com.au or adwordpress2012@gmail.com
           </div>
         </div>
 
         {/* Workflow reminder */}
         <div className="np" style={{ marginTop: 12, padding: "16px 24px", background: "rgba(0,209,178,0.04)", border: "1px solid rgba(0,209,178,0.15)", borderRadius: 12 }}>
-          <div style={{ fontWeight: 700, fontSize: 12, color: TEAL, marginBottom: 6 }}>Workflow: Health Check → Email → Quote</div>
+          <div style={{ fontWeight: 700, fontSize: 12, color: TEAL, marginBottom: 6 }}>Workflow: Health Check → Concept → Email → Quote</div>
           <div style={{ fontSize: 11, color: "#64748b", lineHeight: 1.8 }}>
-            1. Run the <a href="/marketing/health-check" style={{ color: TEAL }}>Health Check tool</a> for the agency &nbsp;·&nbsp;
-            2. Fill in the findings above &nbsp;·&nbsp;
-            3. Copy Email 1 → send (no attachment) &nbsp;·&nbsp;
-            4. Print the Health Check as PDF → attach with Email 2 &nbsp;·&nbsp;
-            5. The quote link auto-fills from the health check
+            1. Run the <a href="/marketing/health-check" style={{ color: TEAL }}>Health Check tool</a> → score + findings &nbsp;·&nbsp;
+            2. Build a homepage concept on the canvas → save screenshot &nbsp;·&nbsp;
+            3. Fill in findings above → send Email 1 with Health Check PDF attached &nbsp;·&nbsp;
+            4. Day 5: send Email 2 with concept image + quote link attached &nbsp;·&nbsp;
+            5. Day 10: send Email 3 (soft close) if still no reply
           </div>
         </div>
       </div>
