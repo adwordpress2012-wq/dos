@@ -177,16 +177,130 @@ Full workflow → see `dos-onboarding` skill.
 
 | Client | URL | Status | Notes |
 |---|---|---|---|
-| Nidus Real Estate | `/nidus-re/` | DEMO | Dark theme |
-| Century 21 The Rana Group | `/c21-rana/` | DEMO | Light theme, uses 0410 567 777 |
+| Nidus Real Estate | `/nidus-re/` | DEMO | Dark theme, separate artifact |
+| Century 21 The Rana Group | `/c21-rana/` | DEMO | Light theme, separate artifact |
+| Ray White United Group | `/ray-white-ug` | DEMO | Dark/yellow theme, route inside `directive-os` |
 
-### Adding a New Client Page
-1. `createArtifact({ slug: "agency-slug", kind: "web", title: "Agency Name" })`
-2. Copy `c21-rana` (light) or `nidus-re` (dark) as base
-3. Update: name, phone, brand colours, logo, nav links
-4. Add DEMO banner, `GetStartedCTA` with agency slug
-5. Add to directive-os homepage "See Directive OS in the Wild" section
-6. Deploy
+---
+
+## AUTOMATIC DEMO SITE PROCESS
+
+**Whenever Jayson asks for a demo site for a new client — do ALL of the following automatically, without waiting to be asked.**
+
+This is a fixed standard operating procedure. Execute every step every time.
+
+### What Jayson gives you:
+- Agency name (e.g. "Ray White United Group")
+- Office location (e.g. "St Marys")
+- Sometimes: brand colours, phone number, or specific areas
+
+### What you figure out yourself (no need to ask):
+- Brand colours → Google the agency brand or use a professional best match
+- Service suburbs → Use the known suburb areas around their office location
+- URL slug → kebab-case of agency name + suburb (e.g. `ray-white-ug`, `ljh-parramatta`)
+- Phone number on page → Always use Sarah's demo line: **02 5850 4038** (never invent a number)
+- Agency nav links → Link to the agency's real website where possible
+
+---
+
+### Step-by-Step Process
+
+**IMPORTANT:** The workspace is at the 7-artifact maximum. New client pages are ALWAYS added as routes inside the `directive-os` app — NOT as new artifacts.
+
+#### Step 1 — Create the landing page file
+File path: `artifacts/directive-os/src/pages/{slug}.tsx`
+
+The page must include ALL of these sections:
+1. **DEMO banner** (top stripe, black background, yellow accent) — always present until client goes live
+2. **Nav bar** — agency logo (text-based using brand colours), nav links to real agency website, phone CTA button
+3. **Hero section** — dark background preferred, big headline "Never Miss Another Property Enquiry", agency-specific subtitle with suburb names
+4. **Stats bar** — yellow/brand background, four stats: 24/7 Always Answering, <2s Response Time, 100% Calls Captured, 0 Missed Leads
+5. **Chat demo section** — static conversation preview + real live chat widget (ChatWidget component hitting `/api/ai/chat`)
+6. **"Call Sarah" phone section** — green live dot, Sarah's demo number (02 5850 4038), prominently displayed
+7. **Features grid** — 6 cards: Answers Every Call, Books Inspections, Captures Every Lead, Qualifies Buyers, Appraisal Booking, Real-Time Dashboard
+8. **Service suburbs** — pill list of all relevant suburbs for that office
+9. **Bottom CTA section** — brand colour background, buy/sell/rent buttons, call/chat CTAs
+10. **Footer** — agency name, Sarah's number, "Powered by Directive OS" link
+
+The live **ChatWidget** component must:
+- Use `agencyId: "{slug}"` in the POST body to `/api/ai/chat`
+- Show agency-branded header
+- Be a fixed floating button bottom-right corner with brand colour
+
+**Refer to `artifacts/directive-os/src/pages/ray-white-ug.tsx` as the canonical template.** Copy its structure, update the branding only.
+
+---
+
+#### Step 2 — Add the route to App.tsx
+File: `artifacts/directive-os/src/App.tsx`
+
+1. Add `import {PascalCaseName} from "@/pages/{slug}";` with the other imports
+2. Add `<Route path="/{slug}" component={PascalCaseName} />` inside the Router switch
+
+---
+
+#### Step 3 — Add to the demos gallery
+File: `artifacts/directive-os/src/pages/demos.tsx`
+
+Add a new entry to the `DEMOS` array. New clients always go **first** (unshift order). Use:
+- `href: \`${BASE}/{slug}\`` (internal link, `external: false`)
+- `badge: "New Client"` for newly onboarded, `"Live Demo"` for prospects
+- `badgeColor` and `accent` → primary brand colour
+- Unsplash house/property photo as `img`
+- `features: ["Voice AI · Sarah", "24/7 Chat", "Inspection Booking", "Lead Capture"]`
+
+---
+
+#### Step 4 — Add to the launch page
+File: `artifacts/directive-os/src/pages/launch.tsx`
+
+Add a new entry to the `DEMOS` array in `launch.tsx`. New clients go first. Same format as demos.tsx entry.
+
+---
+
+#### Step 5 — Build check
+Run: `PORT=25037 BASE_PATH=/ pnpm --filter @workspace/directive-os run build`
+
+Confirm clean build before deploying.
+
+---
+
+#### Step 6 — Deploy
+Call `suggest_deploy()` so Jayson can publish immediately.
+
+---
+
+### After Completion — Tell Jayson:
+- The live URL: `directiveos.com.au/{slug}`
+- To share with the prospect: send them that URL, or use the QR code from the Marketing Hub
+- Reminder: `directiveos.com.au/launch` is his home screen shortcut — it already shows the new client
+
+---
+
+### Brand Colour Reference (Known Agencies)
+
+| Agency | Primary | Text on primary | Theme |
+|---|---|---|---|
+| Ray White | #FFE100 | #111 (black) | Dark background |
+| Century 21 | #F2B838 | #111 (black) | Light background |
+| LJ Hooker | #E40521 (red) | #fff | Light background |
+| McGrath | #1a1a1a (black) | #fff | Dark/minimal |
+| Harcourts | #00439B (navy) | #fff | Light background |
+| First National | #003087 (navy) | #fff | Light background |
+| PRD | #00529B (blue) | #fff | Light background |
+| Laing+Simmons | #E31937 (red) | #fff | Light background |
+| Barry Plant | #E31837 (red) | #fff | Light background |
+| Jellis Craig | #2C5F8A (blue) | #fff | Light background |
+
+If the agency is not listed above, use a professional navy (#003087) and white as a safe default.
+
+---
+
+### What NOT to do:
+- Do NOT create a new artifact (workspace is at 7-artifact limit, and routing inside directive-os is the correct pattern)
+- Do NOT invent a real phone number — always use 02 5850 4038 (the demo line)
+- Do NOT remove the DEMO banner (it stays until client pays and goes live)
+- Do NOT ask Jayson for brand colours, suburbs, or nav links — research and choose them yourself
 
 ---
 
