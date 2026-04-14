@@ -36,6 +36,12 @@ const ADDON_LABELS: Record<string, string> = {
   forms: "Custom Forms & Lead Capture (+$350)",
   security: "Security Hardening & SSL (+$150)",
   chat: "Live Chat Integration (+$300)",
+  vaultre: "VaultRE CRM Integration (+$900)",
+  rex: "Rex Software CRM Integration (+$900)",
+  propertyme: "PropertyMe Integration (+$800)",
+  rea: "realestate.com.au Listing Feed (+$500)",
+  domain: "Domain.com.au Listing Feed (+$500)",
+  crm: "Custom CRM / API Integration (+$1,200)",
 };
 
 function getRec(avg: number): { type: "new"|"rebuild"; pkg: string; verdict: string; color: string; summary: string } {

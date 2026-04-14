@@ -34,13 +34,19 @@ const ADDONS = [
   { id: "analytics", label: "Google Analytics + Search Console", price: 200, unit: "one-off", category: "Marketing" },
   { id: "logo", label: "Logo Design", price: 500, unit: "one-off", category: "Design" },
   { id: "copywriting", label: "Copywriting (per page)", price: 150, unit: "per page", category: "Content" },
+  { id: "vaultre", label: "VaultRE CRM Integration", price: 900, unit: "one-off", category: "Integrations" },
+  { id: "rex", label: "Rex Software CRM Integration", price: 900, unit: "one-off", category: "Integrations" },
+  { id: "propertyme", label: "PropertyMe Integration", price: 800, unit: "one-off", category: "Integrations" },
+  { id: "rea", label: "realestate.com.au Listing Feed", price: 500, unit: "one-off", category: "Integrations" },
+  { id: "domain", label: "Domain.com.au Listing Feed", price: 500, unit: "one-off", category: "Integrations" },
+  { id: "crm", label: "Custom CRM / API Integration", price: 1200, unit: "one-off", category: "Integrations" },
   { id: "speed", label: "Speed & Performance Optimisation", price: 400, unit: "one-off", category: "Technical" },
   { id: "security", label: "Security Hardening & SSL Setup", price: 150, unit: "one-off", category: "Technical" },
   { id: "hosting", label: "Domain & Hosting Setup", price: 99, unit: "one-off", category: "Technical" },
   { id: "maintenance", label: "Monthly Maintenance & Support", price: 199, unit: "per month", category: "Ongoing" },
 ];
 
-const CATEGORIES = ["Features", "AI & Automation", "Marketing", "Design", "Content", "Technical", "Ongoing"];
+const CATEGORIES = ["Features", "AI & Automation", "Marketing", "Design", "Content", "Integrations", "Technical", "Ongoing"];
 
 function fmt(n: number) {
   return "$" + n.toLocaleString("en-AU");
