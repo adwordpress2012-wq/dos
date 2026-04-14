@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
+import profilePhoto from "@assets/MYPHOTO-IM_1776166731530.png";
 
 const TEAL = "#00d1b2";
 const NAVY = "#0a0f1a";
@@ -146,9 +147,8 @@ function OutsidePanels() {
           <div style={{ fontSize: 10, fontWeight: 700, color: TEAL, textTransform: "uppercase", letterSpacing: "0.14em", marginBottom: 20 }}>Your Directive OS Representative</div>
 
           {/* Photo placeholder */}
-          <div style={{ width: 120, height: 140, borderRadius: 12, background: "linear-gradient(135deg, #1e293b, #0f172a)", border: `2px dashed ${TEAL}`, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", marginBottom: 20, gap: 6 }}>
-            <div style={{ fontSize: 28 }}>👤</div>
-            <div style={{ fontSize: 9, color: TEAL, fontWeight: 700, textAlign: "center", lineHeight: 1.3 }}>INSERT<br />HEADSHOT</div>
+          <div style={{ width: 120, height: 140, borderRadius: 12, background: "linear-gradient(135deg, #1e293b, #0f172a)", border: `2px solid ${TEAL}`, overflow: "hidden", marginBottom: 20 }}>
+            <img src={profilePhoto} alt="Jayson Ocampo" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           </div>
 
           <div style={{ fontWeight: 800, fontSize: 20, marginBottom: 4, color: "#fff" }}>Jayson Ocampo</div>
