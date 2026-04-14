@@ -132,7 +132,7 @@ const PRODUCTS = [
     name: "Branded Mobile App — iOS & Android",
     tag: "Add-on",
     tagColor: "#f59e0b",
-    price: "$4,500 setup + $149/mo flat",
+    price: "POA — quoted per agency",
     pitch: "Your agency's own app. On the App Store. Under your name.",
     desc: "A fully branded mobile app published under the agency's name on the Apple App Store and Google Play — not Directive OS. Buyers download \"Ray White Castle Hill\" or \"First National Hills\". They see your listings, book inspections, and chat with Sarah, all inside your app.",
     bullets: [
@@ -176,7 +176,7 @@ const APPS = [
     who: "Buyers & renters",
     icon: <Smartphone size={28} />,
     color: "#f59e0b",
-    badge: "Add-on — $4,500 + $149/mo",
+    badge: "Premium Add-on",
     badgeColor: "rgba(245,158,11,0.15)",
     badgeBorder: "rgba(245,158,11,0.3)",
     description: "A completely separate app — published under YOUR agency's name on the App Store and Google Play. Buyers search your listings, book inspections, and chat with Sarah, all inside an app that looks like it was built by your agency.",
