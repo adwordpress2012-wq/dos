@@ -131,10 +131,13 @@ export default function HealthCheck() {
     <div style={{ minHeight: "100vh", background: "#0a0f1a", fontFamily: "Inter, sans-serif", color: "#fff" }}>
       <style>{`
         @media print {
-          @page { size: A4; margin: 8mm 10mm; }
+          @page { size: A4 landscape; margin: 10mm 12mm; }
           body { margin:0!important; background:#0d1424!important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
           .np { display:none!important; }
           .page { box-shadow:none!important; border-radius:0!important; max-width:100%!important; margin:0!important; }
+          .print-section { page-break-inside: avoid; break-inside: avoid; }
+          .print-page-break { page-break-before: always; break-before: always; }
+          * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         }
         input,textarea { background:transparent; border:none; outline:none; color:inherit; font:inherit; }
         textarea:focus,input:focus { border-bottom:1px dashed ${TEAL}; }

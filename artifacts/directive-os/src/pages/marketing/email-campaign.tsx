@@ -148,13 +148,15 @@ export default function EmailCampaign() {
     <div style={{ minHeight: "100vh", background: "#0a0f1a", color: "#fff", fontFamily: "Inter, sans-serif" }}>
       <style>{`
         @media print {
-          @page { size: A4; margin: 12mm; }
+          @page { size: A4 landscape; margin: 12mm 16mm; }
           body { margin:0!important; background:#fff!important; color:#000!important; }
           .np { display:none!important; }
           .print-email { background:#fff!important; color:#000!important; border:none!important; padding:0!important; }
-          .print-email pre { color:#000!important; font-size:13px!important; }
+          .print-email pre { color:#000!important; font-size:13px!important; line-height:1.9!important; }
           .print-label { color:#000!important; font-weight:800; font-size:16px; margin-bottom:8px; display:block; }
           .print-subject { color:#333!important; font-size:13px; margin-bottom:16px; display:block; }
+          .print-section { page-break-inside: avoid; break-inside: avoid; }
+          * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         }
         input:focus, textarea:focus { border-color: rgba(0,209,178,0.5)!important; outline:none; }
       `}</style>
