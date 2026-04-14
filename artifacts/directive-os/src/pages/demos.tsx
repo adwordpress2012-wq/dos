@@ -7,6 +7,22 @@ const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
 
 const DEMOS = [
   {
+    id: "ray-white-ug",
+    name: "Ray White United Group",
+    tagline: "AI Receptionist Landing Page",
+    industry: "Real Estate",
+    location: "St Marys · Greater Penrith, NSW",
+    desc: "Ray White-branded AI receptionist for United Group St Marys. Sarah answers every call 24/7, qualifies buyers under $750k, books inspections and captures vendor appraisal requests.",
+    href: `${BASE}/ray-white-ug`,
+    external: false,
+    badge: "New Client",
+    badgeColor: "#FFE100",
+    accent: "#FFE100",
+    accentGlow: "rgba(255,225,0,0.25)",
+    img: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80",
+    features: ["Voice AI · Sarah", "24/7 Chat", "Inspection Booking", "Lead Capture"],
+  },
+  {
     id: "elite-sydney",
     name: "Elite Sydney Property",
     tagline: "AI Receptionist Landing Page",
