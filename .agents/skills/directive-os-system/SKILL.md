@@ -223,7 +223,9 @@ The page must include ALL of these sections:
 10. **Footer** — agency name, Sarah's number, "Powered by Directive OS" link
 
 The live **ChatWidget** component must:
-- Use `agencyId: "{slug}"` in the POST body to `/api/ai/chat`
+- Use `agencyName: "Full Agency Name"` in the POST body to `/api/ai/chat` — **NOT** `agencyId`
+- Demo pages don't have DB records, so `agencyName` is the correct override field (the API reads it from `req.body.agencyName` directly)
+- Do NOT send `agencyId` for demo pages — it expects a numeric integer and will fail validation with a slug string, causing Sarah to fall back to platform mode
 - Show agency-branded header
 - Be a fixed floating button bottom-right corner with brand colour
 

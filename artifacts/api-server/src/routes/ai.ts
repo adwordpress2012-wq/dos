@@ -171,6 +171,9 @@ router.post("/ai/chat", async (req, res): Promise<void> => {
   if (!parsed.success) { res.status(400).json({ error: parsed.error.message }); return; }
 
   const { sessionId, message, agencyId } = parsed.data;
+  // agencyNameOverride allows demo pages to pass the agency name directly
+  // without needing a database record (used by client landing page demos)
+  const agencyNameOverride: string | null = typeof req.body.agencyName === "string" ? req.body.agencyName : null;
 
   // Load or create session
   let session = await db.select().from(chatSessionsTable).where(eq(chatSessionsTable.sessionId, sessionId)).then(r => r[0]);
@@ -180,8 +183,9 @@ router.post("/ai/chat", async (req, res): Promise<void> => {
   history.push({ role: "user", content: message });
 
   // Get agency name — null means platform (Directive OS) Sarah, a real name means real estate Sarah
-  let agencyName: string | null = null;
-  if (agencyId) {
+  // Priority: agencyNameOverride (demo pages) > DB lookup by agencyId > null (platform Sarah)
+  let agencyName: string | null = agencyNameOverride;
+  if (!agencyName && agencyId) {
     const [ag] = await db.select({ name: agenciesTable.name }).from(agenciesTable).where(eq(agenciesTable.id, agencyId));
     if (ag) agencyName = ag.name;
   }

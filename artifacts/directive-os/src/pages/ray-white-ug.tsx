@@ -49,7 +49,7 @@ function ChatWidget() {
       const res = await fetch(`${API_BASE}/ai/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionId: sessionId.current, message: text, agencyId: "ray-white-ug" }),
+        body: JSON.stringify({ sessionId: sessionId.current, message: text, agencyName: "Ray White United Group" }),
       });
       const data = await res.json();
       setMessages(p => [...p, { role: "assistant", content: data.message || data.reply || `Please call us on ${PHONE}.` }]);
