@@ -3,6 +3,14 @@ import { useState, useMemo, useEffect } from "react";
 const TEAL = "#00d1b2";
 const NAVY = "#0a0f1a";
 
+type Tier = "small" | "medium" | "large";
+
+const TIER_PRICING: Record<Tier, { label: string; size: string; ai: { setup: number; monthly: number }; app: { setup: number; monthly: number }; seat: number }> = {
+  small:  { label: "Small Agency",     size: "1–5 agents",   ai: { setup: 1800,  monthly: 299 }, app: { setup: 4500,  monthly: 149 }, seat: 89  },
+  medium: { label: "Medium Agency",    size: "6–20 agents",  ai: { setup: 2500,  monthly: 399 }, app: { setup: 6500,  monthly: 199 }, seat: 99  },
+  large:  { label: "Large / Franchise",size: "20+ agents",   ai: { setup: 4500,  monthly: 599 }, app: { setup: 12500, monthly: 299 }, seat: 119 },
+};
+
 const today = new Date();
 const DATE = today.toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" });
 const EXPIRY = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" });
@@ -73,10 +81,20 @@ export default function WebQuote() {
   const [projectTitle, setProjectTitle] = useState("Website Project");
   const [notes, setNotes] = useState("");
   const [editing, setEditing] = useState(false);
+  const [tier, setTier] = useState<Tier>("small");
   const [timeline, setTimeline] = useState(DEFAULT_TIMELINE);
 
   const updateMilestone = (i: number, field: "week" | "title" | "desc", val: string) =>
     setTimeline(prev => prev.map((m, idx) => idx === i ? { ...m, [field]: val } : m));
+
+  const effectiveAddons = useMemo(() => {
+    const tp = TIER_PRICING[tier];
+    return ADDONS.map(a => {
+      if (a.id === "ai")             return { ...a, price: tp.ai.setup,  monthly: tp.ai.monthly };
+      if (a.id === "app-ios-android") return { ...a, price: tp.app.setup, monthly: tp.app.monthly };
+      return a;
+    });
+  }, [tier]);
 
   useEffect(() => {
     const p = new URLSearchParams(window.location.search);
@@ -99,19 +117,19 @@ export default function WebQuote() {
   const basePkg = packages.find(p => p.id === selectedPackage) || packages[1];
 
   const addonTotal = useMemo(() => {
-    return ADDONS.reduce((sum, a) => {
+    return effectiveAddons.reduce((sum, a) => {
       if (!addons[a.id]) return sum;
       if (a.id === "copywriting") return sum + a.price * copywritingPages;
       return sum + a.price;
     }, 0);
-  }, [addons, copywritingPages]);
+  }, [addons, copywritingPages, effectiveAddons]);
 
   const monthlyTotal = useMemo(() => {
-    return ADDONS.reduce((sum, a) => {
+    return effectiveAddons.reduce((sum, a) => {
       if (!addons[a.id] || !a.monthly) return sum;
       return sum + a.monthly;
     }, addons["maintenance"] ? 199 : 0);
-  }, [addons]);
+  }, [addons, effectiveAddons]);
 
   const subtotal = basePkg.price + addonTotal;
   const discountAmt = Math.round(subtotal * (discount / 100));
@@ -119,7 +137,7 @@ export default function WebQuote() {
   const deposit = Math.round(total * 0.5);
   const balance = total - deposit;
 
-  const selectedAddons = ADDONS.filter(a => addons[a.id]);
+  const selectedAddons = effectiveAddons.filter(a => addons[a.id]);
 
   const toggleAddon = (id: string) => setAddons(prev => ({ ...prev, [id]: !prev[id] }));
 
@@ -189,6 +207,13 @@ export default function WebQuote() {
           </button>
         ))}
 
+        <span style={{ fontSize: 12, color: "#475569", marginLeft: 8 }}>Agency size:</span>
+        {(["small", "medium", "large"] as const).map(t => (
+          <button key={t} onClick={() => setTier(t)} style={{ padding: "6px 12px", borderRadius: 7, border: `1px solid ${tier === t ? TEAL : "#1e293b"}`, background: tier === t ? "rgba(0,209,178,0.1)" : "transparent", color: tier === t ? TEAL : "#64748b", fontWeight: 600, cursor: "pointer", fontSize: 12 }}>
+            {t === "small" ? "Small (1–5)" : t === "medium" ? "Medium (6–20)" : "Large (20+)"}
+          </button>
+        ))}
+
         <button onClick={() => setEditing(!editing)} style={{ marginLeft: "auto", padding: "7px 14px", borderRadius: 7, border: `1px solid ${editing ? TEAL : "#1e293b"}`, background: editing ? "rgba(0,209,178,0.1)" : "transparent", color: editing ? TEAL : "#94a3b8", fontWeight: 600, cursor: "pointer", fontSize: 12 }}>
           {editing ? "✓ Done" : "✏ Edit Client"}
         </button>
@@ -206,7 +231,7 @@ export default function WebQuote() {
             <div style={{ fontSize: 12, color: "#64748b", marginBottom: 20 }}>Tick to include in the quote</div>
 
             {CATEGORIES.map(cat => {
-              const items = ADDONS.filter(a => a.category === cat);
+              const items = effectiveAddons.filter(a => a.category === cat);
               return (
                 <div key={cat} style={{ marginBottom: 20 }}>
                   <div style={{ fontSize: 10, fontWeight: 700, color: TEAL, textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 8 }}>{cat}</div>
@@ -279,6 +304,14 @@ export default function WebQuote() {
                     </div>
                     <div style={{ fontSize: 12, color: "#475569", marginTop: 6, fontStyle: "italic" }}>
                       Project: <input readOnly={!editing} value={projectTitle} onChange={e => setProjectTitle(e.target.value)} style={{ ...inputStyle(editing), width: 240, display: "inline", fontStyle: "italic" }} />
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10 }}>
+                      <div style={{ padding: "4px 12px", borderRadius: 20, background: "rgba(0,209,178,0.1)", border: "1px solid rgba(0,209,178,0.25)", fontSize: 11, fontWeight: 700, color: TEAL }}>
+                        {TIER_PRICING[tier].label}
+                      </div>
+                      <div style={{ fontSize: 11, color: "#475569" }}>
+                        {TIER_PRICING[tier].size} · ${TIER_PRICING[tier].ai.monthly}/mo base · ${TIER_PRICING[tier].seat}/seat/mo
+                      </div>
                     </div>
                   </div>
                   <div style={{ fontSize: 11, color: "#475569", textAlign: "right", lineHeight: 2 }}>
