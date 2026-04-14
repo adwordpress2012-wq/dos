@@ -410,6 +410,28 @@ Each paying client gets a standalone branded landing page hosted at `directiveos
 - Agency lookup by Twilio number for voice calls (currently hardcoded `agencyId: 1`)
 - Requires Clerk auth to be live first
 
+## System Skills & Documentation
+
+All official Directive OS business knowledge is saved as agent skills in `.agents/skills/`:
+
+| Skill | File | Contents |
+|---|---|---|
+| `directive-os-system` | `.agents/skills/directive-os-system/SKILL.md` | Master system skill — workspace architecture, tech stack, pricing, products, client workflow, environment variables, known gaps |
+| `directive-os-system` | `.agents/skills/directive-os-system/products-pricing.md` | Full product catalog (7 products) with pitch lines, pricing breakdown, and the two-app comparison |
+| `directive-os-system` | `.agents/skills/directive-os-system/business-system-plan.md` | Business plan — revenue model, sales system, growth targets, competitive position, automation roadmap, legal |
+| `dos-onboarding` | `.agents/skills/dos-onboarding/SKILL.md` | Client onboarding workflow, lead email system, dashboard access, payment flow |
+
+**Always read the `directive-os-system` skill before making changes to any artifact in this workspace.**
+
+## Marketing Hub
+
+The internal sales command centre for Jayson is at:
+`directiveos.com.au/directive-os/marketing`
+
+Contains: 7 Products (expandable with pitch lines), Two Apps comparison, Print & Digital materials, Live Demo script and QR codes.
+
+**NEVER share the web quote calculator link with prospects** — internal use only. Send the Proposal Template PDF instead.
+
 ## Key Commands
 
 ```bash

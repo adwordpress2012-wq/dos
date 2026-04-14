@@ -5,6 +5,9 @@ description: Directive OS client onboarding workflow, lead email system, dashboa
 
 # Directive OS — Client Onboarding Workflow
 
+> **Related skills:** Read `directive-os-system` skill for full product catalog, pricing, tech stack, and business plan.
+> Reference files: `.agents/skills/directive-os-system/products-pricing.md` · `.agents/skills/directive-os-system/business-system-plan.md`
+
 ## The Full Journey (Client Perspective)
 
 ```
