@@ -137,12 +137,32 @@ export default function WebQuote() {
     <div style={{ minHeight: "100vh", background: NAVY, fontFamily: "Inter, sans-serif", color: "#fff" }}>
       <style>{`
         @media print {
-          @page { size: A4 landscape; margin: 10mm 12mm; }
-          body { margin: 0 !important; background: #0d1424 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-          .no-print { display: none !important; }
-          .page { box-shadow: none !important; border-radius: 0 !important; max-width: 100% !important; margin: 0 !important; }
-          .print-section { page-break-inside: avoid; break-inside: avoid; }
+          @page { size: A4 landscape; margin: 8mm 10mm; }
           * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+          body { margin: 0 !important; background: #0d1424 !important; }
+          .no-print { display: none !important; }
+          /* Flatten the outer two-column grid to a single column */
+          .print-outer-grid {
+            display: block !important;
+            min-height: unset !important;
+          }
+          /* Remove overflow clipping from the right scroll panel */
+          .print-right-panel {
+            overflow: visible !important;
+            max-height: none !important;
+            padding: 0 !important;
+          }
+          /* Expand the quote document to fill the full page width */
+          .page {
+            max-width: 100% !important;
+            width: 100% !important;
+            margin: 0 !important;
+            box-shadow: none !important;
+            border-radius: 0 !important;
+            overflow: visible !important;
+          }
+          .print-section { page-break-inside: avoid; break-inside: avoid; }
+          .print-page-break { page-break-before: always; break-before: always; }
         }
         input, textarea { background: transparent; border: none; outline: none; color: inherit; font: inherit; }
         input:focus, textarea:focus { border-bottom: 1px dashed ${TEAL}; }
@@ -176,7 +196,7 @@ export default function WebQuote() {
         </button>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "340px 1fr", minHeight: "calc(100vh - 57px)" }}>
+      <div className="print-outer-grid" style={{ display: "grid", gridTemplateColumns: "340px 1fr", minHeight: "calc(100vh - 57px)" }}>
 
         {/* LEFT — Add-on selector (no-print) */}
         <div className="no-print" style={{ borderRight: "1px solid #1e293b", overflowY: "auto", maxHeight: "calc(100vh - 57px)", position: "sticky", top: 57 }}>
@@ -223,7 +243,7 @@ export default function WebQuote() {
         </div>
 
         {/* RIGHT — Quote document */}
-        <div style={{ overflowY: "auto", padding: "28px 24px 60px" }}>
+        <div className="print-right-panel" style={{ overflowY: "auto", padding: "28px 24px 60px" }}>
           <div className="page" style={{ maxWidth: 720, margin: "0 auto", background: "#0d1424", borderRadius: 12, overflow: "hidden", boxShadow: "0 0 40px rgba(0,0,0,0.5)" }}>
 
             {/* Header */}

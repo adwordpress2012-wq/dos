@@ -131,13 +131,15 @@ export default function HealthCheck() {
     <div style={{ minHeight: "100vh", background: "#0a0f1a", fontFamily: "Inter, sans-serif", color: "#fff" }}>
       <style>{`
         @media print {
-          @page { size: A4 landscape; margin: 10mm 12mm; }
-          body { margin:0!important; background:#0d1424!important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+          @page { size: A4 landscape; margin: 8mm 10mm; }
+          * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+          body { margin:0!important; background:#0d1424!important; }
           .np { display:none!important; }
-          .page { box-shadow:none!important; border-radius:0!important; max-width:100%!important; margin:0!important; }
+          .print-outer-grid { display: block !important; min-height: unset !important; }
+          .print-right-panel { overflow: visible !important; max-height: none !important; padding: 0 !important; }
+          .page { max-width: 100% !important; width: 100% !important; margin: 0 !important; box-shadow: none !important; border-radius: 0 !important; overflow: visible !important; }
           .print-section { page-break-inside: avoid; break-inside: avoid; }
           .print-page-break { page-break-before: always; break-before: always; }
-          * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         }
         input,textarea { background:transparent; border:none; outline:none; color:inherit; font:inherit; }
         textarea:focus,input:focus { border-bottom:1px dashed ${TEAL}; }
@@ -164,7 +166,7 @@ export default function HealthCheck() {
       </div>
 
       {/* Two-column layout */}
-      <div style={{ display: "grid", gridTemplateColumns: "290px 1fr", minHeight: "calc(100vh - 49px)" }}>
+      <div className="print-outer-grid" style={{ display: "grid", gridTemplateColumns: "290px 1fr", minHeight: "calc(100vh - 49px)" }}>
 
         {/* LEFT — sliders + notes */}
         <div className="np" style={{ borderRight: "1px solid #1e293b", overflowY: "auto", maxHeight: "calc(100vh - 49px)", position: "sticky", top: 49, padding: "18px 16px" }}>
@@ -202,7 +204,7 @@ export default function HealthCheck() {
         </div>
 
         {/* RIGHT — printable report */}
-        <div style={{ overflowY: "auto", padding: "24px 16px 60px" }}>
+        <div className="print-right-panel" style={{ overflowY: "auto", padding: "24px 16px 60px" }}>
           <div className="page" style={{ maxWidth: 700, margin: "0 auto", background: "#0d1424", borderRadius: 12, overflow: "hidden", boxShadow: "0 0 40px rgba(0,0,0,0.5)" }}>
 
             {/* Report header */}
