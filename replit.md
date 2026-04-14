@@ -133,18 +133,23 @@ Showcased in the master site under `/#templates` (nav: Templates → Live Demos 
 - **Twilio webhook URL**: Should be set to `https://directiveos.com.au/api/voice/incoming` (production) so both TwiML and WebSocket go through production stack
 - **OpenAI Realtime URL**: `wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview` (no date suffix)
 - **Session config**: `input_audio_transcription: { model: "whisper-1" }` is required for caller speech capture
-- **VAD silence**: `silence_duration_ms: 800` gives natural conversational pauses
+- **VAD silence**: `silence_duration_ms: 2000`, `threshold: 0.6`, `prefix_padding_ms: 300` — tuned to avoid cutting in too early. See `.agents/skills/sarah-ai-voice/SKILL.md` for tuning guide.
 - **Early close guard**: Check `readyState !== CONNECTING` before closing OpenAI WS; use `terminate()` if still connecting
 
 ### Sarah Persona
-- Warm, casual Aussie personality — uses "reckon", "keen", "heaps", "arvo", "no worries", "cheers"
-- "Like chatting with a knowledgeable mate who works in real estate"
-- 1-2 sentences per turn, then listens
+- Warm, natural Australian woman — confident, unhurried, never corporate
+- ONE short sentence per turn, then waits for the caller to finish completely
+- Greets on main line: "G'day! You've reached Directive OS — I'm Sarah, how can I help you today?"
+- Greets on agency line: "Thanks for calling [Agency Name] — I'm Sarah, how can I help you today?"
 - Qualifies: buyer / tenant / vendor / landlord
-- Collects: name, email, phone
+- Collects: name, phone, email — always confirms email back clearly
 - Offers: inspection bookings (buyers), tenancy form (tenants), free appraisal (vendors/landlords)
-- For urgent offers: flags as urgent, promises immediate Jayson callback
-- File: `artifacts/api-server/src/routes/voice.ts` → `AI_PERSONA` constant
+- No pricing ever quoted — all pricing/cost questions redirected to Jayson
+- Real estate property questions → Jayson redirect (never answered directly)
+- 3-step mandatory wrap-up: confirm details → next step → goodbye → STOP
+- Voice: `coral` | Temperature: 0.8
+- File: `artifacts/api-server/src/routes/voice.ts` — two personas: `DIRECTIVE_OS_PERSONA` (main line) + `buildAgencyPersona()` (per client)
+- Full config reference: `.agents/skills/sarah-ai-voice/SKILL.md`
 
 ### Post-Call Pipeline
 - Transcript saved to `transcripts` + `transcript_messages` tables
