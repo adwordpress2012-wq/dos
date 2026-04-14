@@ -53,3 +53,9 @@ id = "OTOnvWGeIc7TRdpiYP0t7"
 uri = "file://session-notes-14-april-2026.md"
 type = "text"
 title = "Session Notes — 14 April 2026"
+
+[[outputs]]
+id = "b2TGvyiRlTqqAHeuxCuev"
+uri = "file://Directive_OS_Sales_Plan.xlsx"
+type = "table"
+title = "Directive OS — Sales Plan & Scripts"
