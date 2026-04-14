@@ -48,6 +48,15 @@ const ADDONS = [
 
 const CATEGORIES = ["Features", "AI & Automation", "Marketing", "Design", "Content", "Integrations", "Technical", "Ongoing"];
 
+const DEFAULT_TIMELINE = [
+  { week: "Week 1",      title: "Discovery & Design Brief",       desc: "Kick-off call, gather all content, photos, brand assets. Present homepage design mockup for approval." },
+  { week: "Week 2",      title: "Design Sign-Off & Build Begins", desc: "Full design approved. Development starts across all pages. Any integrations (CRM, feeds) initiated." },
+  { week: "Weeks 3–4",   title: "Full Site Build",                desc: "All pages built. Live listing sync and integrations tested. Suburb SEO pages written and loaded." },
+  { week: "Week 5",      title: "Testing & Client Walkthrough",   desc: "Full QA testing across all devices and browsers. Walkthrough call with your team. Revisions actioned." },
+  { week: "Week 6",      title: "Launch & Go Live",               desc: "DNS migration from current host. Zero-downtime handover. SSL, CDN, and daily backups confirmed." },
+  { week: "Post-launch", title: "30-Day Support Period",          desc: "Priority response on all issues. Weekly check-in. Fine-tune based on real-world performance." },
+];
+
 function fmt(n: number) {
   return "$" + n.toLocaleString("en-AU");
 }
@@ -63,6 +72,10 @@ export default function WebQuote() {
   const [projectTitle, setProjectTitle] = useState("Website Project");
   const [notes, setNotes] = useState("");
   const [editing, setEditing] = useState(false);
+  const [timeline, setTimeline] = useState(DEFAULT_TIMELINE);
+
+  const updateMilestone = (i: number, field: "week" | "title" | "desc", val: string) =>
+    setTimeline(prev => prev.map((m, idx) => idx === i ? { ...m, [field]: val } : m));
 
   useEffect(() => {
     const p = new URLSearchParams(window.location.search);
@@ -359,6 +372,51 @@ export default function WebQuote() {
                   <div style={{ fontSize: 20, fontWeight: 800, color: TEAL }}>{fmt(monthlyTotal)}<span style={{ fontSize: 12, fontWeight: 400, color: "#64748b" }}>/mo</span></div>
                 </div>
               )}
+            </div>
+
+            {/* Project Timeline */}
+            <div style={{ padding: "24px 44px", borderBottom: "1px solid #1e293b" }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: TEAL, textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 18 }}>Project Timeline</div>
+              <div style={{ position: "relative" }}>
+                {/* Vertical line */}
+                <div style={{ position: "absolute", left: 52, top: 12, bottom: 12, width: 2, background: "linear-gradient(to bottom, rgba(0,209,178,0.6), rgba(0,209,178,0.05))", borderRadius: 1 }} />
+                <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+                  {timeline.map((m, i) => {
+                    const isLast = i === timeline.length - 1;
+                    return (
+                      <div key={i} style={{ display: "flex", gap: 0, alignItems: "flex-start", paddingBottom: isLast ? 0 : 20 }}>
+                        {/* Week badge */}
+                        <div style={{ width: 105, flexShrink: 0, paddingTop: 2, zIndex: 1 }}>
+                          <input
+                            readOnly={!editing}
+                            value={m.week}
+                            onChange={e => updateMilestone(i, "week", e.target.value)}
+                            style={{ fontSize: 9, fontWeight: 800, color: TEAL, background: "rgba(0,209,178,0.1)", border: editing ? `1px dashed rgba(0,209,178,0.5)` : "1px solid rgba(0,209,178,0.2)", borderRadius: 20, padding: "3px 8px", outline: "none", textAlign: "center", width: "100%", letterSpacing: "0.05em", textTransform: "uppercase", cursor: editing ? "text" : "default", boxSizing: "border-box" }}
+                          />
+                        </div>
+                        {/* Dot */}
+                        <div style={{ width: 12, height: 12, borderRadius: "50%", background: i === 0 ? TEAL : "#1e3a4a", border: `2px solid ${TEAL}`, flexShrink: 0, marginTop: 3, marginLeft: -6, marginRight: 14, zIndex: 2, boxShadow: i === 0 ? `0 0 8px rgba(0,209,178,0.5)` : "none" }} />
+                        {/* Content */}
+                        <div style={{ flex: 1, background: "#0a0f1a", border: "1px solid #1e293b", borderRadius: 9, padding: "11px 14px" }}>
+                          <input
+                            readOnly={!editing}
+                            value={m.title}
+                            onChange={e => updateMilestone(i, "title", e.target.value)}
+                            style={{ fontSize: 13, fontWeight: 700, color: "#fff", background: "transparent", border: "none", outline: "none", width: "100%", cursor: editing ? "text" : "default", borderBottom: editing ? `1px dashed rgba(0,209,178,0.4)` : "none", marginBottom: 5, display: "block" }}
+                          />
+                          <textarea
+                            readOnly={!editing}
+                            value={m.desc}
+                            onChange={e => updateMilestone(i, "desc", e.target.value)}
+                            rows={2}
+                            style={{ fontSize: 11, color: "#64748b", lineHeight: 1.6, background: "transparent", border: "none", outline: "none", width: "100%", cursor: editing ? "text" : "default", resize: editing ? "vertical" : "none", fontFamily: "Inter, sans-serif", padding: 0, display: "block" }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
 
             {/* Notes */}
