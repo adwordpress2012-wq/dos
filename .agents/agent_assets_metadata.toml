@@ -41,3 +41,9 @@ id = "mWo-fJhYYaT6fHFsWDzBi"
 uri = "file://Directive-OS-Agreement-Email.pdf"
 type = "pdf"
 title = "Directive OS — Service Agreement Email Template"
+
+[[outputs]]
+id = "ow4QwAqMI6SaxzsbAbRZZ"
+uri = "file://screenshots/highspec-homepage-concept.jpg"
+type = "image"
+title = "HighSpec Properties — Homepage Redesign Concept"
