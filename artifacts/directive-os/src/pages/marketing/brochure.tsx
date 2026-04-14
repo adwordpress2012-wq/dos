@@ -201,7 +201,7 @@ function OutsidePanels() {
           <img src="/logo.png" alt="Directive OS" style={{ width: 28, height: 28, filter: "drop-shadow(0 0 6px rgba(0,209,178,0.5))" }} />
           <div>
             <div style={{ fontSize: 10, fontWeight: 700, color: TEAL }}>DIRECTIVE OS</div>
-            <div style={{ fontSize: 9, color: SLATE }}>Proudly Australian · ABN 00 000 000 000</div>
+            <div style={{ fontSize: 9, color: SLATE }}>Proudly Australian · ABN 87 754 544 171</div>
           </div>
         </div>
       </div>
