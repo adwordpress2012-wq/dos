@@ -23,6 +23,7 @@ const BASE_PACKAGES = {
 };
 
 const ADDONS = [
+  { id: "app-ios-android", label: "Mobile App — iOS & Android", price: 4500, unit: "one-off", category: "Mobile", monthly: 149 },
   { id: "ecommerce", label: "E-Commerce / Online Shop", price: 1500, unit: "one-off", category: "Features" },
   { id: "booking", label: "Booking System / Calendar", price: 800, unit: "one-off", category: "Features" },
   { id: "members", label: "Members Area / Client Login", price: 1200, unit: "one-off", category: "Features" },
@@ -46,7 +47,7 @@ const ADDONS = [
   { id: "maintenance", label: "Monthly Maintenance & Support", price: 199, unit: "per month", category: "Ongoing" },
 ];
 
-const CATEGORIES = ["Features", "AI & Automation", "Marketing", "Design", "Content", "Integrations", "Technical", "Ongoing"];
+const CATEGORIES = ["Mobile", "Features", "AI & Automation", "Marketing", "Design", "Content", "Integrations", "Technical", "Ongoing"];
 
 const DEFAULT_TIMELINE = [
   { week: "Week 1",      title: "Discovery & Design Brief",       desc: "Kick-off call, gather all content, photos, brand assets. Present homepage design mockup for approval." },
