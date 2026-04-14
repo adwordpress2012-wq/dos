@@ -17,6 +17,9 @@ localPort = 25037
 [services.development]
 run = "pnpm --filter @workspace/directive-os run dev"
 
+[services.development.health.startup]
+path = "/"
+
 [services.production]
 build = [ "pnpm", "--filter", "@workspace/directive-os", "run", "build" ]
 publicDir = "artifacts/directive-os/dist/public"
