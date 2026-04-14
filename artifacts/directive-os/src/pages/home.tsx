@@ -474,7 +474,7 @@ export default function Home() {
               </div>
 
               <div className="text-sm text-muted-foreground">
-                <span style={{ color: "#00d1b2" }} className="font-semibold">$4,500 setup</span> · <span style={{ color: "#00d1b2" }} className="font-semibold">$149/mo</span> flat — whole agency, no per-seat fee
+                Quoted per agency — speak with Jayson for a custom package.
               </div>
             </div>
 
