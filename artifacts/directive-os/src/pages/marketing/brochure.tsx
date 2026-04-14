@@ -84,6 +84,41 @@ export default function Brochure() {
         }
       `}</style>
 
+      {/* Sarah CTA Banner */}
+      <div className="no-print" style={{ background: "linear-gradient(90deg, #003d35 0%, #005a4e 50%, #003d35 100%)", borderBottom: "2px solid #00d1b2", padding: "18px 24px", display: "flex", alignItems: "center", justifyContent: "center", gap: 20, flexWrap: "wrap" }}>
+        <style>{`
+          @keyframes pulse-ring {
+            0% { box-shadow: 0 0 0 0 rgba(0,209,178,0.6); }
+            70% { box-shadow: 0 0 0 14px rgba(0,209,178,0); }
+            100% { box-shadow: 0 0 0 0 rgba(0,209,178,0); }
+          }
+        `}</style>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ width: 44, height: 44, borderRadius: "50%", background: TEAL, display: "flex", alignItems: "center", justifyContent: "center", animation: "pulse-ring 2s ease-out infinite", flexShrink: 0 }}>
+            <span style={{ fontSize: 22 }}>📞</span>
+          </div>
+          <div>
+            <div style={{ fontSize: 11, color: "#4dd9c6", fontWeight: 700, textTransform: "uppercase", letterSpacing: 1.5, lineHeight: 1 }}>Try it right now</div>
+            <div style={{ fontSize: 13, color: "#94a3b8", marginTop: 2 }}>Call this number to talk to Sarah</div>
+          </div>
+        </div>
+        <a
+          href="tel:0258504038"
+          style={{
+            display: "inline-flex", alignItems: "center", gap: 10,
+            background: TEAL, color: "#000", fontWeight: 900,
+            fontSize: 22, letterSpacing: 1, padding: "12px 28px",
+            borderRadius: 10, textDecoration: "none",
+            boxShadow: "0 0 24px rgba(0,209,178,0.45)",
+          }}
+        >
+          02 5850 4038
+        </a>
+        <div style={{ color: "#4dd9c6", fontSize: 12, maxWidth: 200, lineHeight: 1.5 }}>
+          Live AI receptionist · Answers 24/7 · Same tech your clients get
+        </div>
+      </div>
+
       {/* Toolbar */}
       <div className="no-print" style={{ padding: "14px 24px", borderBottom: "1px solid #1e293b", display: "flex", alignItems: "center", gap: 12, background: NAVY2, position: "sticky", top: 0, zIndex: 10 }}>
         <a href="/marketing" style={{ color: "#64748b", fontSize: 13, textDecoration: "none", marginRight: 8 }}>← Marketing</a>
