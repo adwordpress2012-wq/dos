@@ -48,7 +48,7 @@ const testimonials = [
     name: "Rebecca & Tom H.",
     suburb: "Baulkham Hills",
     rating: 5,
-    text: "James and the Meridian team achieved $85k above our expectations. Their communication throughout the campaign was second to none. Truly a world-class agency.",
+    text: "James and the Ray White Castle Hill team achieved $85k above our expectations. Their communication throughout the campaign was second to none. Truly a world-class agency.",
   },
   {
     name: "David K.",
@@ -86,14 +86,14 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-[#0F1623]/60" />
         <div className="relative z-10 text-center px-4 max-w-4xl mx-auto pt-[6.5rem]">
           <p className="text-gold text-sm font-semibold tracking-[0.25em] uppercase mb-4">
-            Western Sydney's Boutique Agency
+            Castle Hill's #1 Real Estate Agency
           </p>
           <h1 className="font-serif text-5xl sm:text-6xl lg:text-7xl text-white font-bold leading-tight mb-6">
             Finding Your Perfect<br />
             <span className="text-gold">Place to Call Home</span>
           </h1>
           <p className="text-white/75 text-lg sm:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
-            Boutique expertise, extraordinary results. Meridian Property Group has been trusted by Hills District families and investors for over 18 years.
+            Australia's most trusted name in real estate. Ray White Castle Hill has delivered exceptional results for Hills District families and investors for over 20 years.
           </p>
 
           {/* Search widget */}
@@ -255,15 +255,15 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
             <p className="text-gold text-xs font-semibold tracking-[0.2em] uppercase mb-2">Why Choose Us</p>
-            <h2 className="font-serif text-3xl sm:text-4xl font-bold">The Meridian Difference</h2>
+            <h2 className="font-serif text-3xl sm:text-4xl font-bold">The Ray White Difference</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               {
                 icon: Award,
-                title: "Boutique Expertise",
-                text: "As an independent agency, we're not beholden to targets or quotas. Our sole focus is achieving the best outcome for every client, every time.",
+                title: "Global Network, Local Experts",
+                text: "Backed by Australia's largest real estate group, Ray White Castle Hill combines global reach with deep local knowledge to deliver outstanding results.",
               },
               {
                 icon: TrendingUp,

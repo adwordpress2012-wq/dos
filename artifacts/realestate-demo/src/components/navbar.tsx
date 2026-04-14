@@ -17,19 +17,57 @@ export default function Navbar() {
 
   return (
     <header
-      className="fixed left-0 right-0 z-40 bg-white/95 backdrop-blur-sm border-b border-border shadow-sm"
+      className="fixed left-0 right-0 z-40 bg-white border-b border-gray-200 shadow-sm"
       style={{ top: "var(--promo-h, 40px)" }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-8 h-8 rounded-sm bg-gold flex items-center justify-center">
-              <span className="text-white font-serif font-bold text-sm">M</span>
-            </div>
-            <div className="leading-none">
-              <div className="font-serif text-base font-bold text-foreground tracking-wide">MERIDIAN</div>
-              <div className="text-[9px] text-muted-foreground tracking-[0.2em] uppercase font-sans">Property Group</div>
+          {/* Logo — Ray White wordmark style */}
+          <Link href="/" className="flex items-center gap-0 group">
+            <div className="flex items-center">
+              <div
+                style={{
+                  background: "#FFD000",
+                  padding: "6px 10px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <span
+                  style={{
+                    color: "#1a1a1a",
+                    fontWeight: 900,
+                    fontSize: 13,
+                    letterSpacing: "0.08em",
+                    fontFamily: "Inter, sans-serif",
+                    lineHeight: 1,
+                  }}
+                >
+                  RAY WHITE
+                </span>
+              </div>
+              <div
+                style={{
+                  background: "#1a1a1a",
+                  padding: "6px 10px",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
+                <span
+                  style={{
+                    color: "#FFD000",
+                    fontWeight: 700,
+                    fontSize: 11,
+                    letterSpacing: "0.12em",
+                    fontFamily: "Inter, sans-serif",
+                    lineHeight: 1,
+                  }}
+                >
+                  CASTLE HILL
+                </span>
+              </div>
             </div>
           </Link>
 
@@ -57,7 +95,8 @@ export default function Navbar() {
             </a>
             <a
               href={`${base}/contact`}
-              className="bg-gold hover:bg-gold-dark text-white text-sm font-medium px-4 py-2 rounded transition-colors"
+              className="text-sm font-bold px-4 py-2 rounded transition-colors"
+              style={{ background: "#FFD000", color: "#1a1a1a" }}
             >
               Appraise My Property
             </a>
@@ -76,7 +115,7 @@ export default function Navbar() {
 
       {/* Mobile drawer */}
       {open && (
-        <div className="md:hidden bg-white border-t border-border px-4 py-4 flex flex-col gap-4">
+        <div className="md:hidden bg-white border-t border-gray-200 px-4 py-4 flex flex-col gap-4">
           {navLinks.map((link) => (
             <a
               key={link.label}
@@ -96,7 +135,8 @@ export default function Navbar() {
           </a>
           <a
             href={`${base}/contact`}
-            className="bg-gold text-white text-sm font-medium px-4 py-2 rounded text-center"
+            className="text-sm font-bold px-4 py-2 rounded text-center"
+            style={{ background: "#FFD000", color: "#1a1a1a" }}
           >
             Appraise My Property
           </a>
