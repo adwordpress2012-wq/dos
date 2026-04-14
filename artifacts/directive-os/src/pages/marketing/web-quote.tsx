@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 
 const TEAL = "#00d1b2";
 const NAVY = "#0a0f1a";
@@ -57,6 +57,23 @@ export default function WebQuote() {
   const [projectTitle, setProjectTitle] = useState("Website Project");
   const [notes, setNotes] = useState("");
   const [editing, setEditing] = useState(false);
+
+  useEffect(() => {
+    const p = new URLSearchParams(window.location.search);
+    const type    = p.get("type") as "new" | "rebuild" | null;
+    const pkg     = p.get("pkg");
+    const client  = p.get("client");
+    const contact = p.get("contact");
+    const addonsP = p.get("addons");
+    if (type)    setProjectType(type);
+    if (pkg)     setSelectedPackage(pkg);
+    if (client)  setClientName(decodeURIComponent(client));
+    if (contact) setContactName(decodeURIComponent(contact));
+    if (addonsP) {
+      const ids = addonsP.split(",").filter(Boolean);
+      setAddons(prev => { const n = { ...prev }; ids.forEach(id => { n[id] = true; }); return n; });
+    }
+  }, []);
 
   const packages = BASE_PACKAGES[projectType];
   const basePkg = packages.find(p => p.id === selectedPackage) || packages[1];

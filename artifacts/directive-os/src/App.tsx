@@ -44,6 +44,7 @@ import EmailCampaign from "@/pages/marketing/email-campaign";
 import EmailSignature from "@/pages/marketing/email-signature";
 import ProposalTemplate from "@/pages/marketing/proposal";
 import WebQuote from "@/pages/marketing/web-quote";
+import HealthCheck from "@/pages/marketing/health-check";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -85,6 +86,7 @@ function Router() {
       <Route path="/marketing/email-signature" component={EmailSignature} />
       <Route path="/marketing/proposal" component={ProposalTemplate} />
       <Route path="/marketing/web-quote" component={WebQuote} />
+      <Route path="/marketing/health-check" component={HealthCheck} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/dashboard/leads" component={Leads} />
       <Route path="/dashboard/transcripts" component={Transcripts} />
