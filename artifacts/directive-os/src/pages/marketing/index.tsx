@@ -461,7 +461,7 @@ export default function MarketingHub() {
                     ["Published under", "Directive OS", "Your agency's name"],
                     ["Visible in App Store as", "Command Bridge", "e.g. \"Ray White Castle Hill\""],
                     ["Purpose", "Manage the AI system", "Search listings & contact Sarah"],
-                    ["Cost", "Included in plan", "$4,500 setup + $149/mo"],
+                    ["Cost", "Included in plan", "Quoted per agency tier"],
                     ["Push notifications to", "Agent alerts", "Buyer broadcasts"],
                     ["Sarah AI built in", "Yes — for agents", "Yes — for buyers"],
                   ].map(([feature, cmd, buyer], i) => (
@@ -482,7 +482,7 @@ export default function MarketingHub() {
                 <strong style={{ color: "#fff" }}>The setup:</strong> Every plan includes Command Bridge — that's the agent app. Most agencies don't need anything else.
               </p>
               <p style={{ color: "#e2e8f0", fontSize: 14, lineHeight: 1.7, margin: "0 0 10px" }}>
-                <strong style={{ color: "#fff" }}>The upgrade:</strong> "Would you like your own branded app on the App Store? Instead of buyers contacting you through Domain or REA, they download YOUR app — it has your logo, your branding, and Sarah is built in. One-off $4,500 to build and publish it, then $149 flat per month forever. No per-user fees."
+                <strong style={{ color: "#fff" }}>The upgrade:</strong> "Would you like your own branded app on the App Store? Instead of buyers contacting you through Domain or REA, they download YOUR app — it has your logo, your branding, and Sarah is built in. One-off build cost to get it published under your name, then a flat monthly — whole agency, no per-user fees. I'll put a quote together based on your setup."
               </p>
               <p style={{ color: "#e2e8f0", fontSize: 14, lineHeight: 1.7, margin: 0 }}>
                 <strong style={{ color: "#fff" }}>The closer:</strong> "Think about open homes — your buyers scan a QR code and download YOUR app. They never need to go to Domain again."
