@@ -47,3 +47,9 @@ id = "ow4QwAqMI6SaxzsbAbRZZ"
 uri = "file://screenshots/highspec-homepage-concept.jpg"
 type = "image"
 title = "HighSpec Properties — Full Homepage Redesign Concept"
+
+[[outputs]]
+id = "OTOnvWGeIc7TRdpiYP0t7"
+uri = "file://session-notes-14-april-2026.md"
+type = "text"
+title = "Session Notes — 14 April 2026"
