@@ -188,7 +188,7 @@ function OutsidePanels() {
 
           <div style={{ fontWeight: 800, fontSize: 20, marginBottom: 4, color: "#fff" }}>Jayson Ocampo</div>
           <div style={{ fontSize: 12, color: TEAL, fontWeight: 600, marginBottom: 2 }}>Principal — Directive OS</div>
-          <div style={{ fontSize: 11, color: SLATE, marginBottom: 20 }}>Licensed Real Estate Agent</div>
+          <div style={{ fontSize: 11, color: SLATE, marginBottom: 20 }}>AI Solutions Consultant</div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {[
