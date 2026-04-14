@@ -277,9 +277,9 @@ function OutsidePanels() {
 
         <div style={{ position: "relative" }}>
           <div style={{ background: "rgba(0,209,178,0.1)", border: `1px solid ${TEAL}`, borderRadius: 10, padding: "12px 16px", textAlign: "center" }}>
-            <div style={{ fontSize: 10, color: TEAL, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>Starting from</div>
-            <div style={{ fontSize: 26, fontWeight: 900, color: "#fff" }}>$299<span style={{ fontSize: 13, fontWeight: 400, color: SLATE }}>/month</span></div>
-            <div style={{ fontSize: 10, color: SLATE, marginTop: 2 }}>No lock-in contracts · Setup from $1,800</div>
+            <div style={{ fontSize: 10, color: TEAL, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>Pricing scaled to your agency</div>
+            <div style={{ fontSize: 26, fontWeight: 900, color: "#fff" }}>from $299<span style={{ fontSize: 13, fontWeight: 400, color: SLATE }}>/month</span></div>
+            <div style={{ fontSize: 10, color: SLATE, marginTop: 2 }}>No lock-in contracts · Setup from $1,800 · Ask us for a custom quote</div>
           </div>
         </div>
       </div>
@@ -328,10 +328,10 @@ function InsidePanels() {
 
           <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 24 }}>
             {[
-              { item: "AI Receptionist (Sarah)", price: "$299/mo" },
-              { item: "Agency Website (new build)", price: "from $2,500" },
-              { item: "Mobile App — iOS & Android", price: "from $4,500" },
-              { item: "CRM / Portal Integration", price: "from $500" },
+              { item: "Small Agency (1–5 agents)", price: "$299/mo" },
+              { item: "Medium Agency (6–20 agents)", price: "$399/mo" },
+              { item: "Large / Franchise (20+)", price: "$599/mo" },
+              { item: "Mobile App Add-on", price: "from $4,500" },
             ].map(r => (
               <div key={r.item} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 12px", background: "rgba(255,255,255,0.03)", borderRadius: 8, border: "1px solid #1e293b" }}>
                 <span style={{ fontSize: 12, color: "#cbd5e1" }}>{r.item}</span>

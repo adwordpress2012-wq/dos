@@ -310,21 +310,61 @@ export default function MarketingHub() {
               </p>
             </div>
 
-            {/* Pricing Summary Banner */}
-            <div style={{ background: "rgba(0,209,178,0.06)", border: "1px solid rgba(0,209,178,0.2)", borderRadius: 14, padding: "20px 24px", marginBottom: 28, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px,1fr))", gap: 16 }}>
-              {[
-                { label: "Setup Fee", value: "$1,800", note: "One-off onboarding" },
-                { label: "Base Plan", value: "$299/mo", note: "Sarah + Dashboard + CRM sync" },
-                { label: "Per Seat", value: "$89/mo", note: "Per additional agent login" },
-                { label: "Overage", value: "$25/10 min", note: "After included call minutes" },
-                { label: "App Add-on", value: "$4,500 + $149/mo", note: "Branded buyer app" },
-              ].map(p => (
-                <div key={p.label} style={{ textAlign: "center" }}>
-                  <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, color: SLATE, marginBottom: 4 }}>{p.label}</div>
-                  <div style={{ fontSize: 18, fontWeight: 800, color: TEAL }}>{p.value}</div>
-                  <div style={{ fontSize: 11, color: "#475569", marginTop: 2 }}>{p.note}</div>
-                </div>
-              ))}
+            {/* Pricing Tier Table */}
+            <div style={{ background: "rgba(0,209,178,0.04)", border: "1px solid rgba(0,209,178,0.2)", borderRadius: 14, padding: "20px 24px", marginBottom: 28 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1.5, color: TEAL, marginBottom: 16, textTransform: "uppercase" }}>Pricing by Agency Size</div>
+              <div style={{ overflowX: "auto" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+                  <thead>
+                    <tr>
+                      {["", "Small (1–5 agents)", "Medium (6–20 agents)", "Large / Franchise (20+)"].map(h => (
+                        <th key={h} style={{ padding: "8px 14px", textAlign: h === "" ? "left" : "center", color: SLATE, fontWeight: 700, fontSize: 11, borderBottom: "1px solid #1e293b", whiteSpace: "nowrap" }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[
+                      { row: "Setup Fee", vals: ["$1,800", "$2,500", "$4,500"] },
+                      { row: "Monthly", vals: ["$299/mo", "$399/mo", "$599/mo"] },
+                      { row: "Per Seat", vals: ["$89/mo", "$99/mo", "$119/mo"] },
+                      { row: "Overage", vals: ["$25/10 min", "$25/10 min", "$25/10 min"] },
+                      { row: "Mobile App Setup", vals: ["$4,500", "$6,500", "Custom quote"] },
+                      { row: "Mobile App Monthly", vals: ["$149/mo", "$199/mo", "$299+/mo"] },
+                    ].map(({ row, vals }) => (
+                      <tr key={row} style={{ borderBottom: "1px solid #0f172a" }}>
+                        <td style={{ padding: "10px 14px", color: "#cbd5e1", fontWeight: 600, fontSize: 12 }}>{row}</td>
+                        {vals.map((v, i) => (
+                          <td key={i} style={{ padding: "10px 14px", textAlign: "center", color: TEAL, fontWeight: 700, fontSize: 13 }}>{v}</td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div style={{ marginTop: 14, fontSize: 11, color: "#475569" }}>No lock-in contracts · Cancel anytime · Pricing is per office · Use the proposal page to generate a client-ready quote for the correct tier.</div>
+            </div>
+
+            {/* Internal Negotiation Lever — NOT for clients */}
+            <div style={{ background: "rgba(251,191,36,0.05)", border: "1px solid rgba(251,191,36,0.25)", borderRadius: 14, padding: "20px 24px", marginBottom: 28 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+                <span style={{ fontSize: 16 }}>🤝</span>
+                <div style={{ fontSize: 13, fontWeight: 700, color: "#fbbf24", textTransform: "uppercase", letterSpacing: "0.08em" }}>Negotiation Lever — Internal Only (Never Show Clients)</div>
+              </div>
+              <p style={{ color: "#94a3b8", fontSize: 13, lineHeight: 1.7, margin: "0 0 14px" }}>
+                Use this as a <strong style={{ color: "#fff" }}>closing tool only</strong> — never lead with it. If a prospect is close but hesitating, offer one of the following in exchange for a <strong style={{ color: "#fbbf24" }}>Google 5-star review + short video testimonial</strong> (30–60 sec, shot on phone is fine):
+              </p>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                {[
+                  { option: "Option A — Free Month", desc: "1 month free subscription added after go-live. Offer: \"Look, because you're one of our early real estate clients in this area — if you're happy to leave us a Google review and a quick video after your first month, I'll give you month two on us.\"" },
+                  { option: "Option B — Setup Discount", desc: "10% off the setup fee. Offer: \"I can knock 10% off the setup for you today if you're happy to do a video review after go-live. That's [amount] back in your pocket before you've even gone live.\"" },
+                ].map(({ option, desc }) => (
+                  <div key={option} style={{ background: "rgba(251,191,36,0.06)", border: "1px solid rgba(251,191,36,0.2)", borderRadius: 10, padding: "14px 16px" }}>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: "#fbbf24", marginBottom: 6 }}>{option}</div>
+                    <div style={{ fontSize: 12, color: "#94a3b8", lineHeight: 1.6, fontStyle: "italic" }}>{desc}</div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ marginTop: 12, fontSize: 11, color: "#64748b" }}>Rule: Only one option per deal. Never offer both. Make them feel like they got something. Get the review link to them within 48 hours of go-live while the excitement is fresh.</div>
             </div>
 
             {/* Product Accordion */}
@@ -577,7 +617,7 @@ export default function MarketingHub() {
                 { step: "3", title: "Introduce Sarah", text: "\"Here's what we do — call this number right now. This is Sarah. She's a live AI receptionist. Hand your phone to me if you like and I'll ask her about your listings.\"" },
                 { step: "4", title: "Demo the call", text: "Call 02 5850 4038 live. Ask about a property. Show the email transcript that arrives in 30 seconds." },
                 { step: "5", title: "Show the dashboard", text: "\"Every call, every transcript, every lead — right here in your dashboard. Your principal can see everything.\"" },
-                { step: "6", title: "Close with pricing", text: "\"It's $1,800 to set up — we handle everything, go-live in 48 hours — then $299 a month. That's less than one missed commission.\"" },
+                { step: "6", title: "Close with pricing", text: "\"Setup is from $1,800 — we handle everything, go-live in 48 hours — then from $299 a month depending on your office size. That's less than one missed commission. What does your team look like — how many agents are you running?\" (Use their answer to match the right tier and send the proposal.)" },
               ].map(s => (
                 <div key={s.step} style={{ display: "flex", gap: 16, marginBottom: 16, alignItems: "flex-start" }}>
                   <div style={{ width: 32, height: 32, borderRadius: "50%", background: TEAL, color: "#000", fontWeight: 900, fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{s.step}</div>

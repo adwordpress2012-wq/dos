@@ -96,17 +96,19 @@ export default function OnePager() {
 
         {/* Pricing */}
         <div style={{ padding: "28px 32px 24px", borderBottom: "1px solid #1e293b" }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: TEAL, textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 16 }}>Simple, Transparent Pricing</div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: TEAL, textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 6 }}>Pricing — Scaled to Your Agency Size</div>
+          <div style={{ fontSize: 11, color: "#64748b", marginBottom: 14 }}>No lock-in contracts. Cancel anytime. Pricing is per office.</div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
             {[
-              { label: "One-Time Setup", price: "$1,800", note: "Full onboarding & configuration" },
-              { label: "Monthly Plan", price: "$299/mo", note: "AI + hosting + support" },
-              { label: "Extra Seats", price: "$89/mo", note: "Per additional staff member" },
-            ].map(({ label, price, note }) => (
+              { label: "Small Agency", size: "1–5 agents", setup: "$1,800", monthly: "$299/mo", seat: "$89/seat" },
+              { label: "Medium Agency", size: "6–20 agents", setup: "$2,500", monthly: "$399/mo", seat: "$99/seat" },
+              { label: "Large / Franchise", size: "20+ agents", setup: "$4,500", monthly: "$599/mo", seat: "$119/seat" },
+            ].map(({ label, size, setup, monthly, seat }) => (
               <div key={label} style={{ background: "#0a0f1a", border: "1px solid #1e293b", borderRadius: 8, padding: "14px 16px" }}>
-                <div style={{ fontSize: 10, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>{label}</div>
-                <div style={{ fontSize: 18, fontWeight: 800, color: "#fff", marginBottom: 4 }}>{price}</div>
-                <div style={{ fontSize: 10, color: "#475569" }}>{note}</div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: "#fff", marginBottom: 2 }}>{label}</div>
+                <div style={{ fontSize: 10, color: "#64748b", marginBottom: 10 }}>{size}</div>
+                <div style={{ fontSize: 16, fontWeight: 800, color: TEAL, marginBottom: 2 }}>{monthly}</div>
+                <div style={{ fontSize: 10, color: "#475569" }}>{setup} setup · {seat}</div>
               </div>
             ))}
           </div>

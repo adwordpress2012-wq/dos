@@ -4,19 +4,44 @@
 
 ---
 
-## Pricing at a Glance
+## Pricing by Agency Size (Tiered)
 
-| Item | Price | Type |
+> Pricing is per office. Tier is determined by number of active agents on the team.
+
+### Platform (Sarah AI + Dashboard + CRM Sync)
+
+| Item | Small (1–5 agents) | Medium (6–20 agents) | Large / Franchise (20+) |
+|---|---|---|---|
+| Setup / Onboarding | $1,800 | $2,500 | $4,500 |
+| Base Monthly Licence | $299/mo | $399/mo | $599/mo |
+| Additional Agent Seats | $89/seat/mo | $99/seat/mo | $119/seat/mo |
+| AI Call Overage | $25/10-min block | $25/10-min block | $25/10-min block |
+
+**Month 1 licence is charged at the same time as setup.** Month 2+ auto-billed by Stripe. No lock-in. 30 days written notice to cancel.
+
+### Branded Mobile App Add-on
+
+| Item | Small (1–5 agents) | Medium (6–20 agents) | Large / Franchise (20+) |
+|---|---|---|---|
+| App Setup (once-off) | $4,500 | $6,500 | Custom quote |
+| App Monthly Licence | $149/mo flat | $199/mo flat | $299+/mo flat |
+
+Mobile app pricing is **not published publicly** — always quote per agency after discovery call.
+
+---
+
+## Negotiation Lever (Internal — Never Share With Clients)
+
+Use this as a **closing tool only**. Never lead with it. Trigger: prospect is close but hesitating.
+
+**Offer in exchange for:** Google 5-star review + short video testimonial (30–60 sec, phone video fine).
+
+| Option | What to offer | Script |
 |---|---|---|
-| Setup / Onboarding | $1,800 | Once-off |
-| Base Monthly Licence | $299/mo | Monthly (auto-renews) |
-| Additional Agent Seats | $89/seat/mo | Per agent login |
-| AI Call Overage | $25/10-min block | After 100 min/mo included |
-| Branded Mobile App Setup | $4,500 | Once-off |
-| Branded Mobile App Licence | $149/mo flat | No per-user fees |
+| Option A | 1 month free subscription (added after go-live) | "Because you're one of our early clients in this area — if you're happy to leave a Google review and a quick video after month one, I'll give you month two on us." |
+| Option B | 10% off setup fee | "I can knock 10% off the setup today if you're happy to do a video review after go-live. That's [amount] back before you've even gone live." |
 
-**Month 1 licence ($299) is charged at the same time as setup ($1,800) = $2,099 day one.**
-Month 2 onwards: auto-billed by Stripe. No lock-in. 30 days written notice to cancel.
+**Rules:** Only offer ONE option per deal. Never offer both. Get the review link to them within 48 hours of go-live while the excitement is fresh.
 
 ---
 
