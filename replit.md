@@ -345,17 +345,68 @@ Each paying client gets a standalone branded landing page hosted at `directiveos
 
 ---
 
+## Session Notes — 14 April 2026
+
+### SPA Routing Fix — DONE ✅
+- Added `artifacts/directive-os/public/_redirects` with `/* /index.html 200`
+- Fixes production 404s when navigating directly to `/marketing/health-check`, `/marketing/web-quote`, etc.
+- Deployed to production (directiveos.com.au)
+
+### Mobile App Add-On — Added to Quote Builder ✅
+- New "Mobile" category added at top of add-ons panel
+- Item: "Mobile App — iOS & Android" — $4,500 one-off + $149/mo
+- $4,500 = React Native (Expo) app build: branded design, listings, contact, push notifications, App Store + Google Play submission
+- $149/mo = flat maintenance fee for entire agency (NOT per user) — covers OS updates, bug fixes, App Store compliance
+- Pricing model: flat per-agency (same as website hosting) — NOT seat-based
+- Best target: mid-to-large independent real estate agencies (NOT Ray White / McGrath franchise — they have head-office systems)
+- Full enterprise stack: Website $9,500 + App $4,500 + Sarah $1,800 + integrations ~$1,000 + SEO $600 = ~$18,300 setup + $647/mo recurring
+- Jayson is registered on Apple Developer + Google Play — ready to publish under Directive OS account
+
+### Listings Feed for Mobile App
+- Two options: CRM direct (VaultRE/Rex API — cleanest, instant) OR portal feed (REA/Domain — simpler, slight delay)
+- Both already in quote builder as separate line items ($900 / $500)
+- These stack naturally with the mobile app add-on
+
+### HighSpec Properties — Prospect Pipeline
+- **Agency**: HighSpec Properties (buyer's agency, Sydney)
+- **Contact**: Amanda Gould — Director | amanda@highspecproperties.com.au | +61 410 608 352
+- **Marie** = Amanda's assistant — Jayson spoke to Marie on 14 April 2026
+- **Health Check**: Score 5.4/10 — Full Rebuild Recommended | Red flags: Page Speed 4/10, Design 5/10, Lead Conversion 5/10
+- **Email sequence drafted** (3 emails — DO NOT send calculator link to prospects):
+  - Email 1 (send now): Personalised intro, reference Marie, attach health check PDF — no pricing
+  - Email 2 (+3 days): Reply in same thread, attach web quote PDF — mention rebuild + Sarah AI
+  - Email 3 (+7 days): Short soft close — "happy to leave you to it" — direct mobile number only
+
+### White-Label Real Estate Demo App — PENDING 🔜
+- Build a NEW Expo artifact (separate from Command Bridge)
+- Purpose: sales demo shown to prospects — "this is what your branded app would look like"
+- Pre-loaded with ~8 fake Sydney listings, fictional agency (name TBD — user to confirm)
+- Listing feed: mock REA-format data with real suburb names
+- White-label config file: swap name, logo, colours, feed URL in 30 mins per client
+- Jayson is already registered on Apple Dev + Google Play — ready to submit
+
+---
+
 ## Next Steps (Priority Order)
 
-### 1. Clerk Auth
+### 1. White-Label Real Estate Demo App — NEXT BUILD 🔜
+- Build a NEW Expo app (separate from Command Bridge) as a sales demo
+- Show prospects what their branded property listing app would look like
+- Pre-loaded with ~8 fake Sydney listings, fictional agency branding
+- Agency name: TBD (user to confirm — "Premier Properties", "Elite Residential", or match "Meridian Group")
+- Features: Home, Listings (search/filter), Property Detail, Contact, Saved properties, Push notifications
+- Config file at top to white-label in 30 mins (name, logo, colours, listings feed URL)
+- This becomes the template cloned for every paid client app build
+
+### 2. Clerk Auth
 - Real user authentication replacing demo middleware
 - Needs: Clerk account + `CLERK_PUBLISHABLE_KEY` + `CLERK_SECRET_KEY`
 
-### 2. Stripe Checkout Wiring
+### 3. Stripe Checkout Wiring
 - Connect "Proceed to Payment" to real Stripe checkout session
 - Keys already configured in environment
 
-### 3. Multi-Agency Support
+### 4. Multi-Agency Support
 - Agency lookup by Twilio number for voice calls (currently hardcoded `agencyId: 1`)
 - Requires Clerk auth to be live first
 
