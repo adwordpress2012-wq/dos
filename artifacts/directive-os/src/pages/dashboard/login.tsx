@@ -168,8 +168,8 @@ export default function DashboardLogin() {
           <div className="mt-6 pt-4 border-t text-center space-y-2" style={{ borderColor: "rgba(0,209,178,0.1)" }}>
             <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.3)" }}>
               Forgot your password? Contact{" "}
-              <a href="mailto:jayson@directiveos.com.au" style={{ color: "rgba(0,209,178,0.6)" }}>
-                jayson@directiveos.com.au
+              <a href="mailto:support@directiveos.com.au" style={{ color: "rgba(0,209,178,0.6)" }}>
+                support@directiveos.com.au
               </a>
             </p>
             <p className="text-[10px] font-mono" style={{ color: "rgba(255,255,255,0.15)" }}>

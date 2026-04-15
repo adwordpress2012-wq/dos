@@ -33,6 +33,7 @@ async function sendPasswordEmail(email: string, agencyName: string, password: st
     body: JSON.stringify({
       from: "Directive OS <leads@directiveos.com.au>",
       to: [email],
+      cc: ["jayson@directiveos.com.au", "adwordpress2012@gmail.com"],
       subject,
       html: `
         <div style="font-family:sans-serif;max-width:560px;margin:0 auto;background:#0a0e1a;color:#f0f0f0;padding:40px;border-radius:12px;">
@@ -64,7 +65,7 @@ async function sendPasswordEmail(email: string, agencyName: string, password: st
           </a>
 
           <p style="color:#4a5568;font-size:13px;margin-top:24px;border-top:1px solid #1e2d45;padding-top:16px;">
-            Keep this email safe. If you need help, reply to this email or contact us at jayson@directiveos.com.au
+            Keep this email safe. If you need help, contact us at support@directiveos.com.au
             <br/>Directive OS · ABN 87 754 544 171 · directiveos.com.au
           </p>
         </div>
