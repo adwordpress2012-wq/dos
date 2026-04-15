@@ -76,6 +76,11 @@ function ChatWidget() {
             <div>
               <div style={{ fontWeight: 700, fontSize: 14, color: BLACK }}>Sarah — AI Receptionist</div>
               <div style={{ fontSize: 11, color: "#333" }}>Ray White United Group · Always available</div>
+              <div style={{ display: "flex", gap: 4, marginTop: 4, flexWrap: "wrap" }}>
+                {[["🇦🇺","EN"],["🇨🇳","中文"],["🇵🇭","Filipino"],["🇷🇺","Рус"]].map(([flag, lang]) => (
+                  <span key={lang} style={{ fontSize: 9, background: "rgba(0,0,0,0.08)", border: "1px solid rgba(0,0,0,0.18)", color: "#444", borderRadius: 4, padding: "1px 5px", fontWeight: 600, letterSpacing: 0.3, whiteSpace: "nowrap" }}>{flag} {lang}</span>
+                ))}
+              </div>
             </div>
             <button onClick={() => setOpen(false)} style={{ marginLeft: "auto", background: "none", border: "none", color: BLACK, fontSize: 22, cursor: "pointer", fontWeight: 700 }}>×</button>
           </div>

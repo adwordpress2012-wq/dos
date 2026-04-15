@@ -481,9 +481,14 @@ export default function BoulevardGroupLanding() {
         <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, opacity: 0.05, backgroundImage: "repeating-linear-gradient(90deg, #fff 0, #fff 1px, transparent 1px, transparent 80px)", pointerEvents: "none" }} />
 
         <div style={{ maxWidth: 780, margin: "0 auto", position: "relative" }}>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: `${GOLD}18`, border: `1px solid ${GOLD}44`, borderRadius: 20, padding: "6px 18px", marginBottom: 28 }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: `${GOLD}18`, border: `1px solid ${GOLD}44`, borderRadius: 20, padding: "6px 18px", marginBottom: 12 }}>
             <div style={{ width: 7, height: 7, borderRadius: "50%", background: GOLD }} />
             <span style={{ color: GOLD, fontSize: 12, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase" }}>Sarah — AI Receptionist · Available 24/7</span>
+          </div>
+          <div style={{ display: "flex", justifyContent: "center", gap: 6, marginBottom: 20, flexWrap: "wrap" }}>
+            {[["🇦🇺","English"],["🇨🇳","中文"],["🇵🇭","Filipino"],["🇷🇺","Русский"]].map(([flag, lang]) => (
+              <span key={lang} style={{ fontSize: 10, background: `${GOLD}14`, border: `1px solid ${GOLD}40`, color: GOLD, borderRadius: 6, padding: "2px 8px", fontWeight: 600, letterSpacing: 0.3 }}>{flag} {lang}</span>
+            ))}
           </div>
 
           <h1 style={{ color: WHITE, fontSize: "clamp(32px, 5vw, 54px)", fontWeight: 800, lineHeight: 1.15, margin: "0 0 20px", fontFamily: "Georgia, serif" }}>

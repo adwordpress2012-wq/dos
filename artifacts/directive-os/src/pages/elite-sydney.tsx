@@ -293,9 +293,14 @@ export default function EliteSydneyLanding() {
 
         <div style={{ maxWidth: 800, margin: "0 auto", textAlign: "center", position: "relative" }}>
           {/* Live badge */}
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(251,183,1,0.15)", border: `1px solid ${GOLD}55`, borderRadius: 24, padding: "7px 20px", marginBottom: 32 }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(251,183,1,0.15)", border: `1px solid ${GOLD}55`, borderRadius: 24, padding: "7px 20px", marginBottom: 12 }}>
             <div style={{ width: 8, height: 8, borderRadius: "50%", background: GOLD, animation: "glow-pulse 2s infinite" }} />
             <span style={{ color: GOLD, fontSize: 12, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>Sarah — AI Receptionist · Available 24/7</span>
+          </div>
+          <div style={{ display: "flex", justifyContent: "center", gap: 6, marginBottom: 24, flexWrap: "wrap" }}>
+            {[["🇦🇺","English"],["🇨🇳","中文"],["🇵🇭","Filipino"],["🇷🇺","Русский"]].map(([flag, lang]) => (
+              <span key={lang} style={{ fontSize: 10, background: "rgba(251,183,1,0.12)", border: `1px solid ${GOLD}44`, color: GOLD, borderRadius: 6, padding: "2px 8px", fontWeight: 600, letterSpacing: 0.3 }}>{flag} {lang}</span>
+            ))}
           </div>
 
           <h1 style={{ color: WHITE, fontSize: "clamp(36px,5.5vw,62px)", fontWeight: 900, lineHeight: 1.1, margin: "0 0 24px", letterSpacing: "-0.02em" }}>

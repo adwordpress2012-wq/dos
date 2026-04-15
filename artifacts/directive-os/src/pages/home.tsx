@@ -166,6 +166,11 @@ function DemoChatWidget() {
               <div>
                 <div className="text-sm font-semibold text-foreground">Sarah · Directive OS</div>
                 <div className="text-xs text-muted-foreground">AI Receptionist · Available 24/7</div>
+                <div className="flex items-center gap-1 mt-1 flex-wrap">
+                  {[["🇦🇺","EN"],["🇨🇳","中文"],["🇵🇭","Filipino"],["🇷🇺","Рус"]].map(([flag, lang]) => (
+                    <span key={lang} style={{ fontSize: 9, background: "rgba(0,209,178,0.12)", border: "1px solid rgba(0,209,178,0.25)", color: "#00d1b2", borderRadius: 4, padding: "1px 5px", fontWeight: 600, letterSpacing: 0.3, whiteSpace: "nowrap" }}>{flag} {lang}</span>
+                  ))}
+                </div>
               </div>
             </div>
             <button onClick={() => setOpen(false)} className="text-muted-foreground hover:text-foreground transition-colors">
@@ -303,6 +308,11 @@ export default function Home() {
               <div className="text-left">
                 <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Or test the AI right now — call Sarah</div>
                 <div className="font-bold text-foreground tracking-wide">02 5850 4038</div>
+                <div className="flex items-center gap-1 mt-1 flex-wrap">
+                  {[["🇦🇺","EN"],["🇨🇳","中文"],["🇵🇭","Filipino"],["🇷🇺","Рус"]].map(([flag, lang]) => (
+                    <span key={lang} style={{ fontSize: 9, background: "rgba(0,209,178,0.12)", border: "1px solid rgba(0,209,178,0.25)", color: "#00d1b2", borderRadius: 4, padding: "1px 5px", fontWeight: 600, letterSpacing: 0.3, whiteSpace: "nowrap" }}>{flag} {lang}</span>
+                  ))}
+                </div>
               </div>
               <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />
             </a>
