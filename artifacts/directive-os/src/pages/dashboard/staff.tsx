@@ -36,7 +36,7 @@ export default function Staff() {
   const [form, setForm] = useState({ name: "", email: "", role: "sales_executive" as StaffRole });
   const queryClient = useQueryClient();
 
-  const { data: staff, isLoading } = useGetStaff();
+  const { data: staffList, isLoading } = useGetStaff();
   const inviteStaff = useInviteStaff({
     mutation: {
       onSuccess: () => {
@@ -55,7 +55,7 @@ export default function Staff() {
     },
   });
 
-  const totalSeats = staff?.length ?? 0;
+  const totalSeats = staffList?.length ?? 0;
   const monthlyTotal = 299 + Math.max(0, totalSeats - 1) * 89;
 
   function RoleBadge({ role }: { role: string }) {
@@ -138,14 +138,14 @@ export default function Staff() {
           <div className="p-6 space-y-3">
             {[...Array(4)].map((_, i) => <div key={i} className="h-16 bg-muted rounded-lg animate-pulse" />)}
           </div>
-        ) : !staff?.length ? (
+        ) : !staffList?.length ? (
           <div className="py-16 text-center">
             <Users className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
             <div className="text-muted-foreground">No team members yet. Invite your first member.</div>
           </div>
         ) : (
           <div className="divide-y divide-border">
-            {staff.map(member => (
+            {staffList.map(member => (
               <div key={member.id} className="flex items-center gap-4 px-6 py-4">
                 <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
                   <span className="text-sm font-semibold text-foreground">{member.name[0]?.toUpperCase()}</span>
