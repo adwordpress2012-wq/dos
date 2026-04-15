@@ -461,7 +461,7 @@ export default function MarketingHub() {
                     ["Published under", "Directive OS", "Your agency's name"],
                     ["Visible in App Store as", "Command Bridge", "e.g. \"Ray White Castle Hill\""],
                     ["Purpose", "Manage the AI system", "Search listings & contact Sarah"],
-                    ["Cost", "Included in plan", "Quoted per agency tier"],
+                    ["Cost", "Included in plan", "See tier pricing below ↓"],
                     ["Push notifications to", "Agent alerts", "Buyer broadcasts"],
                     ["Sarah AI built in", "Yes — for agents", "Yes — for buyers"],
                   ].map(([feature, cmd, buyer], i) => (
@@ -473,6 +473,44 @@ export default function MarketingHub() {
                   ))}
                 </tbody>
               </table>
+            </div>
+
+            {/* App Add-On Tier Pricing */}
+            <div style={{ marginTop: 20, background: NAVY3, border: `1px solid ${BORDER}`, borderRadius: 16, overflow: "hidden" }}>
+              <div style={{ padding: "16px 24px", borderBottom: `1px solid ${BORDER}`, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
+                <div style={{ fontWeight: 700, fontSize: 15 }}>Branded Buyer App — Pricing by Tier</div>
+                <a href="/marketing/web-quote" style={{ fontSize: 12, color: TEAL, textDecoration: "none", fontWeight: 600 }}>Open Quote Builder →</a>
+              </div>
+              <div style={{ overflowX: "auto" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+                  <thead>
+                    <tr style={{ background: "rgba(255,255,255,0.02)" }}>
+                      <th style={{ padding: "12px 24px", textAlign: "left", color: SLATE, fontWeight: 600, fontSize: 12 }}></th>
+                      <th style={{ padding: "12px 24px", textAlign: "center", color: "#94a3b8", fontWeight: 700, fontSize: 12 }}>Small<br /><span style={{ fontWeight: 400, fontSize: 10 }}>1–5 agents</span></th>
+                      <th style={{ padding: "12px 24px", textAlign: "center", color: "#94a3b8", fontWeight: 700, fontSize: 12 }}>Medium<br /><span style={{ fontWeight: 400, fontSize: 10 }}>6–20 agents</span></th>
+                      <th style={{ padding: "12px 24px", textAlign: "center", color: "#94a3b8", fontWeight: 700, fontSize: 12 }}>Large / Franchise<br /><span style={{ fontWeight: 400, fontSize: 10 }}>20+ agents</span></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[
+                      { label: "Sarah setup",        vals: ["$1,800",    "$2,500",    "$4,500"]   },
+                      { label: "Sarah monthly",       vals: ["+$299/mo",  "+$399/mo",  "+$599/mo"] },
+                      { label: "Mobile App setup",    vals: ["$4,500",    "$6,500",    "$12,500"]  },
+                      { label: "Mobile App monthly",  vals: ["+$149/mo",  "+$199/mo",  "+$299/mo"] },
+                    ].map(({ label, vals }, i) => (
+                      <tr key={label} style={{ borderTop: `1px solid ${BORDER}`, background: i % 2 === 0 ? "transparent" : "rgba(255,255,255,0.01)" }}>
+                        <td style={{ padding: "12px 24px", color: "#e2e8f0", fontWeight: 600, fontSize: 12 }}>{label}</td>
+                        {vals.map((v, j) => (
+                          <td key={j} style={{ padding: "12px 24px", textAlign: "center", color: TEAL, fontWeight: 700, fontSize: 14 }}>{v}</td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div style={{ padding: "12px 24px", borderTop: `1px solid ${BORDER}`, fontSize: 11, color: "#475569" }}>
+                Mobile App monthly is flat — no per-buyer or per-seat fees. Sarah monthly includes 1 seat; additional seats charged per tier.
+              </div>
             </div>
 
             {/* Pitch box */}
