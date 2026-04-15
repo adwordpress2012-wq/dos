@@ -259,27 +259,27 @@ export default function DemoStandardPage() {
               {
                 num: "01",
                 icon: "📞",
-                title: "Someone calls your office line",
-                body: "A buyer, a vendor, a tenant — they ring your office. Could be during an inspection, after hours, Sunday night. It doesn't matter. Sarah picks up in under 3 seconds. No voicemail. No missed call.",
+                title: "Someone calls your office",
+                body: "A buyer, vendor, or tenant rings your office line — midday, at 7pm, on a Saturday. Instead of ringing out or hitting voicemail, Sarah answers in under 3 seconds. Every time.",
               },
               {
                 num: "02",
                 icon: "🤖",
-                title: "Sarah handles the whole call",
-                body: "\"G'day, [Your Agency] — this is Sarah, how can I help?\" She chats naturally, qualifies the enquiry, answers questions about listings, books inspections, handles rental enquiries. Sounds like a real person. Acts like a great receptionist.",
+                title: "Sarah handles the call",
+                body: "\"G'day, [Your Agency] — this is Sarah, how can I help?\" She qualifies the caller, answers questions about listings, books inspection times, handles rental enquiries. Sounds real, acts professional.",
               },
               {
                 num: "03",
                 icon: "📧",
-                title: "Email straight to your inbox — immediately",
-                body: "The second the call ends, a lead summary hits your email. Caller name, phone number, what they're after, their budget, finance status — and the full word-for-word transcript of the call. Nothing missed.",
+                title: "Email lands in your inbox immediately",
+                body: "The second the call ends, a lead summary email hits your inbox. Caller's name, phone number, what they're looking for, their budget, finance status — and the full word-for-word transcript of the call.",
                 mockup: "email",
               },
               {
                 num: "04",
                 icon: "🔔",
-                title: "Push notification on your phone",
-                body: "Your phone buzzes — even if you're at an auction or an inspection. Tap the notification to open the full lead card. You can see who called, what they said, and call them back with full context. Not blind.",
+                title: "App notification straight to your phone",
+                body: "Your phone buzzes — even if you're at an auction or an inspection. Tap the notification to open the full lead in the app. You can see who called, what they said, and call them back with full context — not blind.",
                 mockup: "app",
               },
             ].map((step, i) => (
@@ -300,22 +300,22 @@ export default function DemoStandardPage() {
                   <p style={{ fontSize: 15, color: SLATE, lineHeight: 1.8, margin: "0 0 24px", maxWidth: 560 }}>{step.body}</p>
 
                   {step.mockup === "email" && (
-                    <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 14, padding: "22px 26px", maxWidth: 520 }}>
-                      <div style={{ fontSize: 11, color: "#2d3748", marginBottom: 16, borderBottom: `1px solid ${BORDER}`, paddingBottom: 14 }}>
-                        <div style={{ marginBottom: 3 }}><span style={{ color: "#2d3748" }}>FROM: </span><span style={{ color: "#3a4a5a" }}>leads@directiveos.com.au</span></div>
-                        <div style={{ marginBottom: 10 }}><span style={{ color: "#2d3748" }}>TO: </span><span style={{ color: "#3a4a5a" }}>you@youragency.com.au</span></div>
-                        <div style={{ color: TEAL, fontWeight: 700, fontSize: 13 }}>🎯 New Lead — Buyer Enquiry</div>
+                    <div style={{ background: "#111827", border: `1px solid ${BORDER}`, borderRadius: 12, padding: "20px 24px", maxWidth: 520, fontFamily: "monospace" }}>
+                      <div style={{ fontSize: 11, color: "#4b5563", marginBottom: 16, borderBottom: `1px solid ${BORDER}`, paddingBottom: 12, fontFamily: "sans-serif" }}>
+                        <div style={{ marginBottom: 3 }}><span style={{ color: "#4b5563" }}>FROM: </span><span style={{ color: "#6b7280" }}>leads@directiveos.com.au</span></div>
+                        <div style={{ marginBottom: 8 }}><span style={{ color: "#4b5563" }}>TO: </span><span style={{ color: "#6b7280" }}>you@youragency.com.au</span></div>
+                        <div style={{ color: TEAL, fontWeight: 700, fontSize: 13, fontFamily: "sans-serif" }}>🔴 New Lead — Buyer Enquiry · Western Sydney</div>
                       </div>
-                      <div style={{ fontSize: 13, lineHeight: 2 }}>
-                        <div><span style={{ color: "#3a4a5a" }}>Caller: </span><span style={{ color: "#cdd8e8", fontWeight: 600 }}>Mark Thompson</span></div>
-                        <div><span style={{ color: "#3a4a5a" }}>Phone: </span><span style={{ color: TEAL, fontWeight: 700 }}>0412 xxx xxx</span></div>
-                        <div><span style={{ color: "#3a4a5a" }}>Enquiry: </span><span style={{ color: "#a0aec0" }}>3-bed house, budget $750K</span></div>
-                        <div><span style={{ color: "#3a4a5a" }}>Finance: </span><span style={{ color: "#4ade80", fontWeight: 700 }}>Pre-approved ✓</span></div>
-                        <div style={{ marginTop: 14, paddingTop: 14, borderTop: `1px solid ${BORDER}` }}>
-                          <div style={{ fontSize: 10, letterSpacing: 1.5, color: "#2d3748", marginBottom: 8, fontWeight: 700 }}>FULL TRANSCRIPT</div>
-                          <div style={{ fontSize: 12, color: "#3a4a5a" }}><span style={{ color: TEAL }}>Sarah: </span>G'day, this is Sarah — how can I help?</div>
-                          <div style={{ fontSize: 12, color: "#3a4a5a" }}><span style={{ color: "#4a5568" }}>Mark: </span>Hi, I'm looking at a 3-bed in the area...</div>
-                          <div style={{ fontSize: 12, color: "#1e2a3a", fontStyle: "italic", marginTop: 4 }}>+ full conversation below...</div>
+                      <div style={{ fontSize: 13, color: "#6b7280", lineHeight: 2, fontFamily: "sans-serif" }}>
+                        <div><span style={{ color: "#4b5563" }}>Caller: </span><span style={{ color: "#d1d5db", fontWeight: 600 }}>Mark Thompson</span></div>
+                        <div><span style={{ color: "#4b5563" }}>Phone: </span><span style={{ color: TEAL, fontWeight: 700 }}>0412 xxx xxx</span></div>
+                        <div><span style={{ color: "#4b5563" }}>Enquiry: </span><span style={{ color: "#9ca3af" }}>3-bed house in Rooty Hill, budget $750K</span></div>
+                        <div><span style={{ color: "#4b5563" }}>Finance: </span><span style={{ color: "#4ade80", fontWeight: 700 }}>Pre-approved ✓</span></div>
+                        <div style={{ marginTop: 12, paddingTop: 12, borderTop: `1px solid ${BORDER}` }}>
+                          <div style={{ color: "#374151", marginBottom: 6, fontSize: 11, letterSpacing: 1, fontWeight: 700 }}>TRANSCRIPT</div>
+                          <div style={{ fontSize: 12 }}><span style={{ color: TEAL }}>Sarah: </span><span style={{ color: "#4b5563" }}>G'day, [Your Agency], this is Sarah — how can I help?</span></div>
+                          <div style={{ fontSize: 12 }}><span style={{ color: "#6b7280" }}>Mark: </span><span style={{ color: "#374151" }}>Hi, I saw your listing in the area...</span></div>
+                          <div style={{ fontSize: 12, color: "#1f2937", fontStyle: "italic", marginTop: 4 }}>+ full conversation below...</div>
                         </div>
                       </div>
                     </div>
@@ -323,21 +323,23 @@ export default function DemoStandardPage() {
 
                   {step.mockup === "app" && (
                     <div style={{ maxWidth: 300 }}>
+                      {/* Push notification */}
                       <div style={{ background: "#1c1c1e", borderRadius: 16, padding: "14px 16px", marginBottom: 12, border: `1px solid ${BORDER}`, display: "flex", gap: 12, alignItems: "flex-start" }}>
                         <div style={{ width: 44, height: 44, borderRadius: 11, background: `linear-gradient(135deg, ${TEAL}, #0891b2)`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 }}>🎯</div>
                         <div>
-                          <div style={{ fontSize: 13, fontWeight: 700, color: WHITE, marginBottom: 3 }}>New Lead — Sarah answered</div>
-                          <div style={{ fontSize: 12, color: "#6b7280", lineHeight: 1.55 }}>Mark Thompson · Pre-approved buyer · 3bd $750K · Tap to view</div>
-                          <div style={{ fontSize: 11, color: "#374151", marginTop: 5 }}>just now · Directive OS</div>
+                          <div style={{ fontSize: 13, fontWeight: 700, color: WHITE, marginBottom: 3 }}>New Lead — Sarah</div>
+                          <div style={{ fontSize: 12, color: "#6b7280", lineHeight: 1.55 }}>Mark Thompson called · Pre-approved · 3bd Rooty Hill $750K · Tap to view full transcript</div>
+                          <div style={{ fontSize: 11, color: "#374151", marginTop: 4 }}>now · Your Agency</div>
                         </div>
                       </div>
+                      {/* App lead card */}
                       <div style={{ background: "#0d1017", border: `1px solid ${TEAL}33`, borderRadius: 14, padding: "18px 20px" }}>
                         <div style={{ fontSize: 10, fontWeight: 700, color: TEAL, letterSpacing: 2, marginBottom: 10 }}>COMMAND BRIDGE APP</div>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
                           <span style={{ fontWeight: 800, color: WHITE, fontSize: 15 }}>Mark Thompson</span>
                           <span style={{ background: "#4ade8018", color: "#4ade80", fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 20, border: "1px solid #4ade8033" }}>Pre-approved</span>
                         </div>
-                        <div style={{ fontSize: 12, color: "#4a5568", marginBottom: 14 }}>0412 xxx xxx · 3bd · $750K budget</div>
+                        <div style={{ fontSize: 12, color: "#4b5563", marginBottom: 14 }}>0412 xxx xxx · 3bd · Rooty Hill · $750K</div>
                         <div style={{ display: "flex", gap: 8 }}>
                           <div style={{ flex: 1, background: TEAL, color: BG, textAlign: "center", padding: "10px 0", borderRadius: 8, fontSize: 12, fontWeight: 900, cursor: "pointer" }}>📞 Call Back</div>
                           <div style={{ flex: 1, background: CARD, color: SLATE, textAlign: "center", padding: "10px 0", borderRadius: 8, fontSize: 12, fontWeight: 600, border: `1px solid ${BORDER}`, cursor: "pointer" }}>📄 Transcript</div>
