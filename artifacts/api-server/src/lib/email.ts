@@ -9,6 +9,9 @@ const FROM = "Directive OS | New Lead Captured <leads@directiveos.com.au>";
 interface ConversationSummary {
   language: string;
   callerName: string | null;
+  capturedName: string | null;
+  capturedEmail: string | null;
+  capturedPhone: string | null;
   intent: string;
   keyDetails: string[];
   contactsCaptured: string[];
@@ -36,19 +39,26 @@ Return ONLY a valid JSON object with this exact shape — no markdown, no code b
 {
   "language": "the primary language detected (e.g. English, Arabic, Mandarin, Vietnamese, Hindi, Korean, Spanish, Filipino, Russian)",
   "callerName": "full name if captured, otherwise null",
+  "capturedName": "the caller's full name exactly as confirmed in the conversation — null if not captured",
+  "capturedEmail": "the exact email address confirmed in the conversation in standard format (e.g. john.smith@gmail.com) — null if not captured or not confirmed. CRITICAL: this must be a real email address in user@domain.com format. Never put a person's name here.",
+  "capturedPhone": "the exact phone number confirmed in the conversation — null if not captured",
   "intent": "one of: buyer | tenant | vendor | landlord | general_enquiry | sales_enquiry",
   "keyDetails": ["array of 3-6 concise bullet point strings summarising what was discussed — always in English"],
-  "contactsCaptured": ["list captured contact info e.g. 'Name: Ahmed Hassan', 'Phone: 0412 345 678', 'Email: ahmed@email.com' — empty array if none captured"],
+  "contactsCaptured": ["human-readable list of what was captured e.g. 'Name: Ahmed Hassan', 'Phone: 0412 345 678', 'Email: ahmed@gmail.com' — empty array if none captured"],
   "outcome": "one sentence in English describing the outcome of the conversation",
   "nextAction": "one sentence in English describing the recommended next action for the agency",
   "isEnglish": true or false (true only if the conversation was primarily in English),
   "translatedMessages": [
-    {"role": "user", "content": "English translation of each caller/visitor message"},
-    {"role": "assistant", "content": "English translation of each Sarah message (if not already English)"}
+    {"role": "user", "content": "English translation of this message"},
+    {"role": "assistant", "content": "English translation of this message"}
   ]
 }
 
-IMPORTANT: The translatedMessages array must contain ALL messages from the transcript in the same order, each translated to natural English. If the conversation was already in English, still include the messages as-is in translatedMessages.`;
+IMPORTANT RULES:
+1. translatedMessages must contain ALL messages in the same order — translate each to natural English. If the conversation was in English, still include as-is.
+2. capturedEmail must ONLY contain a valid email address (user@domain.com) that was actually confirmed in the conversation. Never use a person's name as an email.
+3. If the email was spoken aloud (e.g. "john at gmail dot com") — reconstruct it as john@gmail.com in capturedEmail.
+4. If any contact detail was NOT explicitly confirmed in the conversation, set it to null — do not guess.`;
 
   try {
     const res = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -439,10 +449,18 @@ export async function sendVoiceTranscriptEmail(opts: {
   callerPhone?: string | null;
 }): Promise<void> {
   const fullText = opts.messages.map(m => m.content).join(" ");
-  const { email, phone, name } = detectContact(fullText);
   const intel = detectLeadIntelligence(fullText);
 
-  const callerLabel = opts.callerName ?? name ?? email ?? phone ?? "Unknown Caller";
+  // Generate AI summary first — it is the authoritative source for contact details
+  const summary = await generateEnglishSummary(opts.messages, "voice", opts.duration);
+
+  // AI-extracted contacts take priority over regex-based detection
+  const { email: regexEmail, phone: regexPhone, name: regexName } = detectContact(fullText);
+  const callerName = summary?.capturedName ?? opts.callerName ?? regexName;
+  const callerEmail = summary?.capturedEmail ?? regexEmail;
+  const callerPhone = summary?.capturedPhone ?? opts.callerPhone ?? regexPhone;
+
+  const callerLabel = callerName ?? callerEmail ?? callerPhone ?? "Unknown Caller";
   const subjectPrefix = opts.callbackNeeded
     ? "⚠️ CALLBACK NEEDED — Price Enquiry: "
     : intel.hasPropertyToSell ? "[POTENTIAL LISTING] " : "";
@@ -450,16 +468,14 @@ export async function sendVoiceTranscriptEmail(opts: {
 
   const to = [...new Set([opts.agencyEmail, ...OWNER_EMAILS])];
 
-  const summary = await generateEnglishSummary(opts.messages, "voice", opts.duration);
-
   const html = buildEmailHtml({
     agencyName: opts.agencyName,
     channel: "voice",
     duration: opts.duration,
     messageCount: opts.messages.length,
-    callerName: name,
-    callerEmail: email,
-    callerPhone: phone,
+    callerName,
+    callerEmail,
+    callerPhone,
     leadType: opts.leadType,
     intel,
     messages: opts.messages,
@@ -477,10 +493,18 @@ export async function sendChatTranscriptEmail(opts: {
   leadType?: string;
 }): Promise<void> {
   const fullText = opts.messages.map(m => m.content).join(" ");
-  const { email, phone, name } = detectContact(fullText);
   const intel = detectLeadIntelligence(fullText);
 
-  const contactLabel = name ?? email ?? phone ?? "Website Visitor";
+  // Generate AI summary first — it is the authoritative source for contact details
+  const summary = await generateEnglishSummary(opts.messages, "chat");
+
+  // AI-extracted contacts take priority over regex-based detection
+  const { email: regexEmail, phone: regexPhone, name: regexName } = detectContact(fullText);
+  const callerName = summary?.capturedName ?? regexName;
+  const callerEmail = summary?.capturedEmail ?? regexEmail;
+  const callerPhone = summary?.capturedPhone ?? regexPhone;
+
+  const contactLabel = callerName ?? callerEmail ?? callerPhone ?? "Website Visitor";
   const subjectPrefix = intel.hasPropertyToSell ? "[POTENTIAL LISTING] " : "";
   const subject = `${subjectPrefix}New Lead: ${contactLabel} · ${opts.agencyName}`;
 
@@ -488,15 +512,13 @@ export async function sendChatTranscriptEmail(opts: {
     ? [...new Set([opts.agencyEmail, ...OWNER_EMAILS])]
     : OWNER_EMAILS;
 
-  const summary = await generateEnglishSummary(opts.messages, "chat");
-
   const html = buildEmailHtml({
     agencyName: opts.agencyName,
     channel: "chat",
     messageCount: opts.messages.length,
-    callerName: name,
-    callerEmail: email,
-    callerPhone: phone,
+    callerName,
+    callerEmail,
+    callerPhone,
     leadType: opts.leadType,
     intel,
     messages: opts.messages,
