@@ -254,7 +254,16 @@ export default function DemoThreePage() {
         display: "flex", alignItems: "center", justifyContent: "space-between", height: 72,
         boxShadow: "0 2px 20px rgba(0,0,0,0.5)"
       }}>
-        <DOSLogo size={36} />
+        <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+          <a href="https://directiveos.com.au" target="_blank" rel="noreferrer" style={{
+            color: "#444", fontSize: 13, fontWeight: 600, textDecoration: "none", letterSpacing: 0.2,
+            display: "flex", alignItems: "center", gap: 5
+          }}
+            onMouseOver={e => (e.currentTarget.style.color = TEAL)}
+            onMouseOut={e => (e.currentTarget.style.color = "#444")}
+          >← directiveos.com.au</a>
+          <DOSLogo size={36} />
+        </div>
         <div style={{ display: "flex", gap: 28, fontSize: 14 }}>
           {["Buy", "Sell", "Rent", "About Agent"].map(l => (
             <span key={l} style={{ color: "#555", fontWeight: 500, cursor: "default" }}>{l}</span>
