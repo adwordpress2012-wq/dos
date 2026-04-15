@@ -4,6 +4,145 @@ import { generateListingServicesPDF } from "./listing-pdf";
 const OWNER_EMAILS = ["adwordpress2012@gmail.com", "jayson@directiveos.com.au"];
 const FROM = "Directive OS | New Lead Captured <leads@directiveos.com.au>";
 
+// ─── AI English Summary ───────────────────────────────────────────────────────
+
+interface ConversationSummary {
+  language: string;
+  callerName: string | null;
+  intent: string;
+  keyDetails: string[];
+  contactsCaptured: string[];
+  outcome: string;
+  nextAction: string;
+  isEnglish: boolean;
+}
+
+async function generateEnglishSummary(
+  messages: TranscriptMessage[],
+  channel: "voice" | "chat",
+  durationSeconds?: number
+): Promise<ConversationSummary | null> {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey || messages.length === 0) return null;
+
+  const transcriptText = messages
+    .map(m => `${m.role === "user" ? "Caller/Visitor" : "Sarah (AI)"}: ${m.content}`)
+    .join("\n");
+
+  const systemPrompt = `You are an assistant that analyses real estate AI receptionist conversations and produces a structured English summary for the agency. Always respond in English regardless of the conversation language.
+
+Return ONLY a valid JSON object with this exact shape:
+{
+  "language": "the primary language detected (e.g. English, Arabic, Mandarin, Vietnamese, etc.)",
+  "callerName": "full name if captured, otherwise null",
+  "intent": "one of: buyer | tenant | vendor | landlord | general_enquiry | sales_enquiry",
+  "keyDetails": ["array of 3-6 bullet point strings summarising what was discussed — always in English"],
+  "contactsCaptured": ["list what was captured e.g. 'Name: Ahmed Hassan', 'Phone: 0412 345 678', 'Email: ahmed@email.com' — empty array if none"],
+  "outcome": "one sentence in English describing the outcome of the conversation",
+  "nextAction": "one sentence in English describing the recommended next action for the agency",
+  "isEnglish": true/false (true if the conversation was in English)
+}`;
+
+  try {
+    const res = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: `Channel: ${channel}${durationSeconds ? ` | Duration: ${Math.floor(durationSeconds / 60)}m ${durationSeconds % 60}s` : ""}\n\nTranscript:\n${transcriptText}` },
+        ],
+        temperature: 0.2,
+        max_tokens: 600,
+      }),
+    });
+
+    if (!res.ok) {
+      logger.warn({ status: res.status }, "OpenAI summary call failed");
+      return null;
+    }
+
+    const data = await res.json() as { choices: Array<{ message: { content: string } }> };
+    const raw = data.choices?.[0]?.message?.content ?? "";
+    const jsonMatch = raw.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) return null;
+    return JSON.parse(jsonMatch[0]) as ConversationSummary;
+  } catch (err) {
+    logger.warn({ err }, "Failed to generate English summary");
+    return null;
+  }
+}
+
+function buildSummaryBlock(summary: ConversationSummary): string {
+  const intentMap: Record<string, string> = {
+    buyer: "🏠 Buyer",
+    tenant: "🔑 Tenant",
+    vendor: "🏷️ Vendor / Potential Listing",
+    landlord: "🏢 Landlord",
+    general_enquiry: "💬 General Enquiry",
+    sales_enquiry: "📣 Sales / Partnership Enquiry",
+  };
+  const intentLabel = intentMap[summary.intent] ?? summary.intent;
+  const langFlag = summary.isEnglish ? "" : ` 🌐 (translated from ${summary.language})`;
+
+  const keyDetailRows = summary.keyDetails.map(d =>
+    `<li style="margin-bottom:5px;font-size:14px;color:#1f2937;">${d}</li>`
+  ).join("");
+
+  const contactRows = summary.contactsCaptured.length > 0
+    ? summary.contactsCaptured.map(c =>
+        `<span style="display:inline-block;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:3px 10px;font-size:13px;font-weight:600;color:#15803d;margin:2px;">${c}</span>`
+      ).join("")
+    : `<span style="color:#9ca3af;font-size:13px;">No contact details captured</span>`;
+
+  return `
+  <!-- English Summary Block -->
+  <div style="padding:20px 28px;border-bottom:1px solid #e5e7eb;background:#f0fdf4;">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+      <div style="background:#16a34a;border-radius:6px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">📋</div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#15803d;text-transform:uppercase;letter-spacing:0.5px;">Conversation Summary — English${langFlag}</div>
+        <div style="font-size:11px;color:#6b7280;margin-top:1px;">AI-generated · ${summary.language} conversation</div>
+      </div>
+    </div>
+
+    <table style="width:100%;font-size:13px;border-collapse:collapse;margin-bottom:14px;">
+      <tr>
+        <td style="padding:6px 0;color:#6b7280;font-weight:600;width:130px;vertical-align:top;">Caller Name</td>
+        <td style="padding:6px 0;font-weight:700;color:#111;">${summary.callerName ?? "—"}</td>
+      </tr>
+      <tr>
+        <td style="padding:6px 0;color:#6b7280;font-weight:600;vertical-align:top;">Intent</td>
+        <td style="padding:6px 0;font-weight:700;color:#111;">${intentLabel}</td>
+      </tr>
+    </table>
+
+    <div style="margin-bottom:12px;">
+      <div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Key Points</div>
+      <ul style="margin:0;padding-left:18px;">${keyDetailRows}</ul>
+    </div>
+
+    <div style="margin-bottom:12px;">
+      <div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Contacts Captured</div>
+      <div>${contactRows}</div>
+    </div>
+
+    <div style="background:#fff;border:1px solid #bbf7d0;border-radius:8px;padding:12px 14px;margin-bottom:10px;">
+      <div style="font-size:11px;font-weight:700;color:#15803d;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Outcome</div>
+      <div style="font-size:14px;color:#1f2937;">${summary.outcome}</div>
+    </div>
+
+    <div style="background:#fef9c3;border:1px solid #fde047;border-radius:8px;padding:12px 14px;">
+      <div style="font-size:11px;font-weight:700;color:#854d0e;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">⚡ Next Action for Your Team</div>
+      <div style="font-size:14px;color:#1f2937;font-weight:600;">${summary.nextAction}</div>
+    </div>
+  </div>`;
+}
+
 interface TranscriptMessage {
   role: "user" | "assistant";
   content: string;
@@ -148,6 +287,7 @@ function buildEmailHtml(opts: {
   leadType?: string;
   intel?: LeadIntelligence;
   messages: TranscriptMessage[];
+  summary?: ConversationSummary | null;
 }): string {
   const channelLabel = opts.channel === "voice" ? "📞 Voice Call" : "💬 Chat Enquiry";
   const durationLabel = opts.duration
@@ -187,6 +327,8 @@ function buildEmailHtml(opts: {
       <div style="font-size:15px;font-weight:600;color:#00d1b2;text-transform:capitalize;">${opts.leadType}</div>
     </div>` : ""}
   </div>
+
+  ${opts.summary ? buildSummaryBlock(opts.summary) : ""}
 
   <!-- Contact details -->
   <div style="padding:20px 28px;border-bottom:1px solid #e5e7eb;">
@@ -289,6 +431,8 @@ export async function sendVoiceTranscriptEmail(opts: {
 
   const to = [...new Set([opts.agencyEmail, ...OWNER_EMAILS])];
 
+  const summary = await generateEnglishSummary(opts.messages, "voice", opts.duration);
+
   const html = buildEmailHtml({
     agencyName: opts.agencyName,
     channel: "voice",
@@ -300,6 +444,7 @@ export async function sendVoiceTranscriptEmail(opts: {
     leadType: opts.leadType,
     intel,
     messages: opts.messages,
+    summary,
   });
 
   await sendViaResend(to, subject, html);
@@ -324,6 +469,8 @@ export async function sendChatTranscriptEmail(opts: {
     ? [...new Set([opts.agencyEmail, ...OWNER_EMAILS])]
     : OWNER_EMAILS;
 
+  const summary = await generateEnglishSummary(opts.messages, "chat");
+
   const html = buildEmailHtml({
     agencyName: opts.agencyName,
     channel: "chat",
@@ -334,6 +481,7 @@ export async function sendChatTranscriptEmail(opts: {
     leadType: opts.leadType,
     intel,
     messages: opts.messages,
+    summary,
   });
 
   await sendViaResend(to, subject, html);
