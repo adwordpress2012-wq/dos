@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { MOCK_VAULT_SUMMARY } from "../lib/mockVault";
-import { runWeeklyProspector } from "../lib/prospector";
+import { runWeeklyProspector, runLocalProspector } from "../lib/prospector";
 
 const router: IRouter = Router();
 
@@ -33,15 +33,20 @@ router.get("/system/status", (_req, res): void => {
   });
 });
 
-// Manual trigger — POST /api/system/prospect-now (admin only)
+// Manual trigger — Monday Sydney list
 router.post("/system/prospect-now", async (req, res): Promise<void> => {
   const secret = req.headers["x-admin-secret"] ?? req.query.secret;
-  if (secret !== "directive-captain-2024") {
-    res.status(401).json({ error: "Unauthorized" });
-    return;
-  }
-  res.json({ ok: true, message: "Prospect search started — email will arrive shortly." });
+  if (secret !== "directive-captain-2024") { res.status(401).json({ error: "Unauthorized" }); return; }
+  res.json({ ok: true, message: "Sydney prospect search started — email will arrive shortly." });
   void runWeeklyProspector();
+});
+
+// Manual trigger — Wednesday local Western Sydney list
+router.post("/system/prospect-local-now", async (req, res): Promise<void> => {
+  const secret = req.headers["x-admin-secret"] ?? req.query.secret;
+  if (secret !== "directive-captain-2024") { res.status(401).json({ error: "Unauthorized" }); return; }
+  res.json({ ok: true, message: "Local prospect search started — email will arrive shortly." });
+  void runLocalProspector();
 });
 
 export default router;

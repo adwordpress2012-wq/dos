@@ -27,43 +27,65 @@ Automatically finds 10 real estate agencies in Sydney each week and emails a rea
 - `adwordpress2012@gmail.com`
 - `jayson@directiveos.com.au`
 
-## Suburb Cluster Rotation (8 clusters, loops)
+## Two Weekly Lists
+
+### Monday 7am AEST — Multicultural Sydney (Chinese/Filipino/Russian focus)
+Targets suburbs with high Chinese, Filipino, and Russian communities — key multilingual selling point for DOS.
 
 ```
 Week 1: Chatswood & North Shore Chinese Community
 Week 2: Burwood, Strathfield & Inner West Chinese Hub
 Week 3: Hurstville & South Sydney Chinese Community
 Week 4: Cabramatta & Liverpool Filipino Community
-Week 5: Parramatta & Western Sydney
+Week 5: Parramatta & Greater West
 Week 6: Ashfield & Campsie Chinese Community
 Week 7: Ryde & Meadowbank
 Week 8: Box Hill & Hills District Growth Corridor
 ```
 
-To add a suburb cluster, add to the `SUBURB_CLUSTERS` array in `prospector.ts`.
+To add/change: edit the `SYDNEY_CLUSTERS` array in `prospector.ts`.
 
-## Manual Trigger
+### Wednesday 7am AEST — Jayson's Local Area (Greater Western Sydney)
+Jayson's home territory — agencies he can visit in person or call with local knowledge.
 
-To send the email immediately without waiting for Monday:
+```
+Week 1: Penrith & Blue Mountains Gateway
+Week 2: Richmond & Hawkesbury Valley
+Week 3: Blacktown & Seven Hills
+Week 4: Parramatta & Westmead Surrounds
+Week 5: Liverpool & South West Corridor
+Week 6: Fairfield & Cabramatta
+Week 7: Mount Druitt & St Marys
+Week 8: Campbelltown & Macarthur Region
+```
 
+To add/change: edit the `LOCAL_CLUSTERS` array in `prospector.ts`.
+
+## Manual Triggers
+
+**Monday Sydney list** (run anytime):
 ```bash
 curl -X POST https://directiveos.com.au/api/system/prospect-now \
   -H "x-admin-secret: directive-captain-2024"
 ```
 
-Response: `{"ok":true,"message":"Prospect search started — email will arrive shortly."}`
+**Wednesday local list** (run anytime):
+```bash
+curl -X POST https://directiveos.com.au/api/system/prospect-local-now \
+  -H "x-admin-secret: directive-captain-2024"
+```
 
-## Cron Expression
+## Cron Expressions
 
 ```
-"0 22 * * 0"  →  Every Sunday 22:00 UTC = Monday 08:00 AEST
+"0 21 * * 0"  →  Every Sunday 21:00 UTC = Monday 07:00 AEST
+"0 21 * * 2"  →  Every Tuesday 21:00 UTC = Wednesday 07:00 AEST
 ```
 
 Defined in `artifacts/api-server/src/index.ts`:
 ```ts
-cron.schedule("0 22 * * 0", () => {
-  void runWeeklyProspector();
-}, { timezone: "UTC" });
+cron.schedule("0 21 * * 0", () => { void runWeeklyProspector(); }, { timezone: "UTC" });
+cron.schedule("0 21 * * 2", () => { void runLocalProspector(); }, { timezone: "UTC" });
 ```
 
 ## Email Format

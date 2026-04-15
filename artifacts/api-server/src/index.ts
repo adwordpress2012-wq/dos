@@ -3,7 +3,7 @@ import cron from "node-cron";
 import app from "./app";
 import { handleMediaStream } from "./routes/voice";
 import { logger } from "./lib/logger";
-import { runWeeklyProspector } from "./lib/prospector";
+import { runWeeklyProspector, runLocalProspector } from "./lib/prospector";
 
 const rawPort = process.env["PORT"];
 
@@ -44,10 +44,19 @@ wss.on("error", (err) => {
   logger.error({ err }, "WebSocket server error");
 });
 
-// ─── Weekly Prospect List — Every Monday 8am AEST (Sunday 22:00 UTC) ─────────
-cron.schedule("0 22 * * 0", () => {
-  logger.info("Cron: running weekly prospect email");
+// ─── Prospect Lists — Monday & Wednesday 7am AEST ────────────────────────────
+// 7am AEST = 21:00 UTC the night before (UTC+10)
+
+// Monday 7am AEST — Multicultural Sydney suburbs
+cron.schedule("0 21 * * 0", () => {
+  logger.info("Cron: running Monday Sydney prospect list");
   void runWeeklyProspector();
 }, { timezone: "UTC" });
 
-logger.info("Weekly prospect list scheduled — fires every Monday 8am AEST");
+// Wednesday 7am AEST — Jayson's local Western Sydney area
+cron.schedule("0 21 * * 2", () => {
+  logger.info("Cron: running Wednesday local prospect list");
+  void runLocalProspector();
+}, { timezone: "UTC" });
+
+logger.info("Prospect lists scheduled — Monday & Wednesday 7am AEST");

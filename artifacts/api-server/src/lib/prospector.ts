@@ -5,22 +5,33 @@ const openai = new OpenAI({ apiKey: process.env.DOS_API_KEY || process.env.OPENA
 
 const OWNER_EMAILS = ["adwordpress2012@gmail.com", "jayson@directiveos.com.au"];
 
-// Rotate through Sydney suburb clusters week by week
-const SUBURB_CLUSTERS = [
+// ── Monday: Multicultural Sydney clusters (Chinese/Filipino/Russian focus) ────
+const SYDNEY_CLUSTERS = [
   { label: "Chatswood & North Shore Chinese Community", suburbs: "Chatswood, St Leonards, Lane Cove, Willoughby" },
   { label: "Burwood, Strathfield & Inner West Chinese Hub", suburbs: "Burwood, Strathfield, Homebush, Concord" },
   { label: "Hurstville & South Sydney Chinese Community", suburbs: "Hurstville, Kogarah, Rockdale, Banksia" },
   { label: "Cabramatta & Liverpool Filipino Community", suburbs: "Cabramatta, Liverpool, Fairfield, Canley Vale" },
-  { label: "Parramatta & Western Sydney", suburbs: "Parramatta, Westmead, Harris Park, Merrylands" },
+  { label: "Parramatta & Greater West", suburbs: "Parramatta, Westmead, Harris Park, Merrylands" },
   { label: "Ashfield & Campsie Chinese Community", suburbs: "Ashfield, Campsie, Lakemba, Canterbury" },
   { label: "Ryde & Meadowbank", suburbs: "Ryde, Meadowbank, Ermington, West Ryde" },
   { label: "Box Hill & Hills District Growth Corridor", suburbs: "Box Hill, Kellyville, Rouse Hill, Castle Hill" },
 ];
 
-function getThisWeeksCluster(): { label: string; suburbs: string } {
-  // Rotate based on ISO week number so it's consistent across restarts
+// ── Wednesday: Jayson's local area — Greater Western Sydney ──────────────────
+const LOCAL_CLUSTERS = [
+  { label: "Penrith & Blue Mountains Gateway", suburbs: "Penrith, Kingswood, St Marys, Emu Plains, Glenmore Park" },
+  { label: "Richmond & Hawkesbury Valley", suburbs: "Richmond, Windsor, Vineyard, Pitt Town, McGraths Hill" },
+  { label: "Blacktown & Seven Hills", suburbs: "Blacktown, Seven Hills, Quakers Hill, Stanhope Gardens, Rooty Hill" },
+  { label: "Parramatta & Westmead Surrounds", suburbs: "Parramatta, Westmead, Northmead, Old Toongabbie, Wentworthville" },
+  { label: "Liverpool & South West Corridor", suburbs: "Liverpool, Moorebank, Casula, Warwick Farm, Prestons" },
+  { label: "Fairfield & Cabramatta", suburbs: "Fairfield, Cabramatta, Canley Vale, Wetherill Park, Smithfield" },
+  { label: "Mount Druitt & St Marys", suburbs: "Mount Druitt, St Marys, Rooty Hill, Plumpton, Bidwill" },
+  { label: "Campbelltown & Macarthur Region", suburbs: "Campbelltown, Narellan, Gregory Hills, Oran Park, Spring Farm" },
+];
+
+function getClusterForWeek(clusters: typeof SYDNEY_CLUSTERS): { label: string; suburbs: string } {
   const weekNumber = Math.floor(Date.now() / (7 * 24 * 60 * 60 * 1000));
-  return SUBURB_CLUSTERS[weekNumber % SUBURB_CLUSTERS.length];
+  return clusters[weekNumber % clusters.length];
 }
 
 interface Agency {
@@ -166,18 +177,36 @@ async function sendProspectEmail(cluster: { label: string; suburbs: string }, ag
   }
 }
 
+// Monday — Multicultural Sydney suburbs
 export async function runWeeklyProspector(): Promise<void> {
-  const cluster = getThisWeeksCluster();
-  logger.info({ cluster: cluster.label }, "Running weekly prospector search");
+  const cluster = getClusterForWeek(SYDNEY_CLUSTERS);
+  logger.info({ cluster: cluster.label }, "Running Monday Sydney prospector");
 
   try {
     const agencies = await searchAgencies(cluster);
     if (agencies.length === 0) {
-      logger.warn("Prospector returned 0 agencies — skipping email");
+      logger.warn("Sydney prospector returned 0 agencies — skipping email");
       return;
     }
     await sendProspectEmail(cluster, agencies);
   } catch (err) {
-    logger.error({ err }, "Weekly prospector failed");
+    logger.error({ err }, "Monday Sydney prospector failed");
+  }
+}
+
+// Wednesday — Jayson's local Western Sydney area
+export async function runLocalProspector(): Promise<void> {
+  const cluster = getClusterForWeek(LOCAL_CLUSTERS);
+  logger.info({ cluster: cluster.label }, "Running Wednesday local prospector");
+
+  try {
+    const agencies = await searchAgencies(cluster);
+    if (agencies.length === 0) {
+      logger.warn("Local prospector returned 0 agencies — skipping email");
+      return;
+    }
+    await sendProspectEmail(cluster, agencies);
+  } catch (err) {
+    logger.error({ err }, "Wednesday local prospector failed");
   }
 }
