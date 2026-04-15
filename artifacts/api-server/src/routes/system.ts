@@ -1,5 +1,6 @@
 import { Router, type IRouter } from "express";
 import { MOCK_VAULT_SUMMARY } from "../lib/mockVault";
+import { runWeeklyProspector } from "../lib/prospector";
 
 const router: IRouter = Router();
 
@@ -30,6 +31,17 @@ router.get("/system/status", (_req, res): void => {
     stripeKeyType,
     timestamp: new Date().toISOString(),
   });
+});
+
+// Manual trigger — POST /api/system/prospect-now (admin only)
+router.post("/system/prospect-now", async (req, res): Promise<void> => {
+  const secret = req.headers["x-admin-secret"] ?? req.query.secret;
+  if (secret !== "directive-captain-2024") {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
+  res.json({ ok: true, message: "Prospect search started — email will arrive shortly." });
+  void runWeeklyProspector();
 });
 
 export default router;

@@ -1,7 +1,9 @@
 import { WebSocketServer } from "ws";
+import cron from "node-cron";
 import app from "./app";
 import { handleMediaStream } from "./routes/voice";
 import { logger } from "./lib/logger";
+import { runWeeklyProspector } from "./lib/prospector";
 
 const rawPort = process.env["PORT"];
 
@@ -41,3 +43,11 @@ wss.on("connection", (ws, req) => {
 wss.on("error", (err) => {
   logger.error({ err }, "WebSocket server error");
 });
+
+// ─── Weekly Prospect List — Every Monday 8am AEST (Sunday 22:00 UTC) ─────────
+cron.schedule("0 22 * * 0", () => {
+  logger.info("Cron: running weekly prospect email");
+  void runWeeklyProspector();
+}, { timezone: "UTC" });
+
+logger.info("Weekly prospect list scheduled — fires every Monday 8am AEST");
