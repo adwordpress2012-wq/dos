@@ -46,6 +46,25 @@ router.post("/admin/test-email", adminAuth, async (req: Request, res: Response):
   res.status(result.status).json(data);
 });
 
+router.post("/admin/send-outbound", adminAuth, async (req: Request, res: Response): Promise<void> => {
+  const apiKey = process.env.DOS_RESEND_CFG || process.env.DOS_RESEND_KEY || process.env.RESEND_API_KEY;
+  if (!apiKey) { res.status(500).json({ error: "Resend key not set" }); return; }
+  const { to, subject, html } = req.body as { to: string; subject: string; html: string };
+  if (!to || !subject || !html) { res.status(400).json({ error: "to, subject, html required" }); return; }
+  const result = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      from: "Jayson | Directive OS <jayson@directiveos.com.au>",
+      to: [to],
+      subject,
+      html,
+    }),
+  });
+  const data = await result.json();
+  res.status(result.status).json(data);
+});
+
 router.get("/admin/overview", adminAuth, async (_req: Request, res: Response): Promise<void> => {
   const agencies = await db.select().from(agenciesTable).orderBy(desc(agenciesTable.createdAt));
 
