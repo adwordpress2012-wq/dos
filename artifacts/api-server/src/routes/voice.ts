@@ -523,21 +523,38 @@ async function onCallEnd(session: CallSession): Promise<void> {
 
   try {
     const fullText = session.transcript.map((m) => m.content).join(" ").toLowerCase();
-    // Parse email — handles both standard format and spoken "X at Y dot com"
+    // Parse email — handles standard format and spoken variations including "underscore", "dash", "dot"
+    const normaliseSpokenLocal = (raw: string): string =>
+      raw
+        .replace(/\s+underscore\s+/gi, "_")
+        .replace(/\bunderscore\b/gi, "_")
+        .replace(/\s+hyphen\s+/gi, "-")
+        .replace(/\bhyphen\b/gi, "-")
+        .replace(/\s+dash\s+/gi, "-")
+        .replace(/\bdash\b/gi, "-")
+        .replace(/\s+dot\s+/gi, ".")
+        .replace(/\bdot\b/gi, ".")
+        .replace(/\s+period\s+/gi, ".")
+        .replace(/\bperiod\b/gi, ".")
+        .replace(/\s+/g, "");
+
     const parseSpokenEmail = (text: string): string | null => {
-      // Standard typed format
+      // Standard typed format (already has @ symbol)
       const std = text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
       if (std) return std[0].toLowerCase();
 
-      // Spoken: "john at gmail dot com" / "john dot smith at outlook dot com dot au"
+      // Spoken: "john at gmail dot com" / "john underscore smith at yahoo dot com"
       const spoken = text.match(
-        /\b([a-zA-Z0-9][a-zA-Z0-9._\- ]*?)\s+at\s+([a-zA-Z0-9-]+(?:\s+dot\s+[a-zA-Z0-9-]+)*)\s+dot\s+([a-zA-Z]{2,}(?:\s+dot\s+[a-zA-Z]{2,})?)\b/i
+        /\b([a-zA-Z0-9][a-zA-Z0-9._\-\s]*?)\s+at\s+([a-zA-Z0-9-]+(?:\s+dot\s+[a-zA-Z0-9-]+)*)\s+dot\s+([a-zA-Z]{2,}(?:\s+dot\s+[a-zA-Z]{2,})?)\b/i
       );
       if (spoken) {
-        const local = spoken[1].trim().replace(/\s+dot\s+/gi, ".").replace(/\s+/g, "");
+        const local = normaliseSpokenLocal(spoken[1].trim());
         const domain = spoken[2].trim().replace(/\s+dot\s+/gi, ".").replace(/\s+/g, "");
         const tld = spoken[3].trim().replace(/\s+dot\s+/gi, ".").replace(/\s+/g, "");
-        return `${local}@${domain}.${tld}`.toLowerCase();
+        // Sanity check — local part must look like a real email local (not a sentence)
+        if (local.length > 0 && local.length <= 64 && !/\s/.test(local)) {
+          return `${local}@${domain}.${tld}`.toLowerCase();
+        }
       }
 
       // Alternative bracket format: john(at)gmail.com
@@ -547,8 +564,8 @@ async function onCallEnd(session: CallSession): Promise<void> {
       return null;
     };
 
-    // Parse caller name — prefers "my name is / this is" over "I'm", blocks non-name phrases
-    const NAME_BLOCKLIST = /^(just|only|calling|inquiring|wondering|asking|checking|following|looking|not|also|actually|currently|really|probably|basically|honestly|here|great|good|fine|yes|no|sure|okay|alright|right|well|hey|hi|hello|morning|afternoon|evening|interested|happy|keen|after)$/i;
+    // Parse caller name — prefers "my name is / this is" over "I'm", blocks non-name words
+    const NAME_BLOCKLIST = /^(just|only|calling|inquiring|wondering|asking|checking|following|looking|not|also|actually|currently|really|probably|basically|honestly|here|great|good|fine|yes|no|sure|okay|alright|right|well|hey|hi|hello|morning|afternoon|evening|interested|happy|keen|after|out|there|back|in|up|down|away|off|on|over|done|go|going|gone|ready|busy|around|about|now|soon|later|today|tomorrow|next|last|first|sorry|thanks|thank|bye|goodbye|cheers|please|help|want|need|trying|test|testing|chat|call|talk|speak|phone|new|still|just|all|too|so|not|with|from|that|this|what|when|where|who|how|why|can|could|would|should|will|shall|may|might|must|do|did|does|have|has|had|get|got|give|see|look|know|think|come|take|make|want|use|find|tell|ask|seem|feel|try|leave|keep|let|begin|show|hear|play|run|move|live|believe|hold|bring|happen|write|provide|sit|stand|lose|pay|meet|include|continue|set|learn|change|lead|understand|watch|follow|stop|create|speak|read|spend|grow|open|walk|win|offer|remember|love|consider|appear|buy|wait|serve|die|send|expect|build|stay|fall|cut|reach|kill|remain|suggest|raise|pass|sell|require|report|decide|pull)$/i;
     const parseCallerName = (text: string): string | null => {
       const patterns = [
         /(?:my name is|this is)\s+([a-z]+(?: [a-z]+)?)/gi,
@@ -558,6 +575,8 @@ async function onCallEnd(session: CallSession): Promise<void> {
         for (const m of text.matchAll(rx)) {
           const words = m[1].trim().split(/\s+/);
           if (NAME_BLOCKLIST.test(words[0])) continue;
+          // Skip if captured word is a very short common word (1-2 chars)
+          if (words[0].length <= 2) continue;
           return m[1].replace(/\b\w/g, (c) => c.toUpperCase());
         }
       }
@@ -565,7 +584,8 @@ async function onCallEnd(session: CallSession): Promise<void> {
     };
 
     const phoneMatch = fullText.match(/(\+?61|0)[0-9 ]{8,12}/);
-    const callerName = parseCallerName(fullText) ?? "Phone Caller";
+    // Use null (not a default string) so sendVoiceTranscriptEmail can prefer AI-extracted name
+    const callerName = parseCallerName(fullText);
     const callerEmail = parseSpokenEmail(fullText);
     const callerPhone = phoneMatch?.[0] ?? null;
 
@@ -581,13 +601,14 @@ async function onCallEnd(session: CallSession): Promise<void> {
 
     // Save leads for ALL calls with contact details (agencyId 0 = Directive OS main line → save to agency 1)
     const saveAgencyId = session.agencyId > 0 ? session.agencyId : 1;
+    const callerLabel = callerName ?? "Phone Caller";
     let leadId: number | null = null;
     if (callerEmail || callerPhone) {
       const [lead] = await db
         .insert(leadsTable)
         .values({
           agencyId: saveAgencyId,
-          name: callerName,
+          name: callerLabel,
           email: callerEmail,
           phone: callerPhone,
           leadType,
@@ -606,10 +627,10 @@ async function onCallEnd(session: CallSession): Promise<void> {
         .values({
           agencyId: saveAgencyId,
           leadId,
-          leadName: callerName,
+          leadName: callerLabel,
           channel: "voice",
           duration: durationSeconds,
-          summary: `Voice call with ${callerName} — ${Math.round(durationMinutes)}m ${durationSeconds % 60}s`,
+          summary: `Voice call with ${callerLabel} — ${Math.round(durationMinutes)}m ${durationSeconds % 60}s`,
         })
         .returning();
 
