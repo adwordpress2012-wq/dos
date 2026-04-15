@@ -6,6 +6,7 @@ import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import Stripe from "stripe";
 import { logger } from "../lib/logger";
+import { resolveAgency } from "../lib/resolveAgency";
 
 const router: IRouter = Router();
 
@@ -106,22 +107,18 @@ async function adjustStripeSeats(agency: typeof agenciesTable.$inferSelect, delt
 
 // ─── GET /staff ────────────────────────────────────────────────────────────────
 router.get("/staff", async (req: Request, res: Response): Promise<void> => {
-  const clerkOrgId = req.headers["x-clerk-org-id"] as string | undefined;
-  if (!clerkOrgId) { res.status(401).json({ error: "Unauthorized" }); return; }
-  const agencyId = await getAgencyId(clerkOrgId);
-  if (!agencyId) { res.status(404).json({ error: "Agency not found" }); return; }
+  const agency = await resolveAgency(req);
+  if (!agency) { res.status(404).json({ error: "Agency not found" }); return; }
   const staff = await db.select({
     id: staffTable.id, name: staffTable.name, email: staffTable.email,
     role: staffTable.role, status: staffTable.status, createdAt: staffTable.createdAt,
-  }).from(staffTable).where(eq(staffTable.agencyId, agencyId));
+  }).from(staffTable).where(eq(staffTable.agencyId, agency.id));
   res.json(staff);
 });
 
 // ─── POST /staff — invite agent ────────────────────────────────────────────────
 router.post("/staff", async (req: Request, res: Response): Promise<void> => {
-  const clerkOrgId = req.headers["x-clerk-org-id"] as string | undefined;
-  if (!clerkOrgId) { res.status(401).json({ error: "Unauthorized" }); return; }
-  const agency = await getAgencyFull(clerkOrgId);
+  const agency = await resolveAgency(req);
   if (!agency) { res.status(404).json({ error: "Agency not found" }); return; }
 
   const parsed = InviteStaffBody.safeParse(req.body);
@@ -152,9 +149,7 @@ router.post("/staff", async (req: Request, res: Response): Promise<void> => {
 
 // ─── DELETE /staff/:id — remove agent ─────────────────────────────────────────
 router.delete("/staff/:id", async (req: Request, res: Response): Promise<void> => {
-  const clerkOrgId = req.headers["x-clerk-org-id"] as string | undefined;
-  if (!clerkOrgId) { res.status(401).json({ error: "Unauthorized" }); return; }
-  const agency = await getAgencyFull(clerkOrgId);
+  const agency = await resolveAgency(req);
   if (!agency) { res.status(404).json({ error: "Agency not found" }); return; }
   const params = RemoveStaffParams.safeParse(req.params);
   if (!params.success) { res.status(400).json({ error: params.error.message }); return; }

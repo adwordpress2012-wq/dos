@@ -5,43 +5,27 @@ import {
   UpdateMyAgencyBody,
   OnboardAgencyBody,
 } from "@workspace/api-zod";
+import { resolveAgency } from "../lib/resolveAgency";
 
 const router: IRouter = Router();
 
 router.get("/agencies/me", async (req, res): Promise<void> => {
-  const clerkOrgId = req.headers["x-clerk-org-id"] as string | undefined;
-  if (!clerkOrgId) {
-    res.status(401).json({ error: "Unauthorized" });
-    return;
-  }
-  const [agency] = await db.select().from(agenciesTable).where(eq(agenciesTable.clerkOrgId, clerkOrgId));
-  if (!agency) {
-    res.status(404).json({ error: "Agency not found" });
-    return;
-  }
+  const agency = await resolveAgency(req);
+  if (!agency) { res.status(404).json({ error: "Agency not found" }); return; }
   res.json(agency);
 });
 
 router.patch("/agencies/me", async (req, res): Promise<void> => {
-  const clerkOrgId = req.headers["x-clerk-org-id"] as string | undefined;
-  if (!clerkOrgId) {
-    res.status(401).json({ error: "Unauthorized" });
-    return;
-  }
+  const agency = await resolveAgency(req);
+  if (!agency) { res.status(404).json({ error: "Agency not found" }); return; }
   const parsed = UpdateMyAgencyBody.safeParse(req.body);
-  if (!parsed.success) {
-    res.status(400).json({ error: parsed.error.message });
-    return;
-  }
-  const [agency] = await db.update(agenciesTable)
+  if (!parsed.success) { res.status(400).json({ error: parsed.error.message }); return; }
+  const [updated] = await db.update(agenciesTable)
     .set(parsed.data)
-    .where(eq(agenciesTable.clerkOrgId, clerkOrgId))
+    .where(eq(agenciesTable.id, agency.id))
     .returning();
-  if (!agency) {
-    res.status(404).json({ error: "Agency not found" });
-    return;
-  }
-  res.json(agency);
+  if (!updated) { res.status(404).json({ error: "Agency not found" }); return; }
+  res.json(updated);
 });
 
 router.post("/agencies/onboard", async (req, res): Promise<void> => {
