@@ -26,6 +26,8 @@ import AdminListings from "@/pages/admin/listings";
 import AdminFinancials from "@/pages/admin/financials";
 import AdminPipeline from "@/pages/admin/pipeline";
 import AdminActivity from "@/pages/admin/activity";
+import AdminQuote from "@/pages/admin/quote";
+import SetPassword from "@/pages/dashboard/set-password";
 import Blog from "@/pages/blog";
 import BlogPost from "@/pages/blog-post";
 import ThankYou from "@/pages/thank-you";
@@ -119,6 +121,8 @@ function Router() {
       <Route path="/admin/financials" component={AdminFinancials} />
       <Route path="/admin/pipeline" component={AdminPipeline} />
       <Route path="/admin/activity" component={AdminActivity} />
+      <Route path="/admin/quote" component={AdminQuote} />
+      <Route path="/dashboard/set-password" component={SetPassword} />
       <Route component={NotFound} />
     </Switch>
   );

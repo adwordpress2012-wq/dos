@@ -1,7 +1,7 @@
 import { Router, type Request, type Response } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { db, agenciesTable } from "@workspace/db";
+import { db, agenciesTable, staffTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 
 const router: Router = Router();
@@ -83,26 +83,42 @@ router.post("/client/login", async (req: Request, res: Response): Promise<void> 
     return;
   }
 
-  const rows = await db.select().from(agenciesTable).where(eq(agenciesTable.contactEmail, email.toLowerCase().trim()));
-  const agency = rows[0];
+  const normalEmail = email.toLowerCase().trim();
 
-  if (!agency || !agency.passwordHash) {
-    res.status(401).json({ ok: false, error: "Invalid email or password" });
-    return;
+  // ── Try agency owner first ──
+  const agencyRows = await db.select().from(agenciesTable).where(eq(agenciesTable.contactEmail, normalEmail));
+  const agency = agencyRows[0];
+  if (agency?.passwordHash) {
+    const valid = await bcrypt.compare(password, agency.passwordHash);
+    if (valid) {
+      const token = jwt.sign({ type: "agency", agencyId: agency.id, email: agency.contactEmail }, JWT_SECRET, { expiresIn: "30d" });
+      res.json({
+        ok: true, token, userType: "agency",
+        agency: { id: agency.id, name: agency.name, contactEmail: agency.contactEmail, subscriptionStatus: agency.subscriptionStatus },
+      });
+      return;
+    }
   }
 
-  const valid = await bcrypt.compare(password, agency.passwordHash);
-  if (!valid) {
-    res.status(401).json({ ok: false, error: "Invalid email or password" });
-    return;
+  // ── Try staff member ──
+  const staffRows = await db.select().from(staffTable).where(eq(staffTable.email, normalEmail));
+  const staff = staffRows[0];
+  if (staff?.passwordHash) {
+    const valid = await bcrypt.compare(password, staff.passwordHash);
+    if (valid) {
+      const agencyData = await db.select().from(agenciesTable).where(eq(agenciesTable.id, staff.agencyId));
+      const ag = agencyData[0];
+      const token = jwt.sign({ type: "staff", staffId: staff.id, agencyId: staff.agencyId, email: staff.email, role: staff.role }, JWT_SECRET, { expiresIn: "30d" });
+      res.json({
+        ok: true, token, userType: "staff",
+        agency: { id: ag?.id, name: ag?.name, contactEmail: ag?.contactEmail, subscriptionStatus: ag?.subscriptionStatus },
+        staff: { id: staff.id, name: staff.name, role: staff.role },
+      });
+      return;
+    }
   }
 
-  const token = jwt.sign({ agencyId: agency.id, email: agency.contactEmail }, JWT_SECRET, { expiresIn: "30d" });
-  res.json({
-    ok: true,
-    token,
-    agency: { id: agency.id, name: agency.name, contactEmail: agency.contactEmail, subscriptionStatus: agency.subscriptionStatus },
-  });
+  res.status(401).json({ ok: false, error: "Invalid email or password" });
 });
 
 router.get("/client/me", async (req: Request, res: Response): Promise<void> => {
@@ -113,23 +129,25 @@ router.get("/client/me", async (req: Request, res: Response): Promise<void> => {
   }
 
   try {
-    const payload = jwt.verify(auth.slice(7), JWT_SECRET) as { agencyId: number };
+    const payload = jwt.verify(auth.slice(7), JWT_SECRET) as { type?: string; agencyId: number; staffId?: number; role?: string };
     const rows = await db.select().from(agenciesTable).where(eq(agenciesTable.id, payload.agencyId));
     const agency = rows[0];
-    if (!agency) {
-      res.status(401).json({ ok: false, error: "Agency not found" });
-      return;
+    if (!agency) { res.status(401).json({ ok: false, error: "Agency not found" }); return; }
+
+    if (payload.type === "staff" && payload.staffId) {
+      const staffRows = await db.select({ id: staffTable.id, name: staffTable.name, role: staffTable.role, status: staffTable.status }).from(staffTable).where(eq(staffTable.id, payload.staffId));
+      const staff = staffRows[0];
+      res.json({
+        ok: true, userType: "staff",
+        agency: { id: agency.id, name: agency.name, contactEmail: agency.contactEmail, subscriptionStatus: agency.subscriptionStatus, clerkOrgId: agency.clerkOrgId },
+        staff: staff ?? null,
+      });
+    } else {
+      res.json({
+        ok: true, userType: "agency",
+        agency: { id: agency.id, name: agency.name, contactEmail: agency.contactEmail, subscriptionStatus: agency.subscriptionStatus, clerkOrgId: agency.clerkOrgId },
+      });
     }
-    res.json({
-      ok: true,
-      agency: {
-        id: agency.id,
-        name: agency.name,
-        contactEmail: agency.contactEmail,
-        subscriptionStatus: agency.subscriptionStatus,
-        clerkOrgId: agency.clerkOrgId,
-      },
-    });
   } catch {
     res.status(401).json({ ok: false, error: "Invalid or expired session" });
   }

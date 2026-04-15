@@ -1,6 +1,7 @@
 import { Router, type IRouter, type Request, type Response, type NextFunction } from "express";
 import { eq, desc, sql, gte, and } from "drizzle-orm";
 import bcrypt from "bcryptjs";
+import Stripe from "stripe";
 import {
   db, agenciesTable, leadsTable, transcriptsTable, chatSessionsTable,
   adminExpensesTable, adminPipelineTable, listingsTable,
@@ -13,6 +14,19 @@ const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "captainjaze";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "directive-captain-2024";
 const SETUP_FEE_CENTS = 180000;
 const MONTHLY_SUB_CENTS = 29900;
+const BASE_URL = "https://directiveos.com.au";
+
+const TIERS: Record<string, { label: string; setupCents: number; monthlyCents: number; perSeatCents: number }> = {
+  small:  { label: "Small",  setupCents: 180000, monthlyCents: 29900, perSeatCents: 8900 },
+  medium: { label: "Medium", setupCents: 250000, monthlyCents: 39900, perSeatCents: 9900 },
+  large:  { label: "Large",  setupCents: 450000, monthlyCents: 59900, perSeatCents: 11900 },
+};
+
+function getStripe(): Stripe {
+  const key = process.env.STRIPE_KEY_ACTIVE;
+  if (!key) throw new Error("STRIPE_KEY_ACTIVE not set");
+  return new Stripe(key, { apiVersion: "2025-03-31.basil" });
+}
 
 function adminAuth(req: Request, res: Response, next: NextFunction) {
   const secret = req.headers["x-admin-secret"];
@@ -355,7 +369,8 @@ router.post("/admin/clients", adminAuth, async (req: Request, res: Response): Pr
   };
   if (!name || !contactEmail) { res.status(400).json({ error: "name and contactEmail required" }); return; }
 
-  const hash = password ? await bcrypt.hash(password, 10) : null;
+  const tempPassword = password || generatePassword();
+  const hash = await bcrypt.hash(tempPassword, 10);
   const [agency] = await db.insert(agenciesTable).values({
     clerkOrgId: `manual-${Date.now()}`,
     name,
@@ -366,7 +381,60 @@ router.post("/admin/clients", adminAuth, async (req: Request, res: Response): Pr
     passwordHash: hash,
   }).returning();
 
-  res.json({ ok: true, agency });
+  void sendPasswordEmail(contactEmail.toLowerCase().trim(), name, tempPassword, false);
+
+  res.json({ ok: true, agency, tempPassword });
+});
+
+router.post("/admin/quote", adminAuth, async (req: Request, res: Response): Promise<void> => {
+  const { tier = "small", seats = 1, contactName = "", email, agencyName } = req.body as {
+    tier?: string; seats?: number; contactName?: string; email?: string; agencyName?: string;
+  };
+  if (!email || !agencyName) { res.status(400).json({ error: "email and agencyName required" }); return; }
+
+  const t = TIERS[tier] ?? TIERS.small;
+  const additionalSeats = Math.max(0, seats - 1);
+
+  let stripe: Stripe;
+  try { stripe = getStripe(); } catch { res.status(500).json({ error: "Stripe not configured" }); return; }
+
+  const priceOnboarding = process.env.STRIPE_PRICE_ONBOARDING;
+  if (!priceOnboarding) { res.status(500).json({ error: "STRIPE_PRICE_ONBOARDING not set" }); return; }
+
+  const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
+    { price: priceOnboarding, quantity: 1 },
+    {
+      price_data: { currency: "aud", product_data: { name: `Directive OS Licence — Month 1 (${t.label})`, description: `Then A$${(t.monthlyCents / 100).toFixed(0)}/month from Month 2` }, unit_amount: t.monthlyCents },
+      quantity: 1,
+    },
+  ];
+
+  if (additionalSeats > 0) {
+    lineItems.push({
+      price_data: { currency: "aud", product_data: { name: `Additional Seats — Month 1 (${additionalSeats} × A$${(t.perSeatCents / 100).toFixed(0)})` }, unit_amount: t.perSeatCents },
+      quantity: additionalSeats,
+    });
+  }
+
+  try {
+    const session = await stripe.checkout.sessions.create({
+      mode: "payment",
+      payment_method_types: ["card", "klarna"],
+      customer_email: email,
+      payment_intent_data: {
+        setup_future_usage: "off_session",
+        metadata: { agencyName, contactName, tier, seats: String(seats), source: "admin_quote" },
+      },
+      line_items: lineItems,
+      metadata: { agencyName, contactName, email, tier, seats: String(seats), source: "admin_quote" },
+      success_url: `${BASE_URL}/welcome?name=${encodeURIComponent(contactName || agencyName)}&agency=${encodeURIComponent(agencyName)}`,
+      cancel_url: `${BASE_URL}/admin/quote`,
+    });
+    res.json({ url: session.url });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    res.status(500).json({ error: message });
+  }
 });
 
 router.post("/admin/clients/:id/reset-password", adminAuth, async (req: Request, res: Response): Promise<void> => {

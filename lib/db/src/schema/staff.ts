@@ -9,7 +9,10 @@ export const staffTable = pgTable("staff", {
   name: text("name").notNull(),
   email: text("email").notNull(),
   role: text("role").notNull().default("agent"),
-  status: text("status").notNull().default("active"),
+  status: text("status").notNull().default("invited"),
+  passwordHash: text("password_hash"),
+  passwordSetToken: text("password_set_token"),
+  tokenExpiry: timestamp("token_expiry", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });

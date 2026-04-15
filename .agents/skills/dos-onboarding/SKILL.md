@@ -3,181 +3,220 @@ name: dos-onboarding
 description: Directive OS client onboarding workflow, lead email system, dashboard access, payment flow, and post-payment setup steps. Use when the user asks about onboarding a new client, activating Sarah for a client, setting up a nominated email, explaining the workflow, or removing the DEMO banner from a client landing page.
 ---
 
-# Directive OS — Client Onboarding Workflow
+# Directive OS — Client Onboarding & Seat Billing
 
-> **Related skills:** Read `directive-os-system` skill for full product catalog, pricing, tech stack, and business plan.
-> Reference files: `.agents/skills/directive-os-system/products-pricing.md` · `.agents/skills/directive-os-system/business-system-plan.md`
+> **Related skills:** Read `directive-os-system` for full product catalog, pricing, tech stack, and business plan.
 
-## The Full Journey (Client Perspective)
+---
+
+## The Two User Types
+
+### 1. Agency Owner (Client)
+- Created by Jayson via admin Fleet Manifest (`POST /api/admin/clients`)
+- Login: `directiveos.com.au/dashboard/login` — email + temp password (emailed on creation)
+- JWT payload: `{ type: "agency", agencyId, email }`
+- Full access: leads, transcripts, listings, staff management, billing, settings
+
+### 2. Staff Agent
+- Invited by agency owner from dashboard → Staff page
+- Login: same `/dashboard/login` — email + self-chosen password
+- JWT payload: `{ type: "staff", staffId, agencyId, email, role }`
+- Limited access: leads, transcripts, listings ONLY (no billing, no staff management)
+
+---
+
+## Onboarding Flow — Agency Owner (Client)
 
 ```
-STEP 1 — Agreement
-  Jayson sends the service agreement email to the prospect.
-  Client replies "I agree" with their full name + business name.
-  This reply = documented electronic acceptance of terms.
+STEP 1 — Jayson creates client in Fleet Manifest (/admin/clients)
+  POST /api/admin/clients (x-admin-secret header)
+  Body: { name, abn, contactEmail, contactPhone, subscriptionStatus }
 
-STEP 2 — Payment
-  Client clicks "Activate Sarah — Pay $1,800 Setup Fee" on their
-  branded landing page (e.g. directiveos.com.au/c21-rana/).
-  → Stripe checkout opens (card / Apple Pay / Google Pay / Klarna)
-  → Line items: $1,800 setup + $299 Month 1 licence
-  → Tax invoice auto-emailed to client's email address
-  → Month 2+ billing is automatic via Stripe subscription
+STEP 2 — System auto-generates temp password
+  bcrypt.hash(tempPassword, 10) → saved to agencies.password_hash
+  Welcome email → client email CC: jayson + adwordpress2012
 
-STEP 3 — Jayson is notified
-  Stripe dashboard shows the payment.
-  TODO: Stripe webhook → auto-notify Jayson when prospect pays
-  (endpoint /billing/checkout/prospect stores metadata: agencySlug,
-   agencyName, contactName, email, phone)
+STEP 3 — Client logs in
+  directiveos.com.au/dashboard/login
+  Email + temp password → JWT stored in localStorage.clientToken
 
-STEP 4 — Jayson activates (takes ~15 mins)
-  a. Create their Clerk org + invite client as owner
-  b. Insert agency record in DB with contactEmail = their nominated email
-  c. Set their dedicated Twilio number (purchase in Twilio console)
-  d. Update landing page: remove DEMO banner, swap in dedicated number
-  e. Set agencyId on the landing page chat widget
-
-STEP 5 — Client goes live
-  Client receives dashboard login link
-  Sarah is live on their dedicated number + landing page chat
-  All leads forward to their nominated email automatically 24/7
+STEP 4 — Client invites agents (optional)
+  → Each invite triggers Stripe +1 seat + invite email to agent
 ```
 
 ---
 
-## Lead Email Forwarding — How It Works
-
-Every call and chat Sarah handles triggers an auto-email containing:
-- Caller name, phone, email
-- Finance status (approved / not approved / working on it)
-- Buyer intent (investment / owner-occupier / unknown)
-- 🔴 POTENTIAL LISTING flag if caller has property to sell
-- Full conversation transcript (colour-coded Sarah vs Caller)
-
-**Who receives lead emails:**
-```
-Voice calls  → [agency.contactEmail, jayson@directiveos.com.au, adwordpress2012@gmail.com]
-Chat enquiries → [agency.contactEmail, jayson@directiveos.com.au, adwordpress2012@gmail.com]
-```
-`agency.contactEmail` = the nominated email stored in the agencies table.
-
-**File:** `artifacts/api-server/src/lib/email.ts`
-- `sendVoiceTranscriptEmail()` — called at end of every voice call
-- `sendChatTranscriptEmail()` — called when chat session closes
-
-**Changing a client's nominated email:**
-```sql
-UPDATE agencies SET contact_email = 'new@email.com' WHERE id = <agency_id>;
-```
-Or via PATCH `/api/agencies/me` with `{ contactEmail: "new@email.com" }` from the dashboard.
-
----
-
-## Dashboard Access
-
-URL: `https://directiveos.com.au/dashboard`
-Auth: Clerk (org-based — each client is a separate Clerk org)
-
-Dashboard features available to clients:
-- Command Centre (live stats + activity feed)
-- Lead Inbox (filterable by type: buyer/tenant/vendor/landlord)
-- Communication Logs (voice + chat transcripts, full playback)
-- Property Intelligence (listings management)
-- Seat Management (add/remove team members)
-- Billing (invoices, AI usage, Stripe portal)
-- Settings (agency profile, Sarah's communication protocols)
-
----
-
-## Pricing Schedule (inc. GST)
-
-| Item | Amount |
-|---|---|
-| Setup / Onboarding (once-off) | A$1,800 |
-| Monthly Licence — Base (1 seat) | A$299/mo |
-| Additional Seats | A$89/seat/mo |
-| AI Overage (per 10-min block above 100 min) | A$25/block |
-
-Month 1 licence is paid at setup. Month 2+ is auto-billed via Stripe.
-No lock-in contract — cancel with 30 days written notice.
-
----
-
-## Landing Page Status & Demo Watermark
-
-Each client landing page shows a DEMO banner until officially activated:
+## Onboarding Flow — Staff Agent Invite
 
 ```
-[DEMO] This page is a live preview — dedicated phone line setup pending.
-       Contact Directive OS to activate your official AI receptionist.
+STEP 1 — Agency owner: Dashboard → Staff → "Invite Agent"
+  POST /api/staff (x-clerk-org-id header)
+  Body: { name, email, role }
+
+STEP 2 — System:
+  - Inserts staff record (status: "invited")
+  - Generates 48hr secure token (crypto.randomBytes(32))
+  - Saves token + tokenExpiry to staff table
+  - Increments seat_count on agencies table
+  - Calls Stripe → adds 1 seat (prorated immediately) via adjustStripeSeats()
+  - Sends invite email to agent CC: jayson + adwordpress2012
+
+STEP 3 — Agent receives email
+  "You've been invited to [Agency Name] — Set your password"
+  Link: directiveos.com.au/dashboard/set-password?token=TOKEN
+  Link expires in 48 hours
+
+STEP 4 — Agent sets password
+  POST /api/staff/verify-token { token } → validates, returns name + agencyName
+  POST /api/staff/activate { token, password } → bcrypt hash saved, token cleared
+  staff.status → "active"
+
+STEP 5 — Agent logs in
+  directiveos.com.au/dashboard/login → email + new password
+  Sees agency Command Centre with limited tabs
 ```
 
-**To remove the DEMO banner after payment:**
-Delete the `{/* DEMO WATERMARK BANNER */}` block from the client's `landing.tsx`.
+---
 
-**To swap in their dedicated Twilio number:**
-Change the `PHONE` constant at the top of `landing.tsx` from the placeholder
-(e.g. `02 9625 0000` or `02 5850 4038`) to their assigned Twilio number.
+## Staff Removal
+
+```
+Agency owner removes agent → DELETE /api/staff/:id
+→ seat_count decremented
+→ Stripe subscription updated: -1 seat (prorated credit)
+```
 
 ---
 
-## Current Client Pages
+## Key API Endpoints
 
-| Client | Slug | Status | Phone | Nominated Email |
-|---|---|---|---|---|
-| Nidus Real Estate | `/nidus-re/` | DEMO | `02 9625 0000` (placeholder) | TBC from Jayson |
-| Century 21 The Rana Group | `/c21-rana/` | DEMO | `0410 567 777` (their real line) | TBC from Jayson |
-
-Demo line (shared): `02 5850 4038` — Sarah answers, used for try-before-you-buy demos.
-
----
-
-## Service Agreement Email Template
-
-**Subject:** Your Directive OS AI Receptionist — Service Agreement & Activation
-
-Key sections:
-1. What they're getting (Sarah, 24/7, dedicated number, landing page)
-2. Pricing schedule (table format)
-3. Terms (no lock-in, setup fee non-refundable once onboarding starts, 30-day notice)
-4. Activation instructions (reply "I agree" → click payment link)
-5. Jayson's signature + ABN 87 754 544 171
-
-Client confirms by replying "I agree" + full name + business name.
-This email reply = binding electronic acceptance.
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| POST | `/api/client/login` | Public | Unified login — checks agencies then staff |
+| GET | `/api/client/me` | JWT Bearer | Returns user type, agency + staff data |
+| POST | `/api/staff` | x-clerk-org-id | Invite agent → Stripe +1 → invite email |
+| DELETE | `/api/staff/:id` | x-clerk-org-id | Remove agent → Stripe -1 |
+| POST | `/api/staff/verify-token` | Public | Validate 48hr set-password token |
+| POST | `/api/staff/activate` | Public | Set password, activate account |
+| POST | `/api/admin/clients` | x-admin-secret | Create agency + auto welcome email |
+| POST | `/api/admin/quote` | x-admin-secret | Generate Stripe Checkout link (any tier) |
+| POST | `/api/admin/clients/:id/reset-password` | x-admin-secret | Reset + email new password |
+| POST | `/api/admin/clients/:id/set-password` | x-admin-secret | Manually set password |
 
 ---
 
-## Stripe Prospect Checkout Endpoint (Public)
+## Database Schema — Key Fields
 
-`POST /api/billing/checkout/prospect`
-No auth required — called directly from client landing pages.
+### agencies table
+| Column | Type | Purpose |
+|--------|------|---------|
+| `contact_email` | text | Login username for owner |
+| `password_hash` | text | bcrypt hash (null = no login yet) |
+| `seat_count` | int | Total seats (owner + agents) |
+| `stripe_customer_id` | text | Stripe customer for billing |
 
-Body: `{ agencySlug, agencyName, contactName, email, phone }`
-Returns: `{ url }` → redirect to Stripe checkout
-
-Line items:
-- Setup fee ($1,800) from `STRIPE_PRICE_ONBOARDING` env var
-- Month 1 licence ($299) as price_data inline
-
-Success URL: `directiveos.com.au/welcome?name=...&agency=...`
-All metadata stored in Stripe payment intent for Jayson to retrieve.
-
-**File:** `artifacts/api-server/src/routes/billing.ts`
+### staff table
+| Column | Type | Purpose |
+|--------|------|---------|
+| `agency_id` | int | FK to agencies |
+| `email` | text | Login username |
+| `password_hash` | text | bcrypt hash (null until activated) |
+| `password_set_token` | text | 48hr activation token |
+| `token_expiry` | timestamptz | Token expiry time |
+| `status` | text | "invited" \| "active" |
+| `role` | text | "agent" \| "admin" |
 
 ---
 
-## What's Next (Automation Gap)
+## JWT Token Structure
 
-Currently missing: Stripe webhook that fires when a prospect pays.
-When built, it should:
-1. Auto-notify Jayson via email with client details (name, email, phone, agency)
-2. Create a pending agency record in the DB
-3. Send the client a "Payment received — we'll be in touch within 1 business day" email
+```
+Agency: { type: "agency", agencyId: number, email: string }
+Staff:  { type: "staff", staffId: number, agencyId: number, email: string, role: string }
+```
+- Secret: `CLIENT_JWT_SECRET` env var
+- Expiry: 30 days
+- Storage: `localStorage.clientToken`
 
-Build at: `POST /api/billing/webhook` with Stripe signature verification.
-Use `stripe.webhooks.constructEvent()` with `STRIPE_WEBHOOK_SECRET` env var.
-Listen for: `checkout.session.completed` where `metadata.source === "landing_page"`.
+---
+
+## Pricing Tiers
+
+| Tier | Setup | Monthly Base | Per Seat |
+|------|-------|--------------|----------|
+| Small | A$1,800 | A$299/mo | A$89/mo |
+| Medium | A$2,500 | A$399/mo | A$99/mo |
+| Large | A$4,500 | A$599/mo | A$119/mo |
+
+Defined in `TIERS` constant in `artifacts/api-server/src/routes/admin.ts`.
+
+---
+
+## Quote Builder
+
+Location: `/admin/quote` — Captain's Bridge nav → "QUOTE BUILDER"
+
+1. Select tier (Small/Medium/Large)
+2. Enter seats, agency name, contact name, email
+3. Click "Generate Payment Link"
+4. Calls `POST /api/admin/quote` → returns Stripe Checkout URL
+5. Copy and send to prospect
+
+---
+
+## Email Flows
+
+| Trigger | To | CC | Content |
+|---------|----|----|---------|
+| Agency created (admin) | Client email | jayson + adwordpress2012 | Welcome + temp credentials |
+| Password reset | Client email | jayson + adwordpress2012 | New password |
+| Agent invited | Agent email | jayson + adwordpress2012 | Set-password link (48hr) |
+
+From: `Directive OS <leads@directiveos.com.au>`
+Support: `support@directiveos.com.au`
+
+---
+
+## Frontend Pages
+
+| Page | Path | Auth Required |
+|------|------|---------------|
+| Client/Staff Login | `/dashboard/login` | Public |
+| Set Password (agents) | `/dashboard/set-password?token=TOKEN` | Public (token-gated) |
+| Command Centre | `/dashboard` | JWT |
+| Staff Management | `/dashboard/staff` | JWT + agency owner only |
+| Billing | `/dashboard/billing` | JWT + agency owner only |
+| Quote Builder | `/admin/quote` | Admin secret |
+
+---
+
+## Admin Credentials
+- URL: `directiveos.com.au/admin`
+- Username: `captainjaze` (ADMIN_USERNAME env var)
+- Password: `M@gdalena2050` (ADMIN_PASSWORD env var)
+- Header used: `x-admin-secret: <ADMIN_PASSWORD>`
+
+## Test Client (Production DB — ID 19)
+- Email: `jayson@directiveos.com.au`
+- Password: `ocampo`
+- Agency: "Directive OS (Test)"
+
+---
+
+## Legacy Onboarding (Clerk-based — pre April 2025)
+
+The original flow used Clerk org-based auth. Now replaced by email+password JWT auth. Clerk org IDs still stored in `clerk_org_id` column for backwards compatibility with existing dashboard routes that use `x-clerk-org-id` header.
+
+---
+
+## Stripe Seat Billing — How It Works
+
+`adjustStripeSeats(agency, delta)` in `artifacts/api-server/src/routes/staff.ts`:
+1. Looks up active Stripe subscription for the agency's `stripe_customer_id`
+2. Finds the `STRIPE_PRICE_PER_SEAT` line item (if any)
+3. +1 seat: creates or increments the seat item with `proration_behavior: "create_prorations"`
+4. -1 seat: decrements or deletes the seat item with prorated credit
+5. Stripe immediately charges (or credits) the prorated amount
 
 ---
 
@@ -186,7 +225,21 @@ Listen for: `checkout.session.completed` where `metadata.source === "landing_pag
 1. Create artifact: `createArtifact({ slug: "agency-slug", kind: "web", title: "Agency Name" })`
 2. Copy `artifacts/c21-rana` (light theme) or `artifacts/nidus-re` (dark theme)
 3. Update: agency name, PHONE constant, brand colours, nav links → client's real site
-4. Add DEMO banner (copy from c21-rana)
+4. Add DEMO banner (copy from c21-rana landing.tsx)
 5. Add `GetStartedCTA` component with agency slug + name
-6. Add to Directive OS homepage "See Directive OS in the Wild" section
-7. Deploy → directiveos.com.au/agency-slug/
+6. Deploy → directiveos.com.au/agency-slug/
+7. Onboard the client via admin Fleet Manifest → creates login credentials automatically
+
+---
+
+## Required Environment Variables
+
+| Variable | Purpose |
+|----------|---------|
+| `CLIENT_JWT_SECRET` | JWT signing secret |
+| `DOS_RESEND_KEY` or `RESEND_API_KEY` | Email sending via Resend |
+| `STRIPE_KEY_ACTIVE` | Stripe API key |
+| `STRIPE_PRICE_ONBOARDING` | Stripe price ID for setup fee |
+| `STRIPE_PRICE_PER_SEAT` | Stripe price ID for per-seat billing |
+| `ADMIN_USERNAME` | Admin login username (`captainjaze`) |
+| `ADMIN_PASSWORD` | Admin login password + x-admin-secret |
