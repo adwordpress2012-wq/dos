@@ -86,6 +86,31 @@ Showcased in the master site under `/#templates` (nav: Templates → Live Demos 
 - **Partner program form**: https://www.mrisoftware.com/au/become-a-partner/
 - Status: Forms to be submitted by Jayson — once credentials arrive, replace mock data in `artifacts/api-server/src/lib/mockVault.ts`
 
+## Recent Changes (15 April 2025)
+
+### Contact Extraction Overhaul (email.ts + voice.ts)
+- **AI-first pipeline**: `generateEnglishSummary()` now returns `capturedName`, `capturedEmail`, `capturedPhone` — AI-extracted from the full transcript. These take priority over regex in both `sendVoiceTranscriptEmail` and `sendChatTranscriptEmail`.
+- **Spoken email normalisation**: `normaliseSpokenLocal()` converts spoken special characters before email parsing — "underscore" → `_`, "dash/hyphen" → `-`, "dot/period" → `.` — so "man underscore dj ph at yahoo dot com" → `man_djph@yahoo.com`
+- **Expanded name blocklist**: 100+ common English words blocked from being extracted as caller names. Length check: any captured word ≤ 2 chars is rejected. Default changed from `"Phone Caller"` string to `null` so AI extraction can take priority.
+- **AI prompt rules**: `capturedEmail` enforced as `user@domain.com` format only — never a person's name. Unconfirmed contacts → `null`.
+
+### Voice Persona Updates (voice.ts — both DIRECTIVE_OS_PERSONA and buildAgencyPersona)
+- **DOUBLE-WORD BAN**: Sarah forbidden from repeating consecutive words in a single response (e.g. "at all at all", "right right"). Rule added to both personas.
+- **CONTACT CAPTURE PROTOCOL**: Strict 3-step confirmation process for name, phone, email. Email must be read back as complete address and explicitly confirmed before accepting.
+
+### Chat Sarah Updates (ai.ts)
+- Same CONTACT CAPTURE PROTOCOL as voice — strict email confirmation, NEVER use name as email.
+
+### DOS-Demo-3 — Multilingual Landing Page
+- New page: `artifacts/directive-os/src/pages/demo-three.tsx` → route `/demo-3`
+- Animated scrolling language marquee (all 9 flags, 36s loop)
+- Full 3×3 language card grid + 3 differentiator panels
+- Hero: "Your Office Answers Every Call. Every Language."
+- Email mockup shows Mandarin call with "Translated by Sarah AI" label
+- Skill documented at `.agents/skills/dos-session-2025-04-15/SKILL.md`
+
+---
+
 ## Key Routes
 
 ### API (`artifacts/api-server`) — served at `/api`
