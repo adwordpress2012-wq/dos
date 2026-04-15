@@ -41,6 +41,8 @@ Week 5: Parramatta & Greater West
 Week 6: Ashfield & Campsie Chinese Community
 Week 7: Ryde & Meadowbank
 Week 8: Box Hill & Hills District Growth Corridor
+Week 9: Eastwood & Epping Chinese Community
+Week 10: Rhodes & Concord West Chinese Community
 ```
 
 To add/change: edit the `SYDNEY_CLUSTERS` array in `prospector.ts`.

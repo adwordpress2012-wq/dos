@@ -59,3 +59,9 @@ id = "b2TGvyiRlTqqAHeuxCuev"
 uri = "file://Directive_OS_Sales_Plan.xlsx"
 type = "table"
 title = "Directive OS — Sales Plan & Scripts"
+
+[[outputs]]
+id = "6lQ0amp-n_fxpa0uJvd-f"
+uri = "file://DOS_Eastwood_Rhodes_Prospects.xlsx"
+type = "table"
+title = "DOS Prospect List — Eastwood, Epping, Rhodes & Concord West"

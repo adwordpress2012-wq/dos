@@ -15,6 +15,8 @@ const SYDNEY_CLUSTERS = [
   { label: "Ashfield & Campsie Chinese Community", suburbs: "Ashfield, Campsie, Lakemba, Canterbury" },
   { label: "Ryde & Meadowbank", suburbs: "Ryde, Meadowbank, Ermington, West Ryde" },
   { label: "Box Hill & Hills District Growth Corridor", suburbs: "Box Hill, Kellyville, Rouse Hill, Castle Hill" },
+  { label: "Eastwood & Epping Chinese Community", suburbs: "Eastwood, Epping, North Epping, Marsfield" },
+  { label: "Rhodes & Concord West Chinese Community", suburbs: "Rhodes, Concord West, Liberty Grove, Homebush West" },
 ];
 
 // ── Wednesday: Jayson's local area — Greater Western Sydney ──────────────────
