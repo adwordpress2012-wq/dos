@@ -11,6 +11,7 @@ export const transcriptsTable = pgTable("transcripts", {
   duration: integer("duration"),
   summary: text("summary"),
   recordingUrl: text("recording_url"),
+  language: text("language"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
@@ -19,6 +20,7 @@ export const transcriptMessagesTable = pgTable("transcript_messages", {
   transcriptId: integer("transcript_id").notNull(),
   role: text("role").notNull().default("user"),
   content: text("content").notNull(),
+  translatedContent: text("translated_content"),
   timestamp: timestamp("timestamp", { withTimezone: true }).notNull().defaultNow(),
 });
 

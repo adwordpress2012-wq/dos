@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 import { db, agenciesTable, chatSessionsTable, transcriptsTable, transcriptMessagesTable, leadsTable } from "@workspace/db";
 import { AiChatBody, AiSendFormBody } from "@workspace/api-zod";
 import { logger } from "../lib/logger";
-import { sendChatTranscriptEmail, OWNER_EMAILS } from "../lib/email";
+import { sendChatTranscriptEmail, generateEnglishSummary, OWNER_EMAILS } from "../lib/email";
 import Stripe from "stripe";
 import OpenAI from "openai";
 
@@ -349,12 +349,38 @@ router.post("/ai/chat", async (req, res): Promise<void> => {
                 : allText.includes("landlord") || allText.includes("manag") ? "landlord"
                 : "enquiry";
 
+              // Generate English summary once — used for both translation DB save and email
+              const chatSummary = await generateEnglishSummary(history, "chat");
+
+              // Save language on transcript and translated content on messages if non-English
+              if (chatSummary && !chatSummary.isEnglish && chatSummary.translatedMessages?.length) {
+                await db.update(transcriptsTable)
+                  .set({ language: chatSummary.language })
+                  .where(eq(transcriptsTable.id, transcript.id));
+
+                // Fetch saved messages in order to update them with translations
+                const savedMsgs = await db.select({ id: transcriptMessagesTable.id })
+                  .from(transcriptMessagesTable)
+                  .where(eq(transcriptMessagesTable.transcriptId, transcript.id))
+                  .orderBy(transcriptMessagesTable.timestamp);
+
+                for (let i = 0; i < savedMsgs.length; i++) {
+                  const translated = chatSummary.translatedMessages[i]?.content;
+                  if (translated) {
+                    await db.update(transcriptMessagesTable)
+                      .set({ translatedContent: translated })
+                      .where(eq(transcriptMessagesTable.id, savedMsgs[i].id));
+                  }
+                }
+              }
+
               void sendChatTranscriptEmail({
                 agencyName: ag.name,
                 agencyEmail: ag.contactEmail,
                 sessionId,
                 messages: history,
                 leadType,
+                preComputedSummary: chatSummary,
               });
             }
           } catch (err) {

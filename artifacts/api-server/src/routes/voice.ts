@@ -4,7 +4,7 @@ import Stripe from "stripe";
 import { db, agenciesTable, transcriptsTable, transcriptMessagesTable, leadsTable } from "@workspace/db";
 import { eq, sql } from "drizzle-orm";
 import { logger } from "../lib/logger";
-import { sendVoiceTranscriptEmail } from "../lib/email";
+import { sendVoiceTranscriptEmail, generateEnglishSummary } from "../lib/email";
 
 const router: IRouter = Router();
 
@@ -623,7 +623,21 @@ async function onCallEnd(session: CallSession): Promise<void> {
       leadId = lead.id;
       logger.info({ leadId, callerName, callerEmail, askedAboutPrice }, "Voice lead saved");
     }
+    // ── Generate English summary once — used for both DB translation and email ──
+    let voiceSummary = null;
     if (session.transcript.length > 0) {
+      try {
+        voiceSummary = await generateEnglishSummary(session.transcript, "voice", durationSeconds);
+      } catch (err) {
+        logger.warn({ err }, "Failed to generate English summary for voice transcript");
+      }
+    }
+
+    if (session.transcript.length > 0) {
+      const detectedLanguage = voiceSummary?.language ?? null;
+      const isEnglish = voiceSummary?.isEnglish !== false;
+      const translatedMsgs = voiceSummary?.translatedMessages ?? [];
+
       const [savedTranscript] = await db
         .insert(transcriptsTable)
         .values({
@@ -633,19 +647,21 @@ async function onCallEnd(session: CallSession): Promise<void> {
           channel: "voice",
           duration: durationSeconds,
           summary: `Voice call with ${callerLabel} — ${Math.round(durationMinutes)}m ${durationSeconds % 60}s`,
+          language: detectedLanguage,
         })
         .returning();
 
       await db.insert(transcriptMessagesTable).values(
-        session.transcript.map((m) => ({
+        session.transcript.map((m, i) => ({
           transcriptId: savedTranscript.id,
           role: m.role,
           content: m.content,
+          translatedContent: (!isEnglish && translatedMsgs[i]?.content) ? translatedMsgs[i].content : null,
           timestamp: new Date(),
         })),
       );
 
-      logger.info({ transcriptId: savedTranscript.id }, "Voice transcript saved");
+      logger.info({ transcriptId: savedTranscript.id, language: detectedLanguage }, "Voice transcript saved");
     }
 
     // ── Email transcript to agency contact (+ priority alert to Jayson if price was asked) ─
@@ -666,6 +682,7 @@ async function onCallEnd(session: CallSession): Promise<void> {
             callbackNeeded: askedAboutPrice,
             callerName,
             callerPhone,
+            preComputedSummary: voiceSummary,
           });
         }
       } catch (err) {

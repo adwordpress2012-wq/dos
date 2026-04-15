@@ -21,7 +21,7 @@ interface ConversationSummary {
   translatedMessages?: Array<{ role: "user" | "assistant"; content: string }>;
 }
 
-async function generateEnglishSummary(
+export async function generateEnglishSummary(
   messages: TranscriptMessage[],
   channel: "voice" | "chat",
   durationSeconds?: number
@@ -447,12 +447,15 @@ export async function sendVoiceTranscriptEmail(opts: {
   callbackNeeded?: boolean;
   callerName?: string | null;
   callerPhone?: string | null;
+  preComputedSummary?: ConversationSummary | null;
 }): Promise<void> {
   const fullText = opts.messages.map(m => m.content).join(" ");
   const intel = detectLeadIntelligence(fullText);
 
-  // Generate AI summary first — it is the authoritative source for contact details
-  const summary = await generateEnglishSummary(opts.messages, "voice", opts.duration);
+  // Use pre-computed summary if provided, otherwise generate one
+  const summary = opts.preComputedSummary !== undefined
+    ? opts.preComputedSummary
+    : await generateEnglishSummary(opts.messages, "voice", opts.duration);
 
   // AI-extracted contacts take priority over regex-based detection
   const { email: regexEmail, phone: regexPhone, name: regexName } = detectContact(fullText);
@@ -491,12 +494,15 @@ export async function sendChatTranscriptEmail(opts: {
   sessionId: string;
   messages: TranscriptMessage[];
   leadType?: string;
-}): Promise<void> {
+  preComputedSummary?: ConversationSummary | null;
+}): Promise<ConversationSummary | null> {
   const fullText = opts.messages.map(m => m.content).join(" ");
   const intel = detectLeadIntelligence(fullText);
 
-  // Generate AI summary first — it is the authoritative source for contact details
-  const summary = await generateEnglishSummary(opts.messages, "chat");
+  // Use pre-computed summary if provided, otherwise generate one
+  const summary = opts.preComputedSummary !== undefined
+    ? opts.preComputedSummary
+    : await generateEnglishSummary(opts.messages, "chat");
 
   // AI-extracted contacts take priority over regex-based detection
   const { email: regexEmail, phone: regexPhone, name: regexName } = detectContact(fullText);
@@ -526,6 +532,7 @@ export async function sendChatTranscriptEmail(opts: {
   });
 
   await sendViaResend(to, subject, html);
+  return summary;
 }
 
 // ─── Tax Invoice Email ────────────────────────────────────────────────────────
