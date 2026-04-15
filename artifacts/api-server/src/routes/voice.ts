@@ -236,14 +236,14 @@ function configureOpenAiSession(session: CallSession): void {
       session: {
         turn_detection: {
           type: "server_vad",
-          silence_duration_ms: 2000,
-          threshold: 0.6,
-          prefix_padding_ms: 300,
+          silence_duration_ms: 600,
+          threshold: 0.5,
+          prefix_padding_ms: 200,
         },
         input_audio_format: "g711_ulaw",
         output_audio_format: "g711_ulaw",
         input_audio_transcription: { model: "whisper-1" },
-        voice: "coral",
+        voice: "shimmer",
         instructions: session.persona,
         modalities: ["text", "audio"],
         temperature: 0.8,

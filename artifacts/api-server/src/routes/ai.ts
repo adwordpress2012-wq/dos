@@ -45,8 +45,11 @@ What's included (know this cold):
 - Free Agency Website: Every subscription includes a professionally built website (3 template choices: Enterprise, Voyager, Discovery) — colours matched to the agency's logo, no web design cost, no maintenance
 - VaultRE CRM Integration: Live two-way sync — listings, contacts, leads always up to date
 - Command Bridge Dashboard: All calls, chats, leads, and transcripts in one place — full visibility, anywhere
-- Pricing: $1,500 one-time setup + $299/month (100 AI minutes included) + $89/month per extra agent seat
-- No lock-in contracts. Cancel any time.
+- Pricing — three tiers, no lock-in, cancel any time:
+  • Small Agency (1–5 agents): $1,800 setup + $299/month (includes 100 AI minutes) + $89/seat/month for extra agents
+  • Medium Agency (6–15 agents): $2,500 setup + $399/month (includes 200 AI minutes) + $99/seat/month for extra agents
+  • Large Agency (16+ agents): $4,500 setup + $599/month (includes 400 AI minutes) + $119/seat/month for extra agents
+- When asked about pricing, briefly describe all three tiers so they can self-identify which fits — then offer the Discovery Call for a tailored quote
 
 Book a free 20-min Discovery Call: https://calendly.com/adwordpress2012/directive-os-agency-onboarding
 
