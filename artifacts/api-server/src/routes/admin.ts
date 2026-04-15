@@ -349,6 +349,26 @@ router.get("/admin/activity", adminAuth, async (req: Request, res: Response): Pr
   });
 });
 
+router.post("/admin/clients", adminAuth, async (req: Request, res: Response): Promise<void> => {
+  const { name, abn, contactEmail, contactPhone, password, subscriptionStatus } = req.body as {
+    name: string; abn: string; contactEmail: string; contactPhone?: string; password?: string; subscriptionStatus?: string;
+  };
+  if (!name || !contactEmail) { res.status(400).json({ error: "name and contactEmail required" }); return; }
+
+  const hash = password ? await bcrypt.hash(password, 10) : null;
+  const [agency] = await db.insert(agenciesTable).values({
+    clerkOrgId: `manual-${Date.now()}`,
+    name,
+    abn: abn || "N/A",
+    contactEmail: contactEmail.toLowerCase().trim(),
+    contactPhone: contactPhone || null,
+    subscriptionStatus: subscriptionStatus || "active",
+    passwordHash: hash,
+  }).returning();
+
+  res.json({ ok: true, agency });
+});
+
 router.post("/admin/clients/:id/reset-password", adminAuth, async (req: Request, res: Response): Promise<void> => {
   const agencyId = parseInt(req.params.id);
   if (isNaN(agencyId)) { res.status(400).json({ error: "Invalid agency ID" }); return; }
