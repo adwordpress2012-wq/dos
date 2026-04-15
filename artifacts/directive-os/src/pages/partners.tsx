@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "wouter";
+import { QRCodeSVG } from "qrcode.react";
 
 const TEAL = "#00d1b2";
 const NAVY = "#07090f";
@@ -275,6 +276,28 @@ export default function PartnersPage() {
               </p>
             </form>
           )}
+        </div>
+      </section>
+
+      {/* QR CODE */}
+      <section style={{ padding: "64px 32px", background: NAVY2, borderBottom: `1px solid ${BORDER}` }}>
+        <div style={{ maxWidth: 560, margin: "0 auto", textAlign: "center" }}>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, color: TEAL, marginBottom: 12 }}>SHARE THIS PAGE</div>
+          <h2 style={{ fontSize: 24, fontWeight: 900, marginBottom: 12 }}>QR Code — Partners Page</h2>
+          <p style={{ color: SLATE, fontSize: 14, lineHeight: 1.7, maxWidth: 420, margin: "0 auto 32px" }}>
+            Print this on your business card, flyer, or one-pager. Anyone who scans it lands directly on the partner registration page.
+          </p>
+          <div style={{ display: "inline-block", background: WHITE, padding: 20, borderRadius: 16, boxShadow: `0 0 40px ${TEAL}22` }}>
+            <QRCodeSVG
+              value="https://directiveos.com.au/partners"
+              size={180}
+              bgColor="#ffffff"
+              fgColor="#07090f"
+              level="H"
+              includeMargin={false}
+            />
+          </div>
+          <div style={{ marginTop: 16, fontSize: 13, color: "#374151" }}>directiveos.com.au/partners</div>
         </div>
       </section>
 
