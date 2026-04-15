@@ -1,8 +1,10 @@
 import { useState, useRef, useEffect } from "react";
 
-const YELLOW = "#FFE100";
-const BLACK = "#1a1a1a";
-const DARK_BG = "#111111";
+const RED = "#CC1414";
+const RED_DARK = "#a00f0f";
+const WHITE = "#ffffff";
+const DARK_BG = "#0f0f0f";
+const DARK_CARD = "#141414";
 const PHONE = "02 5850 4038";
 const API_BASE = "/api";
 
@@ -10,16 +12,16 @@ interface Message { role: "user" | "assistant"; content: string; }
 
 function RWLogo({ size = 40 }: { size?: number }) {
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
       <div style={{
-        width: size, height: size, background: YELLOW,
-        display: "flex", alignItems: "center", justifyContent: "center",
-        fontWeight: 900, fontSize: size * 0.42, color: BLACK, flexShrink: 0,
-        clipPath: "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)"
-      }}>RW</div>
+        background: RED, padding: `${size * 0.12}px ${size * 0.22}px`,
+        display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+      }}>
+        <span style={{ fontWeight: 900, fontSize: size * 0.52, color: WHITE, letterSpacing: -1, lineHeight: 1 }}>R&amp;W</span>
+      </div>
       <div>
-        <div style={{ fontSize: size * 0.34, fontWeight: 900, color: YELLOW, letterSpacing: 2, textTransform: "uppercase", lineHeight: 1 }}>RAY WHITE</div>
-        <div style={{ fontSize: size * 0.2, fontWeight: 600, color: "#999", letterSpacing: 1.5, textTransform: "uppercase", lineHeight: 1.3 }}>Rooty Hill</div>
+        <div style={{ fontSize: size * 0.3, fontWeight: 800, color: WHITE, letterSpacing: 1, lineHeight: 1 }}>RICHARDSON &amp; WRENCH</div>
+        <div style={{ fontSize: size * 0.2, fontWeight: 500, color: "#aaa", letterSpacing: 1, lineHeight: 1.4 }}>Rooty Hill &amp; Mt Druitt</div>
       </div>
     </div>
   );
@@ -28,7 +30,7 @@ function RWLogo({ size = 40 }: { size?: number }) {
 function ChatWidget() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
-    { role: "assistant", content: "G'day! I'm Sarah, the AI receptionist for Ray White Rooty Hill. Looking to buy, sell, or rent in Rooty Hill, Mount Druitt, or Western Sydney? I'm available 24/7 — how can I help?" }
+    { role: "assistant", content: "G'day! I'm Sarah, the AI receptionist for Richardson & Wrench Rooty Hill & Mt Druitt. Thinking of buying, selling, or renting in Western Sydney? I'm here 24/7 — how can I help?" }
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -49,7 +51,7 @@ function ChatWidget() {
       const res = await fetch(`${API_BASE}/ai/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionId: sessionId.current, message: text, agencyName: "Ray White Rooty Hill" }),
+        body: JSON.stringify({ sessionId: sessionId.current, message: text, agencyName: "Richardson & Wrench Rooty Hill" }),
       });
       const data = await res.json();
       setMessages(p => [...p, { role: "assistant", content: data.message || data.reply || `Please call us on ${PHONE}.` }]);
@@ -64,62 +66,58 @@ function ChatWidget() {
       {open && (
         <div style={{
           position: "fixed", bottom: 90, right: 24, width: 360, height: 500,
-          background: BLACK, borderRadius: 4, boxShadow: `0 8px 40px rgba(255,225,0,0.2)`,
-          border: `2px solid ${YELLOW}`, display: "flex", flexDirection: "column", zIndex: 9999, overflow: "hidden"
+          background: DARK_BG, borderRadius: 6, boxShadow: `0 8px 40px rgba(204,20,20,0.25)`,
+          border: `2px solid ${RED}`, display: "flex", flexDirection: "column", zIndex: 9999, overflow: "hidden"
         }}>
-          <div style={{ background: YELLOW, padding: "14px 16px", display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{
-              width: 36, height: 36, background: BLACK, display: "flex", alignItems: "center",
-              justifyContent: "center", fontWeight: 900, fontSize: 12, color: YELLOW, flexShrink: 0,
-              clipPath: "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)"
-            }}>RW</div>
+          <div style={{ background: RED, padding: "14px 16px", display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{ background: WHITE, padding: "4px 8px", fontWeight: 900, fontSize: 13, color: RED, flexShrink: 0 }}>R&amp;W</div>
             <div>
-              <div style={{ fontWeight: 700, fontSize: 14, color: BLACK }}>Sarah — AI Receptionist</div>
-              <div style={{ fontSize: 11, color: "#333" }}>Ray White Rooty Hill · Always available</div>
+              <div style={{ fontWeight: 700, fontSize: 14, color: WHITE }}>Sarah — AI Receptionist</div>
+              <div style={{ fontSize: 11, color: "rgba(255,255,255,0.75)" }}>R&amp;W Rooty Hill · Always available</div>
             </div>
-            <button onClick={() => setOpen(false)} style={{ marginLeft: "auto", background: "none", border: "none", color: BLACK, fontSize: 22, cursor: "pointer", fontWeight: 700 }}>×</button>
+            <button onClick={() => setOpen(false)} style={{ marginLeft: "auto", background: "none", border: "none", color: WHITE, fontSize: 22, cursor: "pointer", fontWeight: 700 }}>×</button>
           </div>
           <div style={{ flex: 1, overflowY: "auto", padding: "16px 14px", display: "flex", flexDirection: "column", gap: 10 }}>
             {messages.map((m, i) => (
               <div key={i} style={{ display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start" }}>
                 <div style={{
                   maxWidth: "82%", padding: "10px 14px", fontSize: 13, lineHeight: 1.55,
-                  background: m.role === "user" ? YELLOW : "#1e1e1e",
-                  color: m.role === "user" ? BLACK : "#eee",
+                  background: m.role === "user" ? RED : "#1e1e1e",
+                  color: WHITE,
                   borderRadius: m.role === "user" ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
-                  border: m.role === "assistant" ? "1px solid #333" : "none"
+                  border: m.role === "assistant" ? "1px solid #2a2a2a" : "none"
                 }}>{m.content}</div>
               </div>
             ))}
             {loading && (
-              <div style={{ display: "flex", gap: 5, padding: "10px 14px", background: "#1e1e1e", borderRadius: "16px 16px 16px 4px", width: 60, border: "1px solid #333" }}>
+              <div style={{ display: "flex", gap: 5, padding: "10px 14px", background: "#1e1e1e", borderRadius: "16px 16px 16px 4px", width: 60, border: "1px solid #2a2a2a" }}>
                 {[0, 1, 2].map(i => (
-                  <div key={i} style={{ width: 7, height: 7, borderRadius: "50%", background: YELLOW, animation: `bounce 1s infinite ${i * 0.2}s` }} />
+                  <div key={i} style={{ width: 7, height: 7, borderRadius: "50%", background: RED, animation: `bounce 1s infinite ${i * 0.2}s` }} />
                 ))}
               </div>
             )}
             <div ref={bottomRef} />
           </div>
-          <div style={{ padding: "12px 14px", borderTop: "1px solid #2a2a2a", display: "flex", gap: 8 }}>
+          <div style={{ padding: "12px 14px", borderTop: "1px solid #222", display: "flex", gap: 8 }}>
             <input
               ref={inputRef}
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key === "Enter" && send()}
               placeholder="Ask Sarah anything..."
-              style={{ flex: 1, background: "#1a1a1a", border: "1px solid #333", borderRadius: 6, padding: "10px 12px", color: "#fff", fontSize: 13, outline: "none" }}
+              style={{ flex: 1, background: "#1a1a1a", border: "1px solid #333", borderRadius: 6, padding: "10px 12px", color: WHITE, fontSize: 13, outline: "none" }}
             />
             <button onClick={send} disabled={loading}
-              style={{ background: YELLOW, border: "none", borderRadius: 6, width: 42, cursor: "pointer", fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center" }}>→</button>
+              style={{ background: RED, border: "none", borderRadius: 6, width: 42, cursor: "pointer", fontSize: 18, color: WHITE, display: "flex", alignItems: "center", justifyContent: "center" }}>→</button>
           </div>
         </div>
       )}
       <button onClick={() => setOpen(p => !p)} style={{
         position: "fixed", bottom: 24, right: 24, width: 64, height: 64, borderRadius: "50%",
-        background: YELLOW, border: "none", cursor: "pointer", zIndex: 9998,
-        boxShadow: `0 4px 24px ${YELLOW}66`, fontSize: 26, display: "flex", alignItems: "center", justifyContent: "center"
+        background: RED, border: "none", cursor: "pointer", zIndex: 9998,
+        boxShadow: `0 4px 24px ${RED}88`, fontSize: 26, display: "flex", alignItems: "center", justifyContent: "center"
       }}>
-        {open ? "×" : "💬"}
+        {open ? <span style={{ color: WHITE, fontSize: 28, fontWeight: 700 }}>×</span> : "💬"}
       </button>
       <style>{`@keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-6px)} }`}</style>
     </>
@@ -128,38 +126,38 @@ function ChatWidget() {
 
 export default function RayWhiteRHPage() {
   return (
-    <div style={{ minHeight: "100vh", background: "#fff", color: BLACK, fontFamily: "'Inter', -apple-system, sans-serif" }}>
+    <div style={{ minHeight: "100vh", background: WHITE, color: DARK_BG, fontFamily: "'Inter', -apple-system, sans-serif" }}>
 
       {/* DEMO BANNER */}
       <div style={{
         background: DARK_BG, color: "#ccc", textAlign: "center",
-        padding: "9px 16px", fontSize: 12, fontWeight: 500, letterSpacing: 0.5,
-        borderBottom: `2px solid ${YELLOW}`, position: "relative", zIndex: 200
+        padding: "9px 16px", fontSize: 12, fontWeight: 500, letterSpacing: 0.4,
+        borderBottom: `3px solid ${RED}`, position: "relative", zIndex: 200
       }}>
-        <span style={{ background: YELLOW, color: BLACK, padding: "2px 8px", fontWeight: 800, fontSize: 11, marginRight: 10, letterSpacing: 1 }}>DEMO</span>
-        This is a live preview built for Ray White Rooty Hill — your franchise and main website are completely untouched.{" "}
-        <a href="https://directiveos.com.au" target="_blank" rel="noreferrer" style={{ color: YELLOW, fontWeight: 700, textDecoration: "none" }}>Directive OS</a>
-        {" "}powers this page independently.
+        <span style={{ background: RED, color: WHITE, padding: "2px 9px", fontWeight: 800, fontSize: 11, marginRight: 10, letterSpacing: 1 }}>DEMO</span>
+        Built specifically for R&amp;W Rooty Hill — your existing website and franchise are completely untouched.{" "}
+        <a href="https://directiveos.com.au" target="_blank" rel="noreferrer" style={{ color: RED, fontWeight: 700, textDecoration: "none" }}>Directive OS</a>
+        {" "}runs this page independently.
       </div>
 
       {/* NAV */}
       <nav style={{
-        position: "sticky", top: 0, zIndex: 100, background: BLACK,
-        borderBottom: `3px solid ${YELLOW}`, padding: "0 32px",
+        position: "sticky", top: 0, zIndex: 100, background: DARK_BG,
+        borderBottom: `3px solid ${RED}`, padding: "0 32px",
         display: "flex", alignItems: "center", justifyContent: "space-between", height: 72,
-        boxShadow: "0 2px 20px rgba(0,0,0,0.4)"
+        boxShadow: "0 2px 20px rgba(0,0,0,0.5)"
       }}>
-        <RWLogo size={38} />
+        <RWLogo size={36} />
         <div style={{ display: "flex", gap: 28, fontSize: 14 }}>
-          {["Buy", "Sell", "Rent", "About Us"].map(l => (
-            <a key={l} href="https://www.raywhite.com/" target="_blank" rel="noreferrer"
+          {["Buy", "Sell", "Rent", "About David"].map(l => (
+            <a key={l} href="https://www.rw.com.au/" target="_blank" rel="noreferrer"
               style={{ color: "#aaa", textDecoration: "none", fontWeight: 500 }}
-              onMouseOver={e => (e.currentTarget.style.color = YELLOW)}
+              onMouseOver={e => (e.currentTarget.style.color = RED)}
               onMouseOut={e => (e.currentTarget.style.color = "#aaa")}>{l}</a>
           ))}
         </div>
         <a href={`tel:${PHONE.replace(/\s/g, "")}`} style={{
-          background: YELLOW, color: BLACK, padding: "10px 22px",
+          background: RED, color: WHITE, padding: "10px 22px",
           textDecoration: "none", fontSize: 14, fontWeight: 800, letterSpacing: 0.5
         }}>📞 {PHONE}</a>
       </nav>
@@ -168,144 +166,170 @@ export default function RayWhiteRHPage() {
       <section style={{
         position: "relative", overflow: "hidden",
         padding: "110px 32px 90px", textAlign: "center",
-        background: `linear-gradient(160deg, ${DARK_BG} 0%, #2a2200 60%, ${DARK_BG} 100%)`,
-        borderBottom: `1px solid #333`
+        background: `linear-gradient(160deg, ${DARK_BG} 0%, #1a0000 60%, ${DARK_BG} 100%)`,
+        borderBottom: `1px solid #2a2a2a`
       }}>
-        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 4, background: YELLOW }} />
-        <div style={{ position: "absolute", top: -80, left: "50%", transform: "translateX(-50%)", width: 600, height: 600, borderRadius: "50%", background: `radial-gradient(circle, ${YELLOW}18 0%, transparent 70%)`, pointerEvents: "none" }} />
-        <div style={{ maxWidth: 800, margin: "0 auto", position: "relative" }}>
+        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 4, background: RED }} />
+        <div style={{ position: "absolute", top: -80, left: "50%", transform: "translateX(-50%)", width: 600, height: 600, borderRadius: "50%", background: `radial-gradient(circle, ${RED}22 0%, transparent 70%)`, pointerEvents: "none" }} />
+        <div style={{ maxWidth: 820, margin: "0 auto", position: "relative" }}>
           <div style={{
-            display: "inline-block", background: `${YELLOW}22`, border: `1px solid ${YELLOW}66`,
-            color: YELLOW, padding: "6px 20px", fontSize: 12, fontWeight: 700,
+            display: "inline-block", background: `${RED}22`, border: `1px solid ${RED}55`,
+            color: RED, padding: "6px 20px", fontSize: 12, fontWeight: 700,
             marginBottom: 28, letterSpacing: 3, textTransform: "uppercase"
           }}>
             AI Receptionist · Available 24/7
           </div>
-          <h1 style={{ fontSize: "clamp(36px, 5.5vw, 66px)", fontWeight: 900, lineHeight: 1.05, marginBottom: 24, letterSpacing: -1.5, color: "#fff" }}>
-            Every Call Answered.<br />
-            <span style={{ color: YELLOW }}>Every Lead Captured.</span>
+          <h1 style={{ fontSize: "clamp(36px, 5.5vw, 64px)", fontWeight: 900, lineHeight: 1.05, marginBottom: 24, letterSpacing: -1.5, color: WHITE }}>
+            Your Office Never<br />
+            <span style={{ color: RED }}>Misses a Call Again.</span>
           </h1>
-          <p style={{ fontSize: 19, color: "#bbb", lineHeight: 1.75, marginBottom: 50, maxWidth: 620, margin: "0 auto 50px" }}>
-            Ray White Rooty Hill's AI receptionist Sarah answers every call to your office — 24/7 — even when you're at an inspection, with a client, or it's Sunday night. You get the lead. You get the transcript. You never miss a thing.
+          <p style={{ fontSize: 19, color: "#bbb", lineHeight: 1.8, marginBottom: 16, maxWidth: 640, margin: "0 auto 16px" }}>
+            Sarah is an AI receptionist built for R&amp;W Rooty Hill &amp; Mt Druitt. She answers every call to your office line — 24 hours a day — qualifies the enquiry, and sends David a notification the moment the call ends.
+          </p>
+          <p style={{ fontSize: 15, color: "#666", lineHeight: 1.7, marginBottom: 50, maxWidth: 560, margin: "0 auto 50px" }}>
+            No voicemail. No missed leads. Just a full lead transcript in your inbox and a tap on your phone — every time.
           </p>
           <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
             <a href={`tel:${PHONE.replace(/\s/g, "")}`} style={{
-              background: YELLOW, color: BLACK, padding: "16px 40px",
+              background: RED, color: WHITE, padding: "16px 40px",
               textDecoration: "none", fontSize: 17, fontWeight: 900,
-              boxShadow: `0 4px 28px ${YELLOW}55`, letterSpacing: 0.5
-            }}>📞 Call Sarah Now — {PHONE}</a>
+              boxShadow: `0 4px 28px ${RED}66`, letterSpacing: 0.5
+            }}>📞 Call Sarah — {PHONE}</a>
             <button onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })}
               style={{
-                background: "transparent", border: `2px solid ${YELLOW}66`, color: "#eee",
+                background: "transparent", border: `2px solid ${RED}66`, color: "#eee",
                 padding: "16px 40px", fontSize: 17, fontWeight: 700, cursor: "pointer", letterSpacing: 0.5
               }}>See How It Works ↓</button>
           </div>
-          <p style={{ color: "#555", fontSize: 13, marginTop: 24 }}>
-            This call connects to a live AI demo — try it. You'll receive a sample lead email within 30 seconds.
+          <p style={{ color: "#444", fontSize: 13, marginTop: 20 }}>
+            Call the number now — Sarah answers live. Or scroll down to chat with her.
           </p>
         </div>
       </section>
 
+      {/* DAVID STAT BAR */}
+      <section style={{ background: RED, padding: "20px 32px" }}>
+        <div style={{ maxWidth: 900, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "center", gap: 40, flexWrap: "wrap" }}>
+          <div style={{ color: WHITE, textAlign: "center" }}>
+            <div style={{ fontSize: 26, fontWeight: 900 }}>27 yrs</div>
+            <div style={{ fontSize: 12, opacity: 0.85, fontWeight: 600 }}>Experience</div>
+          </div>
+          <div style={{ width: 1, height: 36, background: "rgba(255,255,255,0.3)" }} />
+          <div style={{ color: WHITE, textAlign: "center" }}>
+            <div style={{ fontSize: 26, fontWeight: 900 }}>5.0 ⭐</div>
+            <div style={{ fontSize: 12, opacity: 0.85, fontWeight: 600 }}>201 Reviews</div>
+          </div>
+          <div style={{ width: 1, height: 36, background: "rgba(255,255,255,0.3)" }} />
+          <div style={{ color: WHITE, textAlign: "center" }}>
+            <div style={{ fontSize: 26, fontWeight: 900 }}>51</div>
+            <div style={{ fontSize: 12, opacity: 0.85, fontWeight: 600 }}>Properties sold this year</div>
+          </div>
+          <div style={{ width: 1, height: 36, background: "rgba(255,255,255,0.3)" }} />
+          <div style={{ color: WHITE, textAlign: "center" }}>
+            <div style={{ fontSize: 26, fontWeight: 900 }}>$1.01M</div>
+            <div style={{ fontSize: 12, opacity: 0.85, fontWeight: 600 }}>Median sold price</div>
+          </div>
+          <div style={{ width: 1, height: 36, background: "rgba(255,255,255,0.3)" }} />
+          <div style={{ color: WHITE, fontSize: 14, fontWeight: 700 }}>
+            David Frendo<br />
+            <span style={{ fontWeight: 500, opacity: 0.85, fontSize: 12 }}>Sales Manager · Auctioneer</span>
+          </div>
+        </div>
+      </section>
+
       {/* HOW IT WORKS */}
-      <section id="how-it-works" style={{ background: "#0d0d0d", padding: "80px 32px", borderBottom: `1px solid #222` }}>
+      <section id="how-it-works" style={{ background: DARK_BG, padding: "80px 32px", borderBottom: `1px solid #1e1e1e` }}>
         <div style={{ maxWidth: 900, margin: "0 auto" }}>
-          <div style={{ textAlign: "center", marginBottom: 56 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, color: YELLOW, marginBottom: 12 }}>HOW IT WORKS</div>
-            <h2 style={{ fontSize: "clamp(28px, 4vw, 46px)", fontWeight: 900, color: "#fff", margin: 0 }}>What happens when someone calls your office</h2>
-            <p style={{ color: "#777", fontSize: 15, marginTop: 14, maxWidth: 560, margin: "14px auto 0" }}>The whole thing runs in under 60 seconds. You don't need to do anything.</p>
+          <div style={{ textAlign: "center", marginBottom: 64 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, color: RED, marginBottom: 12 }}>HOW IT WORKS</div>
+            <h2 style={{ fontSize: "clamp(26px, 4vw, 44px)", fontWeight: 900, color: WHITE, margin: 0 }}>
+              What happens when someone calls the office
+            </h2>
+            <p style={{ color: "#666", fontSize: 15, marginTop: 14, maxWidth: 520, margin: "14px auto 0" }}>
+              You don't have to do anything differently. The whole thing runs automatically — in under 60 seconds.
+            </p>
           </div>
 
-          {/* Flow steps */}
           <div style={{ display: "grid", gap: 0 }}>
             {[
               {
                 num: "01",
                 icon: "📞",
                 title: "Someone calls your office",
-                body: "A buyer, vendor, or tenant rings your office line — at 7pm, on the weekend, whenever. Instead of voicemail or a missed call, Sarah picks up in under 3 seconds.",
-                accent: "#FFE100",
+                body: "A buyer, vendor, or tenant rings your office line — midday, at 7pm, on a Saturday. Instead of ringing out or hitting voicemail, Sarah answers in under 3 seconds. Every time.",
               },
               {
                 num: "02",
                 icon: "🤖",
-                title: "Sarah answers — naturally",
-                body: "\"G'day, Ray White Rooty Hill, this is Sarah — how can I help you today?\" She qualifies the caller, answers questions about listings, books inspections, and handles rentals. Sounds like a real receptionist.",
-                accent: "#FFE100",
+                title: "Sarah handles the call",
+                body: "\"G'day, Richardson & Wrench Rooty Hill, this is Sarah — how can I help?\" She qualifies the caller, answers questions about listings, books inspection times, handles rental enquiries. Sounds real, acts professional.",
               },
               {
                 num: "03",
                 icon: "📧",
-                title: "You get an email immediately",
-                body: "The moment the call ends, an email lands in your inbox. It contains: the caller's name, phone number, what they were enquiring about, their buyer intent, and the full conversation transcript — word for word.",
-                accent: "#FFE100",
+                title: "Email lands in David's inbox immediately",
+                body: "The second the call ends, a lead summary email hits your inbox. Caller's name, phone number, what they're looking for, their budget, finance status — and the full word-for-word transcript of the call.",
                 mockup: "email",
               },
               {
                 num: "04",
                 icon: "🔔",
-                title: "App notification on your phone",
-                body: "Your phone buzzes with a push notification — even if you're at an inspection. Tap it to open the full lead profile in the Command Bridge app. See exactly who called, what they said, and what they need — so you can call back with full context.",
-                accent: "#FFE100",
+                title: "App notification straight to David's phone",
+                body: "Your phone buzzes — even if you're at an auction or an inspection. Tap the notification to open the full lead in the app. You can see who called, what they said, and call them back with full context — not blind.",
                 mockup: "app",
               },
             ].map((step, i) => (
-              <div key={step.num} style={{ display: "flex", gap: 0, marginBottom: i < 3 ? 0 : 0 }}>
-                {/* Left: number + connector */}
+              <div key={step.num} style={{ display: "flex", gap: 0, marginBottom: 0 }}>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: 80, flexShrink: 0 }}>
-                  <div style={{ width: 56, height: 56, borderRadius: "50%", background: YELLOW, color: BLACK, fontWeight: 900, fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, zIndex: 1 }}>{step.num}</div>
-                  {i < 3 && <div style={{ width: 2, flex: 1, background: `linear-gradient(${YELLOW}, ${YELLOW}33)`, minHeight: 60 }} />}
+                  <div style={{ width: 54, height: 54, borderRadius: "50%", background: RED, color: WHITE, fontWeight: 900, fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, zIndex: 1 }}>{step.num}</div>
+                  {i < 3 && <div style={{ width: 2, flex: 1, background: `linear-gradient(${RED}, ${RED}22)`, minHeight: 60 }} />}
                 </div>
-                {/* Right: content */}
-                <div style={{ flex: 1, paddingBottom: i < 3 ? 48 : 0, paddingLeft: 24, paddingTop: 14 }}>
+                <div style={{ flex: 1, paddingBottom: i < 3 ? 52 : 0, paddingLeft: 24, paddingTop: 12 }}>
                   <div style={{ fontSize: 28, marginBottom: 8 }}>{step.icon}</div>
-                  <h3 style={{ fontSize: 22, fontWeight: 800, color: "#fff", margin: "0 0 10px" }}>{step.title}</h3>
-                  <p style={{ fontSize: 15, color: "#999", lineHeight: 1.75, margin: "0 0 20px", maxWidth: 560 }}>{step.body}</p>
+                  <h3 style={{ fontSize: 21, fontWeight: 800, color: WHITE, margin: "0 0 10px" }}>{step.title}</h3>
+                  <p style={{ fontSize: 15, color: "#888", lineHeight: 1.8, margin: "0 0 22px", maxWidth: 560 }}>{step.body}</p>
 
-                  {/* Email mockup */}
                   {step.mockup === "email" && (
-                    <div style={{ background: "#1a1a1a", border: "1px solid #333", borderRadius: 12, padding: "20px 24px", maxWidth: 520, fontFamily: "monospace" }}>
-                      <div style={{ fontSize: 11, color: "#555", marginBottom: 16, borderBottom: "1px solid #222", paddingBottom: 12 }}>
-                        <div style={{ marginBottom: 4 }}><span style={{ color: "#666" }}>FROM: </span><span style={{ color: "#aaa" }}>leads@directiveos.com.au</span></div>
-                        <div style={{ marginBottom: 4 }}><span style={{ color: "#666" }}>TO: </span><span style={{ color: "#aaa" }}>david@raywhiterootyhillnsw.com.au</span></div>
-                        <div style={{ color: YELLOW, fontWeight: 700, fontSize: 12, fontFamily: "sans-serif" }}>🔴 New Lead — Buyer Enquiry · Rooty Hill</div>
+                    <div style={{ background: "#1a1a1a", border: "1px solid #2a2a2a", borderRadius: 12, padding: "20px 24px", maxWidth: 520, fontFamily: "monospace" }}>
+                      <div style={{ fontSize: 11, color: "#555", marginBottom: 16, borderBottom: "1px solid #222", paddingBottom: 12, fontFamily: "sans-serif" }}>
+                        <div style={{ marginBottom: 3 }}><span style={{ color: "#555" }}>FROM: </span><span style={{ color: "#888" }}>leads@directiveos.com.au</span></div>
+                        <div style={{ marginBottom: 8 }}><span style={{ color: "#555" }}>TO: </span><span style={{ color: "#888" }}>david@rwrootyhillmtdruitt.com.au</span></div>
+                        <div style={{ color: RED, fontWeight: 700, fontSize: 13 }}>🔴 New Lead — Buyer Enquiry · Rooty Hill</div>
                       </div>
-                      <div style={{ fontSize: 12, color: "#888", lineHeight: 1.8, fontFamily: "sans-serif" }}>
-                        <div><span style={{ color: "#555" }}>Caller: </span><span style={{ color: "#ddd" }}>Mark Thompson</span></div>
-                        <div><span style={{ color: "#555" }}>Phone: </span><span style={{ color: YELLOW, fontWeight: 700 }}>0412 xxx xxx</span></div>
-                        <div><span style={{ color: "#555" }}>Enquiry: </span><span style={{ color: "#ddd" }}>3-bed house in Rooty Hill, budget $750K</span></div>
-                        <div><span style={{ color: "#555" }}>Finance: </span><span style={{ color: "#4ade80" }}>Pre-approved ✓</span></div>
-                        <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid #222" }}>
-                          <div style={{ color: "#555", marginBottom: 6, fontSize: 11 }}>TRANSCRIPT</div>
-                          <div><span style={{ color: YELLOW }}>Sarah: </span><span style={{ color: "#777" }}>G'day, Ray White Rooty Hill, this is Sarah...</span></div>
-                          <div><span style={{ color: "#aaa" }}>Mark: </span><span style={{ color: "#666" }}>Hi, I'm looking at a 3-bed in Rooty Hill...</span></div>
+                      <div style={{ fontSize: 13, color: "#777", lineHeight: 2, fontFamily: "sans-serif" }}>
+                        <div><span style={{ color: "#444" }}>Caller: </span><span style={{ color: "#ccc", fontWeight: 600 }}>Mark Thompson</span></div>
+                        <div><span style={{ color: "#444" }}>Phone: </span><span style={{ color: RED, fontWeight: 700 }}>0412 xxx xxx</span></div>
+                        <div><span style={{ color: "#444" }}>Enquiry: </span><span style={{ color: "#ccc" }}>3-bed house in Rooty Hill, budget $750K</span></div>
+                        <div><span style={{ color: "#444" }}>Finance: </span><span style={{ color: "#4ade80", fontWeight: 700 }}>Pre-approved ✓</span></div>
+                        <div style={{ marginTop: 12, paddingTop: 12, borderTop: "1px solid #222" }}>
+                          <div style={{ color: "#444", marginBottom: 6, fontSize: 11, letterSpacing: 1 }}>TRANSCRIPT</div>
+                          <div style={{ fontSize: 12 }}><span style={{ color: RED }}>Sarah: </span><span style={{ color: "#666" }}>G'day, Richardson & Wrench Rooty Hill, this is Sarah...</span></div>
+                          <div style={{ fontSize: 12 }}><span style={{ color: "#888" }}>Mark: </span><span style={{ color: "#555" }}>Hi, I saw your listing in Rooty Hill...</span></div>
                         </div>
                       </div>
                     </div>
                   )}
 
-                  {/* App notification mockup */}
                   {step.mockup === "app" && (
-                    <div style={{ maxWidth: 320 }}>
-                      {/* Phone notification */}
-                      <div style={{ background: "#1c1c1e", borderRadius: 16, padding: "14px 16px", marginBottom: 12, border: "1px solid #333", display: "flex", gap: 12, alignItems: "flex-start" }}>
-                        <div style={{ width: 42, height: 42, borderRadius: 10, background: YELLOW, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 }}>🎯</div>
+                    <div style={{ maxWidth: 300 }}>
+                      <div style={{ background: "#1c1c1e", borderRadius: 16, padding: "14px 16px", marginBottom: 12, border: "1px solid #2a2a2a", display: "flex", gap: 12, alignItems: "flex-start" }}>
+                        <div style={{ width: 44, height: 44, borderRadius: 10, background: RED, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 }}>🎯</div>
                         <div>
-                          <div style={{ fontSize: 13, fontWeight: 700, color: "#fff", marginBottom: 2 }}>New Lead — Sarah</div>
-                          <div style={{ fontSize: 12, color: "#999", lineHeight: 1.5 }}>Mark Thompson called · Pre-approved buyer · 3bd Rooty Hill $750K · Tap to view full transcript</div>
-                          <div style={{ fontSize: 11, color: "#555", marginTop: 4 }}>now · Ray White Rooty Hill</div>
+                          <div style={{ fontSize: 13, fontWeight: 700, color: WHITE, marginBottom: 2 }}>New Lead — Sarah</div>
+                          <div style={{ fontSize: 12, color: "#888", lineHeight: 1.55 }}>Mark Thompson called · Pre-approved · 3bd Rooty Hill $750K · Tap to view full transcript</div>
+                          <div style={{ fontSize: 11, color: "#444", marginTop: 4 }}>now · R&amp;W Rooty Hill</div>
                         </div>
                       </div>
-                      {/* App lead card */}
-                      <div style={{ background: "#111", border: `1px solid ${YELLOW}44`, borderRadius: 12, padding: "16px 18px" }}>
-                        <div style={{ fontSize: 10, fontWeight: 700, color: YELLOW, letterSpacing: 2, marginBottom: 8 }}>COMMAND BRIDGE APP</div>
-                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                          <span style={{ fontWeight: 700, color: "#fff", fontSize: 14 }}>Mark Thompson</span>
+                      <div style={{ background: "#111", border: `1px solid ${RED}44`, borderRadius: 12, padding: "16px 18px" }}>
+                        <div style={{ fontSize: 10, fontWeight: 700, color: RED, letterSpacing: 2, marginBottom: 8 }}>COMMAND BRIDGE APP</div>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                          <span style={{ fontWeight: 700, color: WHITE, fontSize: 15 }}>Mark Thompson</span>
                           <span style={{ background: "#4ade8022", color: "#4ade80", fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 20 }}>Pre-approved</span>
                         </div>
-                        <div style={{ fontSize: 12, color: "#777", marginBottom: 10 }}>0412 xxx xxx · 3bd · Rooty Hill · $750K</div>
+                        <div style={{ fontSize: 12, color: "#666", marginBottom: 12 }}>0412 xxx xxx · 3bd · Rooty Hill · $750K</div>
                         <div style={{ display: "flex", gap: 8 }}>
-                          <div style={{ flex: 1, background: YELLOW, color: BLACK, textAlign: "center", padding: "8px 0", borderRadius: 6, fontSize: 12, fontWeight: 700, cursor: "pointer" }}>📞 Call Back</div>
-                          <div style={{ flex: 1, background: "#1e1e1e", color: "#aaa", textAlign: "center", padding: "8px 0", borderRadius: 6, fontSize: 12, fontWeight: 600, border: "1px solid #333", cursor: "pointer" }}>📄 Transcript</div>
+                          <div style={{ flex: 1, background: RED, color: WHITE, textAlign: "center", padding: "9px 0", borderRadius: 6, fontSize: 12, fontWeight: 800, cursor: "pointer" }}>📞 Call Back</div>
+                          <div style={{ flex: 1, background: "#1e1e1e", color: "#888", textAlign: "center", padding: "9px 0", borderRadius: 6, fontSize: 12, fontWeight: 600, border: "1px solid #2a2a2a", cursor: "pointer" }}>📄 Transcript</div>
                         </div>
                       </div>
                     </div>
@@ -318,26 +342,28 @@ export default function RayWhiteRHPage() {
       </section>
 
       {/* FRANCHISE REASSURANCE */}
-      <section style={{ background: "#0a0a0a", padding: "60px 32px", borderBottom: "1px solid #1a1a1a" }}>
+      <section style={{ background: "#0a0a0a", padding: "64px 32px", borderBottom: "1px solid #1a1a1a" }}>
         <div style={{ maxWidth: 760, margin: "0 auto", textAlign: "center" }}>
-          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, color: YELLOW, marginBottom: 16 }}>IMPORTANT — YOUR FRANCHISE IS UNTOUCHED</div>
-          <h2 style={{ fontSize: 30, fontWeight: 800, color: "#fff", marginBottom: 20 }}>This doesn't change anything about your Ray White setup</h2>
-          <p style={{ color: "#777", fontSize: 15, lineHeight: 1.8, marginBottom: 36 }}>
-            Directive OS operates on a separate landing page — completely independent of your Ray White franchise, your main office listing, and your head office relationship. Nothing is changed on your existing website, your Ray White profile, or your franchise agreement.
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, color: RED, marginBottom: 16 }}>IMPORTANT — YOUR R&amp;W SETUP IS UNTOUCHED</div>
+          <h2 style={{ fontSize: 30, fontWeight: 800, color: WHITE, marginBottom: 18 }}>
+            This doesn't change anything about your Richardson &amp; Wrench franchise
+          </h2>
+          <p style={{ color: "#666", fontSize: 15, lineHeight: 1.8, marginBottom: 36, maxWidth: 600, margin: "0 auto 36px" }}>
+            Directive OS runs on a separate branded landing page — completely independent of your R&amp;W franchise, your head office, and your existing website. Nothing is touched, moved, or changed. It's simply an addition.
           </p>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16, textAlign: "left" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14, textAlign: "left" }}>
             {[
-              { icon: "✅", label: "Your Ray White profile", status: "Untouched" },
-              { icon: "✅", label: "Your franchise agreement", status: "Untouched" },
+              { icon: "✅", label: "Your R&W franchise", status: "Untouched" },
+              { icon: "✅", label: "Your head office relationship", status: "Untouched" },
               { icon: "✅", label: "Your existing website", status: "Untouched" },
               { icon: "✅", label: "Your team's phones & email", status: "Untouched" },
-              { icon: "✅", label: "Your VaultRE setup", status: "Untouched" },
-              { icon: "🆕", label: "This landing page", status: "New addition" },
+              { icon: "✅", label: "Your realestate.com.au profile", status: "Untouched" },
+              { icon: "🆕", label: "This landing page", status: "New addition only" },
             ].map(item => (
-              <div key={item.label} style={{ background: "#141414", border: "1px solid #222", borderRadius: 10, padding: "14px 16px" }}>
+              <div key={item.label} style={{ background: DARK_CARD, border: "1px solid #1e1e1e", borderRadius: 10, padding: "14px 16px" }}>
                 <div style={{ fontSize: 20, marginBottom: 6 }}>{item.icon}</div>
-                <div style={{ fontSize: 13, fontWeight: 600, color: "#ccc", marginBottom: 3 }}>{item.label}</div>
-                <div style={{ fontSize: 12, color: item.status === "New addition" ? YELLOW : "#4ade80", fontWeight: 700 }}>{item.status}</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: "#aaa", marginBottom: 3 }}>{item.label}</div>
+                <div style={{ fontSize: 11, color: item.status === "New addition only" ? RED : "#4ade80", fontWeight: 700 }}>{item.status}</div>
               </div>
             ))}
           </div>
@@ -345,32 +371,32 @@ export default function RayWhiteRHPage() {
       </section>
 
       {/* LIVE CHAT DEMO */}
-      <section id="chat-demo" style={{ background: "#f8f8f8", padding: "80px 32px", borderBottom: "1px solid #e5e5e5" }}>
-        <div style={{ maxWidth: 680, margin: "0 auto", textAlign: "center" }}>
-          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, color: "#888", marginBottom: 16 }}>TRY IT NOW</div>
-          <h2 style={{ fontSize: "clamp(26px, 3.5vw, 40px)", fontWeight: 900, color: BLACK, marginBottom: 16 }}>Chat with Sarah right now</h2>
-          <p style={{ color: "#666", fontSize: 15, lineHeight: 1.7, marginBottom: 40 }}>
-            Click the chat button below — bottom right corner — and ask about a listing, a rental, or anything you'd expect a buyer to ask. This is exactly what your callers would experience.
+      <section id="chat-demo" style={{ background: "#f7f7f7", padding: "80px 32px", borderBottom: "1px solid #e5e5e5" }}>
+        <div style={{ maxWidth: 660, margin: "0 auto", textAlign: "center" }}>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, color: "#999", marginBottom: 16 }}>TRY IT NOW</div>
+          <h2 style={{ fontSize: "clamp(26px, 3.5vw, 40px)", fontWeight: 900, color: DARK_BG, marginBottom: 16 }}>Talk to Sarah yourself</h2>
+          <p style={{ color: "#666", fontSize: 15, lineHeight: 1.75, marginBottom: 36 }}>
+            Hit the chat button at the bottom right and ask about a listing, a price appraisal, or anything a buyer would say. Or ring the number and talk to her live — she answers 24/7.
           </p>
           <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
             <a href={`tel:${PHONE.replace(/\s/g, "")}`} style={{
-              background: BLACK, color: YELLOW, padding: "14px 32px",
-              textDecoration: "none", fontSize: 16, fontWeight: 900, letterSpacing: 0.5,
-              border: `3px solid ${YELLOW}`, display: "inline-block"
-            }}>📞 Or Call — {PHONE}</a>
+              background: RED, color: WHITE, padding: "14px 36px",
+              textDecoration: "none", fontSize: 16, fontWeight: 900,
+              boxShadow: `0 4px 20px ${RED}55`, display: "inline-block"
+            }}>📞 Call Sarah — {PHONE}</a>
           </div>
-          <p style={{ color: "#aaa", fontSize: 12, marginTop: 20 }}>Sarah answers calls 24/7 — try it after hours to see what your clients experience when no one's in the office.</p>
+          <p style={{ color: "#bbb", fontSize: 12, marginTop: 18 }}>Try it after hours — that's when your competitors' phones go to voicemail.</p>
         </div>
       </section>
 
       {/* FOOTER */}
-      <footer style={{ background: BLACK, borderTop: `3px solid ${YELLOW}`, padding: "32px", textAlign: "center" }}>
-        <div style={{ maxWidth: 600, margin: "0 auto" }}>
-          <RWLogo size={32} />
-          <p style={{ color: "#555", fontSize: 12, marginTop: 16, lineHeight: 1.7 }}>
-            This demo page is powered by{" "}
-            <a href="https://directiveos.com.au" target="_blank" rel="noreferrer" style={{ color: YELLOW, textDecoration: "none", fontWeight: 700 }}>Directive OS</a>
-            {" "}— AI Receptionist for Real Estate. The Ray White name and branding are property of Ray White (Real Estate) Ltd. This landing page is operated independently and is not affiliated with or endorsed by Ray White corporate.
+      <footer style={{ background: DARK_BG, borderTop: `3px solid ${RED}`, padding: "32px", textAlign: "center" }}>
+        <div style={{ maxWidth: 640, margin: "0 auto" }}>
+          <RWLogo size={30} />
+          <p style={{ color: "#444", fontSize: 12, marginTop: 18, lineHeight: 1.8 }}>
+            This demo page is independently powered by{" "}
+            <a href="https://directiveos.com.au" target="_blank" rel="noreferrer" style={{ color: RED, textDecoration: "none", fontWeight: 700 }}>Directive OS</a>
+            {" "}— AI Receptionist for Real Estate. Richardson &amp; Wrench name and branding are property of Richardson &amp; Wrench Ltd. This landing page is not affiliated with or endorsed by Richardson &amp; Wrench corporate.
           </p>
         </div>
       </footer>
