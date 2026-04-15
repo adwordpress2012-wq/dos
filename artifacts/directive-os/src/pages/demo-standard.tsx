@@ -30,8 +30,7 @@ function DOSLogo({ size = 36 }: { size?: number }) {
   );
 }
 
-function ChatWidget() {
-  const [open, setOpen] = useState(false);
+function ChatWidget({ open, setOpen }: { open: boolean; setOpen: (v: boolean) => void }) {
   const [messages, setMessages] = useState<Message[]>([
     { role: "assistant", content: "G'day! I'm Sarah — a 24/7 AI receptionist for real estate agencies. I answer calls, qualify buyers and tenants, book inspections, and send lead summaries straight to the agent. What would you like to know?" }
   ]);
@@ -120,7 +119,7 @@ function ChatWidget() {
           </div>
         </div>
       )}
-      <button onClick={() => setOpen(p => !p)} style={{
+      <button onClick={() => setOpen(!open)} style={{
         position: "fixed", bottom: 24, right: 24, width: 64, height: 64, borderRadius: "50%",
         background: `linear-gradient(135deg, ${TEAL}, #0891b2)`, border: "none", cursor: "pointer", zIndex: 9998,
         boxShadow: `0 4px 28px ${TEAL}66`, fontSize: 26, display: "flex", alignItems: "center", justifyContent: "center"
@@ -133,6 +132,13 @@ function ChatWidget() {
 }
 
 export default function DemoStandardPage() {
+  const [chatOpen, setChatOpen] = useState(false);
+
+  function openChat() {
+    setChatOpen(true);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
   return (
     <div style={{ minHeight: "100vh", background: BG, color: WHITE, fontFamily: "'Inter', -apple-system, sans-serif" }}>
 
@@ -143,9 +149,9 @@ export default function DemoStandardPage() {
         textAlign: "center", letterSpacing: 0.4
       }}>
         <span style={{ background: TEAL, color: BG, padding: "2px 9px", fontWeight: 800, fontSize: 11, marginRight: 10, borderRadius: 4, letterSpacing: 1 }}>LIVE DEMO</span>
-        This is a standard demo — we build your agency a custom version with{" "}
-        <span style={{ color: TEAL, fontWeight: 700 }}>your branding, your name, and your listings</span>.{" "}
-        <a href="https://directiveos.com.au" style={{ color: TEAL, textDecoration: "none", fontWeight: 600 }}>See how →</a>
+        Standard demo in DOS branding —{" "}
+        <span style={{ color: TEAL, fontWeight: 700 }}>your version comes fully branded to your agency</span>.{" "}
+        <a href={`tel:${PHONE.replace(/\s/g, "")}`} style={{ color: TEAL, textDecoration: "none", fontWeight: 600 }}>Call {PHONE} →</a>
       </div>
 
       {/* NAV */}
@@ -158,8 +164,8 @@ export default function DemoStandardPage() {
         <div style={{ display: "flex", gap: 32, fontSize: 14 }}>
           {[
             { label: "How It Works", href: "#how-it-works" },
-            { label: "Try Sarah", href: "#try-sarah" },
-            { label: "For Your Agency", href: "#for-your-agency" },
+            { label: "Chat with Sarah", href: "#chat-demo" },
+            { label: "Your Agency", href: "#for-your-agency" },
           ].map(l => (
             <a key={l.label} href={l.href}
               style={{ color: SLATE, textDecoration: "none", fontWeight: 500 }}
@@ -194,10 +200,10 @@ export default function DemoStandardPage() {
             Your Office Phone.<br />
             <span style={{ color: TEAL }}>Answered. Every Time.</span>
           </h1>
-          <p style={{ fontSize: 19, color: SLATE, lineHeight: 1.8, marginBottom: 14, maxWidth: 620, margin: "0 auto 14px" }}>
-            Sarah is a 24/7 AI receptionist built specifically for real estate agencies. She answers every call, qualifies every lead, and puts the details in your pocket — before you've even looked at your phone.
+          <p style={{ fontSize: 19, color: SLATE, lineHeight: 1.8, maxWidth: 620, margin: "0 auto 16px" }}>
+            Sarah is a 24/7 AI receptionist built specifically for real estate agencies. She answers every call, qualifies every lead, and puts the full details in your pocket — before you've even looked at your phone.
           </p>
-          <p style={{ fontSize: 14, color: "#4a5568", lineHeight: 1.7, marginBottom: 52, maxWidth: 480, margin: "0 auto 52px" }}>
+          <p style={{ fontSize: 14, color: "#3a4a5a", lineHeight: 1.7, maxWidth: 480, margin: "0 auto 52px" }}>
             Built for Australian agencies of all sizes. Fully branded to match your agency — colours, name, tone, everything.
           </p>
           <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
@@ -205,19 +211,15 @@ export default function DemoStandardPage() {
               background: TEAL, color: BG, padding: "17px 44px", borderRadius: 10,
               textDecoration: "none", fontSize: 17, fontWeight: 900,
               boxShadow: `0 4px 32px ${TEAL}55`, letterSpacing: 0.3
-            }}>📞 Call Sarah — {PHONE}</a>
-            <button onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })}
+            }}>📞 Call Sarah Now — {PHONE}</a>
+            <button onClick={() => document.getElementById("chat-demo")?.scrollIntoView({ behavior: "smooth" })}
               style={{
-                background: "transparent", border: `1.5px solid ${BORDER}`, color: SLATE,
-                padding: "17px 44px", borderRadius: 10, fontSize: 17, fontWeight: 600, cursor: "pointer",
-              }}
-              onMouseOver={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = TEAL; (e.currentTarget as HTMLButtonElement).style.color = WHITE; }}
-              onMouseOut={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = BORDER; (e.currentTarget as HTMLButtonElement).style.color = SLATE; }}>
-              See How It Works ↓
-            </button>
+                background: "transparent", border: `1.5px solid ${BORDER}`, color: "#eee",
+                padding: "17px 44px", borderRadius: 10, fontSize: 17, fontWeight: 700, cursor: "pointer", letterSpacing: 0.3
+              }}>Chat with Sarah ↓</button>
           </div>
-          <p style={{ color: "#2d3748", fontSize: 12, marginTop: 22 }}>
-            Call the number right now — Sarah answers live, 24/7. No scripts, no voicemail.
+          <p style={{ color: "#2d3748", fontSize: 13, marginTop: 24 }}>
+            This call connects to a live AI demo — try it now. Or scroll down to chat with her in the browser.
           </p>
         </div>
       </section>
@@ -277,7 +279,7 @@ export default function DemoStandardPage() {
                 num: "04",
                 icon: "🔔",
                 title: "Push notification on your phone",
-                body: "Your phone buzzes with a tap notification. Open it and you see the full lead card — who called, what they want, whether they're finance-approved. Hit \"Call Back\" and you're on the front foot before they've called anyone else.",
+                body: "Your phone buzzes — even if you're at an auction or an inspection. Tap the notification to open the full lead card. You can see who called, what they said, and call them back with full context. Not blind.",
                 mockup: "app",
               },
             ].map((step, i) => (
@@ -299,10 +301,10 @@ export default function DemoStandardPage() {
 
                   {step.mockup === "email" && (
                     <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 14, padding: "22px 26px", maxWidth: 520 }}>
-                      <div style={{ fontSize: 11, color: "#3a4a5a", marginBottom: 16, borderBottom: `1px solid ${BORDER}`, paddingBottom: 14 }}>
-                        <div style={{ marginBottom: 3 }}><span style={{ color: "#2d3748" }}>FROM: </span><span style={{ color: "#4a5568" }}>leads@directiveos.com.au</span></div>
-                        <div style={{ marginBottom: 10 }}><span style={{ color: "#2d3748" }}>TO: </span><span style={{ color: "#4a5568" }}>you@youragency.com.au</span></div>
-                        <div style={{ color: TEAL, fontWeight: 700, fontSize: 13 }}>🎯 New Lead — Buyer Enquiry · Rooty Hill</div>
+                      <div style={{ fontSize: 11, color: "#2d3748", marginBottom: 16, borderBottom: `1px solid ${BORDER}`, paddingBottom: 14 }}>
+                        <div style={{ marginBottom: 3 }}><span style={{ color: "#2d3748" }}>FROM: </span><span style={{ color: "#3a4a5a" }}>leads@directiveos.com.au</span></div>
+                        <div style={{ marginBottom: 10 }}><span style={{ color: "#2d3748" }}>TO: </span><span style={{ color: "#3a4a5a" }}>you@youragency.com.au</span></div>
+                        <div style={{ color: TEAL, fontWeight: 700, fontSize: 13 }}>🎯 New Lead — Buyer Enquiry</div>
                       </div>
                       <div style={{ fontSize: 13, lineHeight: 2 }}>
                         <div><span style={{ color: "#3a4a5a" }}>Caller: </span><span style={{ color: "#cdd8e8", fontWeight: 600 }}>Mark Thompson</span></div>
@@ -311,9 +313,9 @@ export default function DemoStandardPage() {
                         <div><span style={{ color: "#3a4a5a" }}>Finance: </span><span style={{ color: "#4ade80", fontWeight: 700 }}>Pre-approved ✓</span></div>
                         <div style={{ marginTop: 14, paddingTop: 14, borderTop: `1px solid ${BORDER}` }}>
                           <div style={{ fontSize: 10, letterSpacing: 1.5, color: "#2d3748", marginBottom: 8, fontWeight: 700 }}>FULL TRANSCRIPT</div>
-                          <div style={{ fontSize: 12, color: "#2d3748" }}><span style={{ color: TEAL }}>Sarah: </span>G'day, this is Sarah — how can I help?</div>
-                          <div style={{ fontSize: 12, color: "#2d3748" }}><span style={{ color: "#4a5568" }}>Mark: </span>Hi, I'm looking at a 3-bed in the area...</div>
-                          <div style={{ fontSize: 12, color: "#1a2030", fontStyle: "italic", marginTop: 4 }}>+ full conversation below...</div>
+                          <div style={{ fontSize: 12, color: "#3a4a5a" }}><span style={{ color: TEAL }}>Sarah: </span>G'day, this is Sarah — how can I help?</div>
+                          <div style={{ fontSize: 12, color: "#3a4a5a" }}><span style={{ color: "#4a5568" }}>Mark: </span>Hi, I'm looking at a 3-bed in the area...</div>
+                          <div style={{ fontSize: 12, color: "#1e2a3a", fontStyle: "italic", marginTop: 4 }}>+ full conversation below...</div>
                         </div>
                       </div>
                     </div>
@@ -321,7 +323,6 @@ export default function DemoStandardPage() {
 
                   {step.mockup === "app" && (
                     <div style={{ maxWidth: 300 }}>
-                      {/* Push notification */}
                       <div style={{ background: "#1c1c1e", borderRadius: 16, padding: "14px 16px", marginBottom: 12, border: `1px solid ${BORDER}`, display: "flex", gap: 12, alignItems: "flex-start" }}>
                         <div style={{ width: 44, height: 44, borderRadius: 11, background: `linear-gradient(135deg, ${TEAL}, #0891b2)`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 }}>🎯</div>
                         <div>
@@ -330,7 +331,6 @@ export default function DemoStandardPage() {
                           <div style={{ fontSize: 11, color: "#374151", marginTop: 5 }}>just now · Directive OS</div>
                         </div>
                       </div>
-                      {/* App lead card */}
                       <div style={{ background: "#0d1017", border: `1px solid ${TEAL}33`, borderRadius: 14, padding: "18px 20px" }}>
                         <div style={{ fontSize: 10, fontWeight: 700, color: TEAL, letterSpacing: 2, marginBottom: 10 }}>COMMAND BRIDGE APP</div>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
@@ -352,33 +352,28 @@ export default function DemoStandardPage() {
         </div>
       </section>
 
-      {/* TRY SARAH */}
-      <section id="try-sarah" style={{ background: CARD, padding: "80px 40px", borderBottom: `1px solid ${BORDER}` }}>
+      {/* CHAT DEMO — matches R&W layout */}
+      <section id="chat-demo" style={{ background: "#f8f8f8", padding: "80px 40px", borderBottom: "1px solid #e5e5e5" }}>
         <div style={{ maxWidth: 660, margin: "0 auto", textAlign: "center" }}>
-          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, color: TEAL, marginBottom: 16 }}>TRY IT NOW — NO SIGN UP</div>
-          <h2 style={{ fontSize: "clamp(26px, 4vw, 42px)", fontWeight: 900, color: WHITE, marginBottom: 16 }}>Talk to Sarah yourself</h2>
-          <p style={{ color: SLATE, fontSize: 15, lineHeight: 1.75, marginBottom: 36 }}>
-            Open the chat widget at the bottom right and ask her anything a buyer or tenant would ask. Or ring the number and have a full conversation with her live — she answers every call, around the clock.
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, color: "#999", marginBottom: 16 }}>TRY IT NOW</div>
+          <h2 style={{ fontSize: "clamp(26px, 3.5vw, 40px)", fontWeight: 900, color: BG, marginBottom: 16 }}>Talk to Sarah yourself</h2>
+          <p style={{ color: "#555", fontSize: 15, lineHeight: 1.75, marginBottom: 40 }}>
+            Hit the chat button below — bottom right corner — and ask her anything a buyer or tenant would ask. This is exactly what your callers would experience. Or call the number and talk to her live, right now.
           </p>
-          <div style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
             <a href={`tel:${PHONE.replace(/\s/g, "")}`} style={{
-              background: TEAL, color: BG, padding: "15px 38px", borderRadius: 10,
+              background: BG, color: TEAL, padding: "14px 36px",
               textDecoration: "none", fontSize: 16, fontWeight: 900,
-              boxShadow: `0 4px 24px ${TEAL}44`
+              border: `3px solid ${TEAL}`, display: "inline-block", borderRadius: 8
             }}>📞 Call Sarah — {PHONE}</a>
-            <button
-              onClick={() => {
-                const btn = document.querySelector<HTMLButtonElement>('button[data-chat-toggle]');
-                if (btn) btn.click();
-                else document.querySelector<HTMLButtonElement>('.chat-toggle-btn')?.click();
-              }}
-              style={{
-                background: "transparent", border: `1.5px solid ${BORDER}`, color: SLATE,
-                padding: "15px 38px", borderRadius: 10, fontSize: 16, fontWeight: 600, cursor: "pointer"
-              }}>💬 Chat with Sarah ↗</button>
+            <button onClick={openChat} style={{
+              background: TEAL, color: BG, padding: "14px 36px",
+              border: "none", fontSize: 16, fontWeight: 900, cursor: "pointer", borderRadius: 8,
+              boxShadow: `0 4px 20px ${TEAL}55`
+            }}>💬 Chat with Sarah</button>
           </div>
-          <p style={{ color: "#2d3748", fontSize: 12, marginTop: 18 }}>
-            Try it at night or on the weekend — that's when most agencies miss their best leads.
+          <p style={{ color: "#bbb", fontSize: 12, marginTop: 20 }}>
+            Try it after hours — that's when your competitors' phones go to voicemail.
           </p>
         </div>
       </section>
@@ -404,7 +399,7 @@ export default function DemoStandardPage() {
               { icon: "🗣️", title: "Your agent names", body: "Sarah can direct enquiries to specific agents or principals. Fully configurable." },
               { icon: "⚙️", title: "Setup in 48 hours", body: "We handle everything. You test it, approve it, and it goes live. No tech knowledge needed." },
             ].map(item => (
-              <div key={item.title} style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 14, padding: "22px 20px" }}
+              <div key={item.title} style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 14, padding: "22px 20px", transition: "border-color 0.2s" }}
                 onMouseOver={e => (e.currentTarget.style.borderColor = `${TEAL}55`)}
                 onMouseOut={e => (e.currentTarget.style.borderColor = BORDER)}>
                 <div style={{ fontSize: 26, marginBottom: 10 }}>{item.icon}</div>
@@ -444,12 +439,12 @@ export default function DemoStandardPage() {
       <footer style={{ background: BG, borderTop: `1px solid ${BORDER}`, padding: "32px 40px", textAlign: "center" }}>
         <DOSLogo size={28} />
         <p style={{ color: "#1e2a3a", fontSize: 12, marginTop: 16, lineHeight: 1.8 }}>
-          © 2025 Directive OS Australia · ABN 87 754 544 171 · directiveos.com.au
-          <br />AI Receptionist for Australian Real Estate Agencies · All rights reserved.
+          © 2025 Directive OS Australia · ABN 87 754 544 171 · directiveos.com.au<br />
+          AI Receptionist for Australian Real Estate Agencies · All rights reserved.
         </p>
       </footer>
 
-      <ChatWidget />
+      <ChatWidget open={chatOpen} setOpen={setChatOpen} />
     </div>
   );
 }
