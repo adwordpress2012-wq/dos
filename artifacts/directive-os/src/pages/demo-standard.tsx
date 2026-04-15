@@ -77,7 +77,7 @@ function ChatWidget({ open, setOpen }: { open: boolean; setOpen: (v: boolean) =>
               <div style={{ fontWeight: 700, fontSize: 14, color: WHITE }}>Sarah — AI Receptionist</div>
               <div style={{ fontSize: 11, color: "rgba(255,255,255,0.75)" }}>Directive OS · Live demo</div>
               <div style={{ display: "flex", gap: 4, marginTop: 4, flexWrap: "wrap" }}>
-                {[["🇦🇺","EN"],["🇨🇳","中文"],["🇵🇭","Filipino"],["🇷🇺","Рус"]].map(([flag, lang]) => (
+                {[["🇦🇺","EN"],["🇨🇳","中文"],["🇵🇭","FIL"],["🇷🇺","РУС"],["🇸🇦","عربي"],["🇰🇷","한국어"],["🇻🇳","Việt"],["🇮🇳","हिंदी"],["🇪🇸","ESP"]].map(([flag, lang]) => (
                   <span key={lang} style={{ fontSize: 9, background: "rgba(0,0,0,0.25)", border: "1px solid rgba(255,255,255,0.25)", color: "rgba(255,255,255,0.9)", borderRadius: 4, padding: "1px 5px", fontWeight: 600, letterSpacing: 0.3, whiteSpace: "nowrap" }}>{flag} {lang}</span>
                 ))}
               </div>

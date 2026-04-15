@@ -486,7 +486,7 @@ export default function BoulevardGroupLanding() {
             <span style={{ color: GOLD, fontSize: 12, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase" }}>Sarah — AI Receptionist · Available 24/7</span>
           </div>
           <div style={{ display: "flex", justifyContent: "center", gap: 6, marginBottom: 20, flexWrap: "wrap" }}>
-            {[["🇦🇺","English"],["🇨🇳","中文"],["🇵🇭","Filipino"],["🇷🇺","Русский"]].map(([flag, lang]) => (
+            {[["🇦🇺","English"],["🇨🇳","中文"],["🇵🇭","Filipino"],["🇷🇺","Русский"],["🇸🇦","عربي"],["🇰🇷","한국어"],["🇻🇳","Tiếng Việt"],["🇮🇳","हिंदी"],["🇪🇸","Español"]].map(([flag, lang]) => (
               <span key={lang} style={{ fontSize: 10, background: `${GOLD}14`, border: `1px solid ${GOLD}40`, color: GOLD, borderRadius: 6, padding: "2px 8px", fontWeight: 600, letterSpacing: 0.3 }}>{flag} {lang}</span>
             ))}
           </div>

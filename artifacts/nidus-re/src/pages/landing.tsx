@@ -65,7 +65,7 @@ function ChatWidget() {
               <div style={{ fontWeight: 700, fontSize: 14 }}>Sarah — AI Receptionist</div>
               <div style={{ fontSize: 11, opacity: 0.85 }}>Nidus Real Estate · Always available</div>
               <div style={{ display: "flex", gap: 4, marginTop: 4, flexWrap: "wrap" }}>
-                {[["🇦🇺","EN"],["🇨🇳","中文"],["🇵🇭","Filipino"],["🇷🇺","Рус"]].map(([flag, lang]) => (
+                {[["🇦🇺","EN"],["🇨🇳","中文"],["🇵🇭","FIL"],["🇷🇺","РУС"],["🇸🇦","عربي"],["🇰🇷","한국어"],["🇻🇳","Việt"],["🇮🇳","हिंदी"],["🇪🇸","ESP"]].map(([flag, lang]) => (
                   <span key={lang} style={{ fontSize: 9, background: "rgba(255,255,255,0.2)", border: "1px solid rgba(255,255,255,0.35)", color: "white", borderRadius: 4, padding: "1px 5px", fontWeight: 700, letterSpacing: 0.3, whiteSpace: "nowrap" }}>{flag} {lang}</span>
                 ))}
               </div>

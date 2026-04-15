@@ -6,7 +6,7 @@ import {
   Phone, MessageSquare, Zap, Shield, Building2, FileText,
   ArrowRight, Check, X, Send, Star, BarChart3,
   Workflow, BrainCircuit, CalendarCheck, Bell, Lock, ChevronRight,
-  Bed, Bath, Mail, Inbox, Smartphone
+  Bed, Bath, Mail, Inbox, Smartphone, Globe
 } from "lucide-react";
 
 const BASE_PRICE = 299;
@@ -167,7 +167,7 @@ function DemoChatWidget() {
                 <div className="text-sm font-semibold text-foreground">Sarah · Directive OS</div>
                 <div className="text-xs text-muted-foreground">AI Receptionist · Available 24/7</div>
                 <div className="flex items-center gap-1 mt-1 flex-wrap">
-                  {[["🇦🇺","EN"],["🇨🇳","中文"],["🇵🇭","Filipino"],["🇷🇺","Рус"]].map(([flag, lang]) => (
+                  {[["🇦🇺","EN"],["🇨🇳","中文"],["🇵🇭","FIL"],["🇷🇺","РУС"],["🇸🇦","عربي"],["🇰🇷","한국어"],["🇻🇳","Việt"],["🇮🇳","हिंदी"],["🇪🇸","ESP"]].map(([flag, lang]) => (
                     <span key={lang} style={{ fontSize: 9, background: "rgba(0,209,178,0.12)", border: "1px solid rgba(0,209,178,0.25)", color: "#00d1b2", borderRadius: 4, padding: "1px 5px", fontWeight: 600, letterSpacing: 0.3, whiteSpace: "nowrap" }}>{flag} {lang}</span>
                   ))}
                 </div>
@@ -309,7 +309,7 @@ export default function Home() {
                 <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Or test the AI right now — call Sarah</div>
                 <div className="font-bold text-foreground tracking-wide">02 5850 4038</div>
                 <div className="flex items-center gap-1 mt-1 flex-wrap">
-                  {[["🇦🇺","EN"],["🇨🇳","中文"],["🇵🇭","Filipino"],["🇷🇺","Рус"]].map(([flag, lang]) => (
+                  {[["🇦🇺","EN"],["🇨🇳","中文"],["🇵🇭","FIL"],["🇷🇺","РУС"],["🇸🇦","عربي"],["🇰🇷","한국어"],["🇻🇳","Việt"],["🇮🇳","हिंदी"],["🇪🇸","ESP"]].map(([flag, lang]) => (
                     <span key={lang} style={{ fontSize: 9, background: "rgba(0,209,178,0.12)", border: "1px solid rgba(0,209,178,0.25)", color: "#00d1b2", borderRadius: 4, padding: "1px 5px", fontWeight: 600, letterSpacing: 0.3, whiteSpace: "nowrap" }}>{flag} {lang}</span>
                   ))}
                 </div>
@@ -380,6 +380,12 @@ export default function Home() {
                 desc: "All call recordings, chat transcripts, and lead data in one intelligence centre. Full visibility over every interaction, from anywhere."
               },
               {
+                icon: <Globe className="w-5 h-5" />,
+                title: "9 Languages — No Extra Charge",
+                desc: "Sarah speaks English, Mandarin, Arabic, Korean, Vietnamese, Hindi, Filipino, Russian, and Spanish. Auto-detects and switches instantly — voice or chat.",
+                badge: "Included"
+              },
+              {
                 icon: <Smartphone className="w-5 h-5" />,
                 title: "Branded Mobile App — iOS & Android",
                 desc: "Your agency's own app on the App Store and Google Play. Buyers search listings, book inspections, and chat with Sarah — all under your brand.",
@@ -394,7 +400,10 @@ export default function Home() {
               >
                 {(f as any).badge && (
                   <span className="absolute top-4 right-4 text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full"
-                    style={{ background: "rgba(0,209,178,0.15)", color: "#00d1b2", border: "1px solid rgba(0,209,178,0.25)" }}>
+                    style={(f as any).badge === "Included"
+                      ? { background: "rgba(0,209,178,0.15)", color: "#00d1b2", border: "1px solid rgba(0,209,178,0.3)" }
+                      : { background: "rgba(251,146,0,0.12)", color: "#f59e0b", border: "1px solid rgba(251,146,0,0.3)" }
+                    }>
                     {(f as any).badge}
                   </span>
                 )}
@@ -406,6 +415,66 @@ export default function Home() {
                 <p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Multilingual Feature Section ────────────────────────────────── */}
+      <section className="py-24 border-t border-border" style={{ background: "rgba(0,209,178,0.02)" }}>
+        <div className="container mx-auto px-4">
+          <div className="max-w-5xl mx-auto text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold tracking-widest uppercase mb-6"
+              style={{ background: "rgba(0,209,178,0.1)", border: "1px solid rgba(0,209,178,0.2)", color: "#00d1b2" }}>
+              <Globe className="w-3.5 h-3.5" />
+              Multilingual AI — Included in Every Plan
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+              Sarah speaks your buyer's language.<br />
+              <span style={{ color: "#00d1b2" }}>No extra charge. No setup.</span>
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Over 40% of property buyers in Greater Sydney speak a language other than English at home. Sarah detects their language instantly and switches — on voice calls and live chat — so your agency never loses a lead to a language barrier.
+            </p>
+          </div>
+
+          {/* Language flags grid */}
+          <div className="max-w-3xl mx-auto">
+            <div className="grid grid-cols-3 md:grid-cols-9 gap-3 mb-10">
+              {[
+                { flag: "🇦🇺", lang: "English", note: "AU" },
+                { flag: "🇨🇳", lang: "Mandarin", note: "普通话" },
+                { flag: "🇸🇦", lang: "Arabic", note: "العربية" },
+                { flag: "🇰🇷", lang: "Korean", note: "한국어" },
+                { flag: "🇻🇳", lang: "Vietnamese", note: "Tiếng Việt" },
+                { flag: "🇮🇳", lang: "Hindi", note: "हिंदी" },
+                { flag: "🇵🇭", lang: "Filipino", note: "Tagalog" },
+                { flag: "🇷🇺", lang: "Russian", note: "Русский" },
+                { flag: "🇪🇸", lang: "Spanish", note: "Español" },
+              ].map(l => (
+                <div key={l.lang} className="flex flex-col items-center gap-1 p-3 rounded-xl text-center"
+                  style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
+                  <span style={{ fontSize: 26 }}>{l.flag}</span>
+                  <span className="text-[10px] font-bold text-foreground">{l.lang}</span>
+                  <span className="text-[9px] text-muted-foreground">{l.note}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Key differentiator points */}
+            <div className="grid md:grid-cols-3 gap-4">
+              {[
+                { icon: "🎙️", title: "Voice auto-switches", desc: "Sarah detects the caller's language in the first sentence and responds natively — no menu prompts, no transfers." },
+                { icon: "💬", title: "Chat auto-switches", desc: "Web chat widget detects typed language and switches immediately. Arabic, Korean, Vietnamese — all handled in real time." },
+                { icon: "🆓", title: "Included at no charge", desc: "All 9 languages are built-in and included in every plan. Not an add-on. Not a premium tier. Just part of what Sarah does." },
+              ].map(p => (
+                <div key={p.title} className="rounded-xl p-5"
+                  style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
+                  <div style={{ fontSize: 24, marginBottom: 8 }}>{p.icon}</div>
+                  <div className="font-semibold text-foreground text-sm mb-1">{p.title}</div>
+                  <div className="text-xs text-muted-foreground leading-relaxed">{p.desc}</div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
