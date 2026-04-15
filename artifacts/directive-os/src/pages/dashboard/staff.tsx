@@ -74,7 +74,7 @@ export default function Staff() {
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Seat Management</h1>
-          <p className="text-muted-foreground text-sm mt-1">Manage your team and licenses</p>
+          <p className="text-muted-foreground text-sm mt-1">Invite agents · Set-password flow · Stripe seat billing · Access control</p>
         </div>
         <button
           onClick={() => setShowInvite(true)}
@@ -101,8 +101,13 @@ export default function Staff() {
         </div>
       </div>
 
-      <div className="bg-muted/30 border border-border rounded-lg px-4 py-3 mb-6 text-sm text-muted-foreground">
-        Billing: Base $299/mo (1st seat) + {Math.max(0, totalSeats - 1)} additional seat{totalSeats > 2 ? "s" : ""} × $89/mo = <strong className="text-foreground">${monthlyTotal}/mo</strong>. Each new seat is billed automatically on your next invoice.
+      <div className="bg-muted/30 border border-border rounded-lg px-4 py-3 mb-6 text-sm text-muted-foreground space-y-1">
+        <div>Seat billing is prorated automatically to your Stripe subscription cycle. Each invite triggers an immediate charge for the remaining days in the current period.</div>
+        <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1.5 text-xs">
+          <span>• Agents: access to Leads, Transcripts &amp; Listings only</span>
+          <span>• Billing, Staff &amp; Protocols: owner-only</span>
+          <span>• Invite link expires in 48 hours</span>
+        </div>
       </div>
 
       <div className="bg-card border border-border rounded-xl overflow-hidden">
@@ -175,8 +180,9 @@ export default function Staff() {
                   <option value="principal">Principal</option>
                 </select>
               </div>
-              <div className="bg-muted/50 rounded-lg p-3 text-xs text-muted-foreground">
-                Adding a seat costs an additional $89/mo, billed on your next invoice.
+              <div className="bg-muted/50 rounded-lg p-3 text-xs text-muted-foreground space-y-1">
+                <div>The agent will receive a set-password email with a 48-hour activation link.</div>
+                <div>One additional seat is added to your Stripe subscription, prorated immediately.</div>
               </div>
             </div>
             <div className="flex gap-3 px-6 py-4 border-t border-border">

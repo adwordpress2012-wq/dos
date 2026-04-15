@@ -95,7 +95,7 @@ export default function Dashboard() {
     <DashboardLayout>
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">Command Centre</h1>
-        <p className="text-muted-foreground text-sm mt-1">Real-time operational overview</p>
+        <p className="text-muted-foreground text-sm mt-1">Live stats · Lead capture · AI activity · VaultRE sync</p>
       </div>
 
       <VaultREBadge />
