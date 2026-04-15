@@ -7,6 +7,22 @@ const BASE = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
 
 const DEMOS = [
   {
+    id: "demo",
+    name: "Standard Demo — Any Agency",
+    tagline: "AI Receptionist · DOS Branding",
+    industry: "Real Estate",
+    location: "Australia-wide",
+    desc: "The standard Directive OS demo — built in DOS branding. Shows the full How It Works flow: call → Sarah answers → email notification → app notification. Use this as the starting point for any new prospect. We customise it with their branding on sign-up.",
+    href: `${BASE}/demo`,
+    external: false,
+    badge: "Template",
+    badgeColor: "#00d1b2",
+    accent: "#00d1b2",
+    accentGlow: "rgba(0,209,178,0.2)",
+    img: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80",
+    features: ["How It Works Flow", "Live Chat Sarah", "Lead Email Mockup", "App Notification Mockup"],
+  },
+  {
     id: "ray-white-ug",
     name: "Ray White United Group",
     tagline: "AI Receptionist Landing Page",

@@ -39,6 +39,7 @@ import EliteProposal from "@/pages/proposals/elite";
 import VideoAd from "@/pages/video-ad";
 import RayWhiteUG from "@/pages/ray-white-ug";
 import RayWhiteRH from "@/pages/ray-white-rh";
+import DemoStandard from "@/pages/demo-standard";
 import Launch from "@/pages/launch";
 import MarketingHub from "@/pages/marketing/index";
 import BusinessCard from "@/pages/marketing/business-card";
@@ -83,6 +84,7 @@ function Router() {
       <Route path="/elite-sydney" component={EliteSydney} />
       <Route path="/ray-white-ug" component={RayWhiteUG} />
       <Route path="/ray-white-rh" component={RayWhiteRH} />
+      <Route path="/demo" component={DemoStandard} />
       <Route path="/launch" component={Launch} />
       <Route path="/demos" component={Demos} />
       <Route path="/proposals/elite" component={EliteProposal} />
