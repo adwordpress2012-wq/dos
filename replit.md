@@ -389,6 +389,13 @@ Each paying client gets a standalone branded landing page hosted at `directiveos
 
 ## Next Steps (Priority Order)
 
+### 0. Referral Partner Page — PENDING 🔜
+- Route: `/partners` on directiveos.com.au
+- Audience: mortgage brokers, conveyancers, accountants, buyers agents — anyone who refers real estate agencies
+- Content: how the referral program works, what partners earn per client signed, how to register
+- Layout: same dark DOS theme, teal accent, professional — not salesy
+- ETA when ready to build: ~10 mins
+
 ### 1. White-Label Real Estate Demo App — NEXT BUILD 🔜
 - Build a NEW Expo app (separate from Command Bridge) as a sales demo
 - Show prospects what their branded property listing app would look like
