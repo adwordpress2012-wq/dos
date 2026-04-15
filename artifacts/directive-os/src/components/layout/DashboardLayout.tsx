@@ -18,14 +18,14 @@ import { useGetMyAgency } from "@workspace/api-client-react";
 import { useSystemStatus } from "@/hooks/useSystemStatus";
 import { useClientAuth } from "@/hooks/useClientAuth";
 
-const navigation = [
-  { name: "Command Centre", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Lead Inbox", href: "/dashboard/leads", icon: Inbox },
-  { name: "Communication Logs", href: "/dashboard/transcripts", icon: FileAudio },
-  { name: "Property Intelligence", href: "/dashboard/listings", icon: Building2 },
-  { name: "Seat Management", href: "/dashboard/staff", icon: Users },
-  { name: "Billing Command", href: "/dashboard/billing", icon: CreditCard },
-  { name: "Protocols", href: "/dashboard/settings", icon: Settings },
+const ALL_NAV = [
+  { name: "Command Centre", href: "/dashboard", icon: LayoutDashboard, agencyOnly: false },
+  { name: "Lead Inbox", href: "/dashboard/leads", icon: Inbox, agencyOnly: false },
+  { name: "Communication Logs", href: "/dashboard/transcripts", icon: FileAudio, agencyOnly: false },
+  { name: "Property Intelligence", href: "/dashboard/listings", icon: Building2, agencyOnly: false },
+  { name: "Seat Management", href: "/dashboard/staff", icon: Users, agencyOnly: true },
+  { name: "Billing Command", href: "/dashboard/billing", icon: CreditCard, agencyOnly: true },
+  { name: "Protocols", href: "/dashboard/settings", icon: Settings, agencyOnly: true },
 ];
 
 function SystemStatusBadge() {
@@ -76,7 +76,10 @@ function SystemStatusBadge() {
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const { data: agency } = useGetMyAgency();
-  const { agency: clientAgency, loading: authLoading, signOut } = useClientAuth();
+  const { agency: clientAgency, staff, isAgencyOwner, loading: authLoading, signOut } = useClientAuth();
+
+  const navigation = ALL_NAV.filter(item => !item.agencyOnly || isAgencyOwner);
+  const displayName = staff ? staff.name : (clientAgency?.contactEmail ?? "");
 
   if (authLoading) {
     return (
@@ -140,8 +143,10 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
         <div className="p-4 border-t border-border/50 space-y-1">
           <div className="px-3 py-1.5">
-            <div className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">Logged in as</div>
-            <div className="text-xs font-medium text-foreground truncate">{clientAgency.contactEmail}</div>
+            <div className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">
+              {staff ? "Agent" : "Owner"}
+            </div>
+            <div className="text-xs font-medium text-foreground truncate">{displayName}</div>
           </div>
           <button
             onClick={signOut}

@@ -1,10 +1,19 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { useGetStaff, useInviteStaff, useRemoveStaff, getGetStaffQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useClientAuth } from "@/hooks/useClientAuth";
 import { Users, Plus, X, Trash2, Crown, User, Mail } from "lucide-react";
 
 export default function Staff() {
+  const { isAgencyOwner, loading: authLoading } = useClientAuth();
+  const [, navigate] = useLocation();
+
+  useEffect(() => {
+    if (!authLoading && !isAgencyOwner) navigate("/dashboard");
+  }, [authLoading, isAgencyOwner]);
+
   const [showInvite, setShowInvite] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
   const [form, setForm] = useState({ name: "", email: "", role: "agent" as "agent" | "principal" });

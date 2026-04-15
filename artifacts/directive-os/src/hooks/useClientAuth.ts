@@ -11,8 +11,17 @@ export interface ClientAgency {
   clerkOrgId: string;
 }
 
+export interface ClientStaff {
+  id: number;
+  name: string;
+  role: string;
+  status: string;
+}
+
 export function useClientAuth() {
   const [agency, setAgency] = useState<ClientAgency | null>(null);
+  const [staff, setStaff] = useState<ClientStaff | null>(null);
+  const [userType, setUserType] = useState<"agency" | "staff" | null>(null);
   const [loading, setLoading] = useState(true);
   const [, navigate] = useLocation();
 
@@ -31,6 +40,8 @@ export function useClientAuth() {
       .then(data => {
         if (data.ok) {
           setAgency(data.agency);
+          setUserType(data.userType ?? "agency");
+          setStaff(data.staff ?? null);
         } else {
           localStorage.removeItem("clientToken");
           navigate("/dashboard/login");
@@ -48,5 +59,7 @@ export function useClientAuth() {
     navigate("/dashboard/login");
   }
 
-  return { agency, loading, signOut };
+  const isAgencyOwner = userType === "agency";
+
+  return { agency, staff, userType, isAgencyOwner, loading, signOut };
 }

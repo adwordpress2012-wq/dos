@@ -1,8 +1,11 @@
+import { useEffect } from "react";
+import { useLocation } from "wouter";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import {
   useGetBillingSubscription, useGetBillingUsage, useGetBillingInvoices,
   useCreateBillingPortal, useCreateCheckout
 } from "@workspace/api-client-react";
+import { useClientAuth } from "@/hooks/useClientAuth";
 import { CreditCard, Zap, FileText, ExternalLink, Check, AlertCircle, Rocket } from "lucide-react";
 
 function StatusBadge({ status }: { status: string }) {
@@ -35,6 +38,13 @@ function InvoiceStatusBadge({ status }: { status: string }) {
 }
 
 export default function Billing() {
+  const { isAgencyOwner, loading: authLoading } = useClientAuth();
+  const [, navigate] = useLocation();
+
+  useEffect(() => {
+    if (!authLoading && !isAgencyOwner) navigate("/dashboard");
+  }, [authLoading, isAgencyOwner]);
+
   const { data: subscription, isLoading: subLoading } = useGetBillingSubscription();
   const { data: usage, isLoading: usageLoading } = useGetBillingUsage();
   const { data: invoices, isLoading: invoicesLoading } = useGetBillingInvoices();

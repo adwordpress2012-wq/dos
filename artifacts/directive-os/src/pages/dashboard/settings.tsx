@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { useGetMyAgency, useUpdateMyAgency, getGetMyAgencyQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useClientAuth } from "@/hooks/useClientAuth";
 import { Settings, Save, Bot, Phone, Globe, Smartphone, Eye, EyeOff, Copy, Check } from "lucide-react";
 
 function MobileTokenCard({ token }: { token?: string }) {
@@ -40,6 +42,13 @@ function MobileTokenCard({ token }: { token?: string }) {
 }
 
 export default function SettingsPage() {
+  const { isAgencyOwner, loading: authLoading } = useClientAuth();
+  const [, navigate] = useLocation();
+
+  useEffect(() => {
+    if (!authLoading && !isAgencyOwner) navigate("/dashboard");
+  }, [authLoading, isAgencyOwner]);
+
   const queryClient = useQueryClient();
   const { data: agency, isLoading } = useGetMyAgency();
   const updateAgency = useUpdateMyAgency({
