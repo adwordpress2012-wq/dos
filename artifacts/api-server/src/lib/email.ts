@@ -15,6 +15,7 @@ interface ConversationSummary {
   outcome: string;
   nextAction: string;
   isEnglish: boolean;
+  translatedMessages?: Array<{ role: "user" | "assistant"; content: string }>;
 }
 
 async function generateEnglishSummary(
@@ -29,19 +30,25 @@ async function generateEnglishSummary(
     .map(m => `${m.role === "user" ? "Caller/Visitor" : "Sarah (AI)"}: ${m.content}`)
     .join("\n");
 
-  const systemPrompt = `You are an assistant that analyses real estate AI receptionist conversations and produces a structured English summary for the agency. Always respond in English regardless of the conversation language.
+  const systemPrompt = `You are an assistant that analyses real estate AI receptionist conversations for Australian agencies. Always respond in English regardless of the conversation language.
 
-Return ONLY a valid JSON object with this exact shape:
+Return ONLY a valid JSON object with this exact shape — no markdown, no code blocks, just raw JSON:
 {
-  "language": "the primary language detected (e.g. English, Arabic, Mandarin, Vietnamese, etc.)",
+  "language": "the primary language detected (e.g. English, Arabic, Mandarin, Vietnamese, Hindi, Korean, Spanish, Filipino, Russian)",
   "callerName": "full name if captured, otherwise null",
   "intent": "one of: buyer | tenant | vendor | landlord | general_enquiry | sales_enquiry",
-  "keyDetails": ["array of 3-6 bullet point strings summarising what was discussed — always in English"],
-  "contactsCaptured": ["list what was captured e.g. 'Name: Ahmed Hassan', 'Phone: 0412 345 678', 'Email: ahmed@email.com' — empty array if none"],
+  "keyDetails": ["array of 3-6 concise bullet point strings summarising what was discussed — always in English"],
+  "contactsCaptured": ["list captured contact info e.g. 'Name: Ahmed Hassan', 'Phone: 0412 345 678', 'Email: ahmed@email.com' — empty array if none captured"],
   "outcome": "one sentence in English describing the outcome of the conversation",
   "nextAction": "one sentence in English describing the recommended next action for the agency",
-  "isEnglish": true/false (true if the conversation was in English)
-}`;
+  "isEnglish": true or false (true only if the conversation was primarily in English),
+  "translatedMessages": [
+    {"role": "user", "content": "English translation of each caller/visitor message"},
+    {"role": "assistant", "content": "English translation of each Sarah message (if not already English)"}
+  ]
+}
+
+IMPORTANT: The translatedMessages array must contain ALL messages from the transcript in the same order, each translated to natural English. If the conversation was already in English, still include the messages as-is in translatedMessages.`;
 
   try {
     const res = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -57,7 +64,7 @@ Return ONLY a valid JSON object with this exact shape:
           { role: "user", content: `Channel: ${channel}${durationSeconds ? ` | Duration: ${Math.floor(durationSeconds / 60)}m ${durationSeconds % 60}s` : ""}\n\nTranscript:\n${transcriptText}` },
         ],
         temperature: 0.2,
-        max_tokens: 600,
+        max_tokens: 2000,
       }),
     });
 
@@ -354,10 +361,22 @@ function buildEmailHtml(opts: {
 
   <!-- Transcript -->
   <div style="padding:20px 28px;">
-    <div style="font-size:13px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:16px;border-bottom:2px solid #00d1b2;padding-bottom:8px;">Full Transcript</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;border-bottom:2px solid #00d1b2;padding-bottom:8px;">
+      <div style="font-size:13px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.5px;">Full Transcript</div>
+      ${opts.summary && !opts.summary.isEnglish && opts.summary.translatedMessages?.length
+        ? `<div style="font-size:11px;color:#6b7280;font-style:italic;">🌐 Translated from ${opts.summary.language} to English by Sarah AI</div>`
+        : ""}
+    </div>
     <table style="width:100%;border-collapse:separate;border-spacing:0 2px;">
-      ${buildTranscriptRows(opts.messages)}
+      ${buildTranscriptRows(
+        (opts.summary?.translatedMessages?.length ? opts.summary.translatedMessages : opts.messages) as TranscriptMessage[]
+      )}
     </table>
+    ${opts.summary && !opts.summary.isEnglish
+      ? `<div style="margin-top:12px;padding:10px 14px;background:#f9fafb;border-radius:6px;font-size:11px;color:#9ca3af;">
+          Original conversation language: <strong>${opts.summary.language}</strong>. This transcript has been automatically translated to English. The original language recording is preserved in your Directive OS dashboard.
+        </div>`
+      : ""}
   </div>
 
   <!-- Footer / Sarah Signature -->
