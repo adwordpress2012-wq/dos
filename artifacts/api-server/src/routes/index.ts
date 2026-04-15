@@ -13,6 +13,7 @@ import systemRouter from "./system";
 import adminRouter from "./admin";
 import mobileRouter from "./mobile";
 import partnersRouter from "./partners";
+import clientAuthRouter from "./clientAuth";
 
 const DEMO_ORG_ID = "org_demo_001";
 
@@ -39,5 +40,6 @@ router.use(systemRouter);
 router.use(adminRouter);
 router.use(mobileRouter);
 router.use(partnersRouter);
+router.use(clientAuthRouter);
 
 export default router;

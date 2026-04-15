@@ -80,6 +80,9 @@ STRIPE_PRICE_SUBSCRIPTION = "price_1TKwuz9aGsy5kFWkNYUwwGQH"
 ONBOARDING_PRICE_ID = "price_1TLWeF9aGsy5kFWkH4TtBm8z"
 SUBSCRIPTION_PRICE_ID = "price_1TLWg59aGsy5kFWkzOWGsN3R"
 DOS_RESEND_CFG = "re_JvocYQRA_Dwe4yzWqKEyiZypBLhoq6JZM"
+ADMIN_USERNAME = "captainjaze"
+ADMIN_PASSWORD = "M@gdalena2050"
+CLIENT_JWT_SECRET = "dos-client-jwt-amw7du9o96avwhzgcku7kb"
 
 [userenv.production]
 VOICE_DOMAIN = "directiveos.com.au"

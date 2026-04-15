@@ -1,19 +1,22 @@
 import { Router, type IRouter, type Request, type Response, type NextFunction } from "express";
 import { eq, desc, sql, gte, and } from "drizzle-orm";
+import bcrypt from "bcryptjs";
 import {
   db, agenciesTable, leadsTable, transcriptsTable, chatSessionsTable,
   adminExpensesTable, adminPipelineTable, listingsTable,
 } from "@workspace/db";
+import { generatePassword, sendPasswordEmail } from "./clientAuth";
 
 const router: IRouter = Router();
 
-const ADMIN_SECRET = process.env.ADMIN_SECRET || "directive-captain-2024";
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "captainjaze";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "directive-captain-2024";
 const SETUP_FEE_CENTS = 180000;
 const MONTHLY_SUB_CENTS = 29900;
 
 function adminAuth(req: Request, res: Response, next: NextFunction) {
   const secret = req.headers["x-admin-secret"];
-  if (secret !== ADMIN_SECRET) {
+  if (secret !== ADMIN_PASSWORD) {
     res.status(401).json({ error: "Unauthorised — Prime Directive violation" });
     return;
   }
@@ -21,11 +24,11 @@ function adminAuth(req: Request, res: Response, next: NextFunction) {
 }
 
 router.post("/admin/auth", (req: Request, res: Response): void => {
-  const { secret } = req.body;
-  if (secret === ADMIN_SECRET) {
+  const { username, password } = req.body as { username: string; password: string };
+  if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
     res.json({ ok: true });
   } else {
-    res.status(401).json({ ok: false, error: "Invalid access code" });
+    res.status(401).json({ ok: false, error: "Invalid username or password" });
   }
 });
 
@@ -344,6 +347,37 @@ router.get("/admin/activity", adminAuth, async (req: Request, res: Response): Pr
       totalChats: Number(totalChats.count),
     },
   });
+});
+
+router.post("/admin/clients/:id/reset-password", adminAuth, async (req: Request, res: Response): Promise<void> => {
+  const agencyId = parseInt(req.params.id);
+  if (isNaN(agencyId)) { res.status(400).json({ error: "Invalid agency ID" }); return; }
+
+  const rows = await db.select().from(agenciesTable).where(eq(agenciesTable.id, agencyId));
+  const agency = rows[0];
+  if (!agency) { res.status(404).json({ error: "Agency not found" }); return; }
+
+  const newPassword = generatePassword();
+  const hash = await bcrypt.hash(newPassword, 10);
+  await db.update(agenciesTable).set({ passwordHash: hash }).where(eq(agenciesTable.id, agencyId));
+  await sendPasswordEmail(agency.contactEmail, agency.name, newPassword, true);
+
+  res.json({ ok: true, message: `Password reset and emailed to ${agency.contactEmail}` });
+});
+
+router.post("/admin/clients/:id/set-password", adminAuth, async (req: Request, res: Response): Promise<void> => {
+  const agencyId = parseInt(req.params.id);
+  const { password } = req.body as { password: string };
+  if (isNaN(agencyId) || !password) { res.status(400).json({ error: "Invalid request" }); return; }
+
+  const rows = await db.select().from(agenciesTable).where(eq(agenciesTable.id, agencyId));
+  const agency = rows[0];
+  if (!agency) { res.status(404).json({ error: "Agency not found" }); return; }
+
+  const hash = await bcrypt.hash(password, 10);
+  await db.update(agenciesTable).set({ passwordHash: hash }).where(eq(agenciesTable.id, agencyId));
+
+  res.json({ ok: true, message: "Password updated" });
 });
 
 export default router;

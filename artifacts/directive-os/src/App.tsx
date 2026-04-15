@@ -6,7 +6,7 @@ import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Onboard from "@/pages/onboard";
 import OnboardSubscribe from "@/pages/onboard-subscribe";
-import { SignIn, SignUp } from "@/pages/auth";
+import DashboardLogin from "@/pages/dashboard/login";
 import Terms from "@/pages/terms";
 import Privacy from "@/pages/privacy";
 import Resources from "@/pages/resources";
@@ -68,8 +68,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
-      <Route path="/sign-in" component={SignIn} />
-      <Route path="/sign-up" component={SignUp} />
+      <Route path="/dashboard/login" component={DashboardLogin} />
       <Route path="/onboard" component={Onboard} />
       <Route path="/onboard/subscribe" component={OnboardSubscribe} />
       <Route path="/terms" component={Terms} />

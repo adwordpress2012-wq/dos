@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { AdminLayout } from "@/components/layout/AdminLayout";
-import { Download, Search, Users, CheckCircle, AlertCircle, Clock, XCircle, ChevronDown } from "lucide-react";
+import { Download, Search, Users, CheckCircle, AlertCircle, Clock, XCircle, KeyRound, RotateCcw } from "lucide-react";
 
 const API = import.meta.env.VITE_API_BASE_URL ?? "/api";
 const secret = () => sessionStorage.getItem("adminSecret") || "";
@@ -35,6 +35,27 @@ export default function AdminClients() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("createdAt");
+  const [resetting, setResetting] = useState<number | null>(null);
+  const [resetMsg, setResetMsg] = useState<{ id: number; msg: string } | null>(null);
+
+  async function resetPassword(clientId: number, email: string) {
+    if (!confirm(`Reset password for ${email}? A new password will be emailed to them.`)) return;
+    setResetting(clientId);
+    setResetMsg(null);
+    try {
+      const res = await fetch(`${API}/admin/clients/${clientId}/reset-password`, {
+        method: "POST",
+        headers: { "x-admin-secret": secret() },
+      });
+      const data = await res.json();
+      setResetMsg({ id: clientId, msg: data.ok ? "Password emailed ✓" : (data.error || "Failed") });
+    } catch {
+      setResetMsg({ id: clientId, msg: "Error — try again" });
+    } finally {
+      setResetting(null);
+      setTimeout(() => setResetMsg(null), 4000);
+    }
+  }
 
   useEffect(() => {
     fetch(`${API}/admin/clients`, { headers: { "x-admin-secret": secret() } })
@@ -107,7 +128,7 @@ export default function AdminClients() {
           <div
             className="grid text-[10px] font-mono font-bold tracking-wider px-4 py-2.5"
             style={{
-              gridTemplateColumns: "1fr 1fr 80px 80px 80px 80px 100px",
+              gridTemplateColumns: "1fr 1fr 80px 80px 80px 80px 90px 110px",
               background: "rgba(0,209,178,0.06)",
               color: "rgba(0,209,178,0.6)",
               borderBottom: "1px solid rgba(0,209,178,0.1)",
@@ -120,6 +141,7 @@ export default function AdminClients() {
             <div>LEADS</div>
             <div>MINUTES</div>
             <div>JOINED</div>
+            <div>DASHBOARD</div>
           </div>
 
           {loading ? (
@@ -137,7 +159,7 @@ export default function AdminClients() {
                 key={c.id}
                 className="grid items-center px-4 py-3 transition-colors hover:bg-white/[0.02]"
                 style={{
-                  gridTemplateColumns: "1fr 1fr 80px 80px 80px 80px 100px",
+                  gridTemplateColumns: "1fr 1fr 80px 80px 80px 80px 90px 110px",
                   background: i % 2 === 0 ? "rgba(5,14,26,0.9)" : "rgba(4,9,18,0.95)",
                   borderBottom: "1px solid rgba(0,209,178,0.05)",
                 }}
@@ -158,6 +180,24 @@ export default function AdminClients() {
                 <div className="text-xs font-mono text-white">{c.aiMinutesUsed}<span className="text-[9px]" style={{ color: "rgba(255,255,255,0.3)" }}>/{c.aiMinutesIncluded}</span></div>
                 <div className="text-[10px] font-mono" style={{ color: "rgba(255,255,255,0.4)" }}>
                   {new Date(c.createdAt).toLocaleDateString("en-AU", { day: "2-digit", month: "short", year: "2-digit" })}
+                </div>
+                <div>
+                  {resetMsg?.id === c.id ? (
+                    <span className="text-[10px] font-mono" style={{ color: resetMsg.msg.includes("✓") ? "#10b981" : "#ef4444" }}>
+                      {resetMsg.msg}
+                    </span>
+                  ) : (
+                    <button
+                      onClick={() => resetPassword(c.id, c.contactEmail)}
+                      disabled={resetting === c.id}
+                      className="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-mono font-bold transition-all disabled:opacity-50"
+                      style={{ background: "rgba(0,209,178,0.08)", border: "1px solid rgba(0,209,178,0.2)", color: "#00d1b2" }}
+                      title="Reset password and email to client"
+                    >
+                      {resetting === c.id ? <RotateCcw className="w-3 h-3 animate-spin" /> : <KeyRound className="w-3 h-3" />}
+                      {resetting === c.id ? "..." : "Reset PW"}
+                    </button>
+                  )}
                 </div>
               </div>
             ))

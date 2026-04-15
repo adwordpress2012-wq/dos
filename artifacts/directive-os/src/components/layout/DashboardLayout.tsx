@@ -11,10 +11,12 @@ import {
   FlaskConical,
   Wifi,
   AlertCircle,
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useGetMyAgency } from "@workspace/api-client-react";
 import { useSystemStatus } from "@/hooks/useSystemStatus";
+import { useClientAuth } from "@/hooks/useClientAuth";
 
 const navigation = [
   { name: "Command Centre", href: "/dashboard", icon: LayoutDashboard },
@@ -74,6 +76,20 @@ function SystemStatusBadge() {
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const { data: agency } = useGetMyAgency();
+  const { agency: clientAgency, loading: authLoading, signOut } = useClientAuth();
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#060d1a" }}>
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="w-8 h-8 animate-spin" style={{ color: "#00d1b2" }} />
+          <p className="text-sm font-mono" style={{ color: "rgba(0,209,178,0.6)" }}>LOADING COMMAND BRIDGE...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!clientAgency) return null;
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -122,14 +138,18 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           })}
         </nav>
 
-        <div className="p-4 border-t border-border/50">
-          <Link
-            href="/"
+        <div className="p-4 border-t border-border/50 space-y-1">
+          <div className="px-3 py-1.5">
+            <div className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">Logged in as</div>
+            <div className="text-xs font-medium text-foreground truncate">{clientAgency.contactEmail}</div>
+          </div>
+          <button
+            onClick={signOut}
             className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors w-full"
           >
             <LogOut className="size-4" />
             Sign Out
-          </Link>
+          </button>
         </div>
       </aside>
 

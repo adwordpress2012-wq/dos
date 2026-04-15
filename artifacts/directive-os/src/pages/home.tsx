@@ -91,13 +91,13 @@ function PricingCalculator() {
         <p className="text-xs text-muted-foreground mt-2 ml-6 italic">Onboarding investment outlined during your free strategy call.</p>
       </div>
 
-      <Link href="/sign-up">
+      <a href="https://calendly.com/adwordpress2012/directive-os-agency-onboarding" target="_blank" rel="noopener noreferrer">
         <button className="w-full font-bold py-3.5 px-6 rounded-xl transition-all hover:scale-[1.02] hover:shadow-lg flex items-center justify-center gap-2"
           style={{ background: "linear-gradient(135deg, #00d1b2, #00b89c)", color: "#0a0a0a", boxShadow: "0 4px 24px rgba(0,209,178,0.3)" }}>
           Get Started with {seats} Seat{seats > 1 ? "s" : ""}
           <ArrowRight className="w-4 h-4" />
         </button>
-      </Link>
+      </a>
 
       <a
         href="https://calendly.com/adwordpress2012/directive-os-agency-onboarding"
@@ -283,13 +283,13 @@ export default function Home() {
               Book Free 15-Min Strategy Call
               <ArrowRight className="w-4 h-4" />
             </a>
-            <Link href="/sign-up">
+            <a href="https://calendly.com/adwordpress2012/directive-os-agency-onboarding" target="_blank" rel="noopener noreferrer" className="w-full">
               <button className="font-semibold py-3.5 px-8 rounded-xl transition-all hover:scale-105 flex items-center gap-2 text-foreground w-full justify-center"
                 style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.15)" }}>
                 Activate Your Agency
                 <ArrowRight className="w-4 h-4 opacity-60" />
               </button>
-            </Link>
+            </a>
           </div>
 
           <p className="text-xs text-muted-foreground mb-6">No commitment · 15 minutes · Talk directly with Jayson</p>
@@ -1489,13 +1489,13 @@ export default function Home() {
           <p className="text-muted-foreground max-w-2xl mx-auto text-xl mb-10">
             Join the agencies capturing 100% of after-hours enquiries. Setup takes less than 48 hours.
           </p>
-          <Link href="/sign-up">
+          <a href="https://calendly.com/adwordpress2012/directive-os-agency-onboarding" target="_blank" rel="noopener noreferrer">
             <button className="font-bold py-4 px-12 rounded-xl transition-all hover:scale-105 text-lg mx-auto flex items-center gap-3"
               style={{ background: "linear-gradient(135deg, #00d1b2, #00b89c)", color: "#0a0a0a", boxShadow: "0 8px 40px rgba(0,209,178,0.35)" }}>
               Activate Directive OS
               <ArrowRight className="w-5 h-5" />
             </button>
-          </Link>
+          </a>
           <p className="text-muted-foreground text-sm mt-6">
             From $299/mo — no lock-in contracts — Australian-hosted infrastructure
           </p>

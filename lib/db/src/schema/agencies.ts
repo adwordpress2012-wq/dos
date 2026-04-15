@@ -19,6 +19,7 @@ export const agenciesTable = pgTable("agencies", {
   aiMinutesUsed: integer("ai_minutes_used").notNull().default(0),
   aiMinutesIncluded: integer("ai_minutes_included").notNull().default(100),
   mobileToken: text("mobile_token").unique(),
+  passwordHash: text("password_hash"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });
