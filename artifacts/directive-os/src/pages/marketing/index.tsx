@@ -5,7 +5,7 @@ import {
   Phone, MessageSquare, Building2, FileText, Zap, BarChart3, Smartphone,
   Download, CreditCard, Mail, PenLine, ClipboardList, Globe, BookOpen,
   ChevronDown, ChevronUp, ExternalLink, Star, Users, Layers, CheckCircle2,
-  Shield, ArrowRight
+  Shield, ArrowRight, Gift, DollarSign, UserPlus, Banknote
 } from "lucide-react";
 
 const TEAL = "#00d1b2";
@@ -256,13 +256,14 @@ function ProductCard({ p, open, toggle }: { p: typeof PRODUCTS[0]; open: boolean
 
 export default function MarketingHub() {
   const [openProduct, setOpenProduct] = useState<number | null>(null);
-  const [activeTab, setActiveTab] = useState<"products" | "apps" | "materials" | "demo">("products");
+  const [activeTab, setActiveTab] = useState<"products" | "apps" | "materials" | "demo" | "referrals">("products");
 
   const tabs = [
     { id: "products" as const, label: "7 Products", icon: <Layers size={15} /> },
     { id: "apps" as const, label: "The 2 Apps", icon: <Smartphone size={15} /> },
     { id: "materials" as const, label: "Print & Digital", icon: <Download size={15} /> },
     { id: "demo" as const, label: "Live Demo", icon: <Phone size={15} /> },
+    { id: "referrals" as const, label: "Referral Program", icon: <Gift size={15} /> },
   ];
 
   return (
@@ -668,6 +669,136 @@ export default function MarketingHub() {
             </div>
           </div>
         )}
+
+        {/* ─── TAB: Referral Program ─── */}
+        {activeTab === "referrals" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+
+            {/* Hero */}
+            <div style={{ background: "linear-gradient(135deg, rgba(0,209,178,0.12) 0%, rgba(0,209,178,0.03) 100%)", border: "1px solid rgba(0,209,178,0.25)", borderRadius: 20, padding: "32px 36px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 16 }}>
+                <div style={{ width: 52, height: 52, borderRadius: 14, background: "rgba(0,209,178,0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <Gift size={26} style={{ color: TEAL }} />
+                </div>
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: TEAL, marginBottom: 4 }}>SPOTTER / REFERRAL PROGRAM</div>
+                  <h2 style={{ margin: 0, fontSize: 24, fontWeight: 800 }}>Get paid for every agency you send our way</h2>
+                </div>
+              </div>
+              <p style={{ color: SLATE, fontSize: 15, lineHeight: 1.7, margin: 0, maxWidth: 680 }}>
+                Know someone in real estate who'd benefit from Sarah? If they sign up and go live, you earn a spotter fee — no fuss, no ongoing obligation. One referral, one payment, bank transfer within 7 days of client going live.
+              </p>
+            </div>
+
+            {/* How it works */}
+            <div style={{ background: NAVY3, border: `1px solid ${BORDER}`, borderRadius: 16, padding: 28 }}>
+              <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 22 }}>How it works — 3 steps</div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16 }}>
+                {[
+                  { icon: <UserPlus size={22} style={{ color: TEAL }} />, step: "01", title: "Give the intro", body: "Point someone towards Directive OS — a call, a text, an email, or just a name and number. That's it." },
+                  { icon: <Phone size={22} style={{ color: TEAL }} />, step: "02", title: "They sign & go live", body: "We do the setup, onboarding, and go-live. Once the client pays their setup invoice and Sarah is live, you've earned it." },
+                  { icon: <Banknote size={22} style={{ color: TEAL }} />, step: "03", title: "You get paid", body: "10% of the setup fee, paid by bank transfer within 7 business days. No chasing. No admin on your end." },
+                ].map(s => (
+                  <div key={s.step} style={{ background: "rgba(255,255,255,0.02)", border: `1px solid ${BORDER}`, borderRadius: 14, padding: 20 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+                      {s.icon}
+                      <span style={{ fontSize: 11, fontWeight: 700, color: TEAL, letterSpacing: 1.5 }}>STEP {s.step}</span>
+                    </div>
+                    <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 8 }}>{s.title}</div>
+                    <div style={{ fontSize: 13, color: SLATE, lineHeight: 1.6 }}>{s.body}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Fee table */}
+            <div style={{ background: NAVY3, border: `1px solid ${BORDER}`, borderRadius: 16, overflow: "hidden" }}>
+              <div style={{ padding: "20px 28px", borderBottom: `1px solid ${BORDER}` }}>
+                <div style={{ fontWeight: 700, fontSize: 16 }}>Spotter Fee Schedule — 10% of Setup</div>
+                <div style={{ fontSize: 13, color: SLATE, marginTop: 4 }}>Based on the package the referred client signs up for</div>
+              </div>
+              <div style={{ overflowX: "auto" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+                  <thead>
+                    <tr style={{ background: "rgba(255,255,255,0.02)" }}>
+                      <th style={{ padding: "14px 28px", textAlign: "left", color: SLATE, fontWeight: 600, fontSize: 12, borderBottom: `1px solid ${BORDER}` }}>Package</th>
+                      <th style={{ padding: "14px 20px", textAlign: "center", color: "#94a3b8", fontWeight: 700, fontSize: 12, borderBottom: `1px solid ${BORDER}` }}>Small<br /><span style={{ fontWeight: 400, fontSize: 10 }}>1–5 agents</span></th>
+                      <th style={{ padding: "14px 20px", textAlign: "center", color: "#94a3b8", fontWeight: 700, fontSize: 12, borderBottom: `1px solid ${BORDER}` }}>Medium<br /><span style={{ fontWeight: 400, fontSize: 10 }}>6–20 agents</span></th>
+                      <th style={{ padding: "14px 20px", textAlign: "center", color: "#94a3b8", fontWeight: 700, fontSize: 12, borderBottom: `1px solid ${BORDER}` }}>Large / Franchise<br /><span style={{ fontWeight: 400, fontSize: 10 }}>20+ agents</span></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[
+                      { label: "Sarah AI Receptionist only",      setup: ["$1,800", "$2,500", "$4,500"],   fee: ["$180",   "$250",   "$450"]   },
+                      { label: "Mobile App only",                 setup: ["$4,500", "$6,500", "$12,500"],  fee: ["$450",   "$650",   "$1,250"] },
+                      { label: "Sarah + Mobile App (bundle)",     setup: ["$6,300", "$9,000", "$17,000"],  fee: ["$630",   "$900",   "$1,700"] },
+                    ].map(({ label, setup, fee }, i) => (
+                      <>
+                        <tr key={`setup-${i}`} style={{ borderTop: `1px solid ${BORDER}`, background: i % 2 === 0 ? "transparent" : "rgba(255,255,255,0.01)" }}>
+                          <td style={{ padding: "12px 28px 4px", color: "#e2e8f0", fontWeight: 700, fontSize: 13 }}>{label}</td>
+                          {setup.map((v, j) => (
+                            <td key={j} style={{ padding: "12px 20px 4px", textAlign: "center", color: SLATE, fontSize: 12 }}>Setup {v}</td>
+                          ))}
+                        </tr>
+                        <tr key={`fee-${i}`} style={{ background: i % 2 === 0 ? "transparent" : "rgba(255,255,255,0.01)" }}>
+                          <td style={{ padding: "4px 28px 14px" }}>
+                            <span style={{ fontSize: 11, color: TEAL, fontWeight: 600 }}>Your spotter fee →</span>
+                          </td>
+                          {fee.map((v, j) => (
+                            <td key={j} style={{ padding: "4px 20px 14px", textAlign: "center", color: TEAL, fontWeight: 800, fontSize: 17 }}>{v}</td>
+                          ))}
+                        </tr>
+                      </>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div style={{ padding: "14px 28px", borderTop: `1px solid ${BORDER}`, background: "rgba(0,209,178,0.03)" }}>
+                <div style={{ fontSize: 12, color: SLATE, lineHeight: 1.6 }}>
+                  <strong style={{ color: "#e2e8f0" }}>Bundle setup</strong> = Sarah setup + Mobile App setup combined. Fee is 10% of total combined setup only — not on monthly recurring.
+                </div>
+              </div>
+            </div>
+
+            {/* Rules */}
+            <div style={{ background: NAVY3, border: `1px solid ${BORDER}`, borderRadius: 16, padding: 28 }}>
+              <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 18 }}>Rules — keep it clean</div>
+              <div style={{ display: "grid", gap: 10 }}>
+                {[
+                  { ok: true,  text: "Referral must be a new client — not someone already in conversation with us" },
+                  { ok: true,  text: "Fee is paid once the client's setup invoice is paid and they are live" },
+                  { ok: true,  text: "Payment is by bank transfer within 7 business days of go-live" },
+                  { ok: true,  text: "Fee is based on the package the client actually signs — not what was originally discussed" },
+                  { ok: false, text: "Fee is not paid on leads who express interest but do not sign" },
+                  { ok: false, text: "Fee does not apply to monthly recurring — setup only" },
+                  { ok: false, text: "No double-dipping — one referral fee per client, regardless of how many add-ons they take later" },
+                ].map((r, i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 12, padding: "10px 16px", background: r.ok ? "rgba(0,209,178,0.04)" : "rgba(239,68,68,0.04)", border: `1px solid ${r.ok ? "rgba(0,209,178,0.12)" : "rgba(239,68,68,0.12)"}`, borderRadius: 10 }}>
+                    <span style={{ fontSize: 15, flexShrink: 0, marginTop: 1 }}>{r.ok ? "✅" : "❌"}</span>
+                    <span style={{ fontSize: 13, color: SLATE, lineHeight: 1.5 }}>{r.text}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Script */}
+            <div style={{ background: "rgba(0,209,178,0.05)", border: "1px solid rgba(0,209,178,0.2)", borderRadius: 16, padding: 28 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1.5, color: TEAL, marginBottom: 14 }}>WHAT TO SAY TO A POTENTIAL REFERRER</div>
+              <div style={{ fontSize: 14, color: "#e2e8f0", lineHeight: 1.8, fontStyle: "italic", borderLeft: `3px solid ${TEAL}`, paddingLeft: 20 }}>
+                "Hey, I run a side project called Directive OS — it's an AI receptionist for real estate agencies. If you know any principal or director who complains about missed calls or leads going cold after hours, point them my way. If they sign up and go live, I'll pay you a spotter fee — anywhere from $180 to $1,700 depending on their agency size. No strings, nothing else required from you."
+              </div>
+              <div style={{ marginTop: 16, display: "flex", gap: 12, flexWrap: "wrap" }}>
+                <div style={{ fontSize: 12, color: SLATE }}>Demo number to share:</div>
+                <a href="tel:0258504038" style={{ fontSize: 12, color: TEAL, fontWeight: 700, textDecoration: "none" }}>02 5850 4038</a>
+                <div style={{ fontSize: 12, color: SLATE }}>|</div>
+                <div style={{ fontSize: 12, color: SLATE }}>Website:</div>
+                <a href="https://directiveos.com.au" target="_blank" rel="noreferrer" style={{ fontSize: 12, color: TEAL, fontWeight: 700, textDecoration: "none" }}>directiveos.com.au</a>
+              </div>
+            </div>
+
+          </div>
+        )}
+
       </div>
     </div>
   );
