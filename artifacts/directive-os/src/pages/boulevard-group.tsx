@@ -106,7 +106,7 @@ function ChatWidget() {
             {messages.map((m, i) => (
               <div key={i} style={{ display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start" }}>
                 <div style={{
-                  maxWidth: "80%", padding: "10px 14px", borderRadius: 12, fontSize: 13, lineHeight: 1.5,
+                  maxWidth: "80%", padding: "10px 14px", fontSize: 13, lineHeight: 1.5,
                   background: m.role === "user" ? NAVY : WHITE,
                   color: m.role === "user" ? WHITE : "#1e1e1e",
                   border: m.role === "assistant" ? `1px solid ${GOLD}33` : "none",
@@ -559,7 +559,7 @@ export default function BoulevardGroupLanding() {
             ].map((m, i) => (
               <div key={i} style={{ display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start", marginBottom: 12 }}>
                 <div style={{
-                  maxWidth: "78%", padding: "10px 14px", fontSize: 13, lineHeight: 1.5, borderRadius: 12,
+                  maxWidth: "78%", padding: "10px 14px", fontSize: 13, lineHeight: 1.5,
                   background: m.role === "user" ? NAVY : LGREY,
                   color: m.role === "user" ? WHITE : "#1e1e1e",
                   borderRadius: m.role === "user" ? "12px 12px 4px 12px" : "12px 12px 12px 4px",

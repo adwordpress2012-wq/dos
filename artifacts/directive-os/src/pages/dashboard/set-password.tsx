@@ -1,12 +1,11 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation } from "wouter";
 
 const API = import.meta.env.VITE_API_BASE_URL ?? "/api";
 
 export default function SetPasswordPage() {
-  const [params] = useSearchParams();
-  const token = params.get("token") ?? "";
-  const navigate = useNavigate();
+  const token = new URLSearchParams(window.location.search).get("token") ?? "";
+  const [, navigate] = useLocation();
 
   const [validating, setValidating] = useState(true);
   const [tokenValid, setTokenValid] = useState(false);
