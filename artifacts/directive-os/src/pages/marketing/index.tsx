@@ -257,6 +257,7 @@ function ProductCard({ p, open, toggle }: { p: typeof PRODUCTS[0]; open: boolean
 export default function MarketingHub() {
   const [openProduct, setOpenProduct] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<"products" | "apps" | "materials" | "demo" | "referrals">("products");
+  const [refEmailCopied, setRefEmailCopied] = useState<"none" | "subject" | "body">("none");
 
   const tabs = [
     { id: "products" as const, label: "7 Products", icon: <Layers size={15} /> },
@@ -795,6 +796,88 @@ export default function MarketingHub() {
                 <a href="https://directiveos.com.au" target="_blank" rel="noreferrer" style={{ fontSize: 12, color: TEAL, fontWeight: 700, textDecoration: "none" }}>directiveos.com.au</a>
               </div>
             </div>
+
+            {/* Standard Referral Email */}
+            {(() => {
+              const EMAIL_SUBJECT = "A way to earn a referral fee — worth 2 mins of your time";
+              const EMAIL_BODY = `Hi [Name],
+
+Hope you're going well!
+
+I wanted to reach out about something I've been building on the side — an AI receptionist for real estate agencies called Directive OS.
+
+In short: it's an AI called Sarah that answers every call an agency receives, 24/7 — qualifies the buyer or vendor, captures their details, and emails the principal a full transcript within seconds of the call ending. No more missed calls, no more voicemail black holes.
+
+I'm growing it through referrals, and I'd love your help. Here's the deal:
+
+→ If you know a real estate principal or director who might be interested
+→ And they sign up and go live with us
+→ I'll pay you a spotter fee — 10% of their setup fee
+
+That works out to anywhere between $180 and $1,700 depending on their agency size. Paid by bank transfer, no strings attached.
+
+All you need to do is send me a name and number, or copy them into a group chat with me. I'll take it from there.
+
+You can see the AI in action here — call the number or chat on the page:
+👉 directiveos.com.au
+
+If you've got anyone in mind, just reply to this email or flick me a message. And if not, no worries at all — appreciate you reading this far.
+
+Talk soon,
+
+Jayson
+Directive OS — AI Receptionist for Real Estate
+📞 02 5850 4038
+🌐 directiveos.com.au`;
+
+              const copyText = (text: string, field: "subject" | "body") => {
+                navigator.clipboard.writeText(text);
+                setRefEmailCopied(field);
+                setTimeout(() => setRefEmailCopied("none"), 2000);
+              };
+
+              return (
+                <div style={{ background: NAVY3, border: `1px solid ${BORDER}`, borderRadius: 16, overflow: "hidden" }}>
+                  <div style={{ padding: "20px 28px", borderBottom: `1px solid ${BORDER}`, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+                    <div>
+                      <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1.5, color: TEAL, marginBottom: 4 }}>STANDARD REFERRAL EMAIL</div>
+                      <div style={{ fontWeight: 700, fontSize: 15 }}>Ready to send — personalise the name, copy, hit send</div>
+                    </div>
+                    <button
+                      onClick={() => copyText(EMAIL_BODY, "body")}
+                      style={{ display: "flex", alignItems: "center", gap: 8, background: refEmailCopied === "body" ? "rgba(0,209,178,0.2)" : "rgba(0,209,178,0.1)", border: `1px solid ${TEAL}`, color: TEAL, borderRadius: 8, padding: "9px 18px", cursor: "pointer", fontSize: 13, fontWeight: 700, transition: "all 0.2s" }}>
+                      <Mail size={14} />
+                      {refEmailCopied === "body" ? "Copied!" : "Copy Email Body"}
+                    </button>
+                  </div>
+
+                  {/* Subject line */}
+                  <div style={{ padding: "14px 28px", borderBottom: `1px solid ${BORDER}`, background: "rgba(255,255,255,0.015)", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: SLATE, minWidth: 60 }}>SUBJECT</span>
+                      <span style={{ fontSize: 14, color: "#e2e8f0", fontWeight: 600 }}>{EMAIL_SUBJECT}</span>
+                    </div>
+                    <button
+                      onClick={() => copyText(EMAIL_SUBJECT, "subject")}
+                      style={{ fontSize: 11, color: refEmailCopied === "subject" ? "#fff" : TEAL, background: "none", border: "none", cursor: "pointer", fontWeight: 600, padding: "4px 8px", transition: "all 0.2s" }}>
+                      {refEmailCopied === "subject" ? "Copied!" : "Copy subject"}
+                    </button>
+                  </div>
+
+                  {/* Body */}
+                  <div style={{ padding: "24px 28px" }}>
+                    <pre style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: SLATE, lineHeight: 1.85, whiteSpace: "pre-wrap", margin: 0 }}>
+                      {EMAIL_BODY}
+                    </pre>
+                  </div>
+
+                  <div style={{ padding: "14px 28px", borderTop: `1px solid ${BORDER}`, background: "rgba(255,255,255,0.01)", display: "flex", gap: 20, flexWrap: "wrap" }}>
+                    <span style={{ fontSize: 11, color: "#475569" }}>✏️ Replace [Name] with their first name before sending.</span>
+                    <span style={{ fontSize: 11, color: "#475569" }}>📧 Send from your personal email — not a bulk tool.</span>
+                  </div>
+                </div>
+              );
+            })()}
 
           </div>
         )}
