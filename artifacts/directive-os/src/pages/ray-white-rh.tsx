@@ -149,11 +149,17 @@ export default function RayWhiteRHPage() {
       }}>
         <RWLogo size={36} />
         <div style={{ display: "flex", gap: 28, fontSize: 14 }}>
-          {["Buy", "Sell", "Rent", "About David"].map(l => (
-            <a key={l} href="https://www.rw.com.au/" target="_blank" rel="noreferrer"
+          {[
+            { label: "Buy",          url: "https://www.randw.com.au/buy" },
+            { label: "Sell",         url: "https://www.randw.com.au/sell" },
+            { label: "Rent",         url: "https://www.randw.com.au/rent" },
+            { label: "Manage",       url: "https://www.randw.com.au/manage" },
+            { label: "About David",  url: "https://www.randw.com.au/staff-profiles/1831-david-frendo.html" },
+          ].map(l => (
+            <a key={l.label} href={l.url} target="_blank" rel="noreferrer"
               style={{ color: "#aaa", textDecoration: "none", fontWeight: 500 }}
               onMouseOver={e => (e.currentTarget.style.color = RED)}
-              onMouseOut={e => (e.currentTarget.style.color = "#aaa")}>{l}</a>
+              onMouseOut={e => (e.currentTarget.style.color = "#aaa")}>{l.label}</a>
           ))}
         </div>
         <a href={`tel:${PHONE.replace(/\s/g, "")}`} style={{
