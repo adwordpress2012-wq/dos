@@ -41,6 +41,7 @@ import RayWhiteUG from "@/pages/ray-white-ug";
 import RayWhiteRH from "@/pages/ray-white-rh";
 import DemoStandard from "@/pages/demo-standard";
 import DemoTwo from "@/pages/demo-two";
+import DemoThree from "@/pages/demo-three";
 import Partners from "@/pages/partners";
 import Launch from "@/pages/launch";
 import MarketingHub from "@/pages/marketing/index";
@@ -88,6 +89,7 @@ function Router() {
       <Route path="/ray-white-rh" component={RayWhiteRH} />
       <Route path="/demo" component={DemoStandard} />
       <Route path="/demo-2" component={DemoTwo} />
+      <Route path="/demo-3" component={DemoThree} />
       <Route path="/partners" component={Partners} />
       <Route path="/launch" component={Launch} />
       <Route path="/demos" component={Demos} />
