@@ -203,6 +203,7 @@ const MATERIALS = [
   { href: "/marketing/email-signature", icon: <PenLine size={20} />, title: "Email Signature", desc: "HTML signature · Gmail & Outlook ready" },
   { href: "/marketing/health-check", icon: <ClipboardList size={20} />, title: "Website Health Check", desc: "Audit a prospect's site · auto-score · build quote" },
   { href: "/marketing/web-quote", icon: <Globe size={20} />, title: "Website Quote Builder", desc: "Live price calculator · internal use only" },
+  { href: "/marketing/referral-schedule", icon: <Gift size={20} />, title: "Referral Fee Schedule", desc: "Printable spotter fee document · send to referrers" },
 ];
 
 function ProductCard({ p, open, toggle }: { p: typeof PRODUCTS[0]; open: boolean; toggle: () => void }) {
@@ -686,9 +687,12 @@ export default function MarketingHub() {
                   <h2 style={{ margin: 0, fontSize: 24, fontWeight: 800 }}>Get paid for every agency you send our way</h2>
                 </div>
               </div>
-              <p style={{ color: SLATE, fontSize: 15, lineHeight: 1.7, margin: 0, maxWidth: 680 }}>
+              <p style={{ color: SLATE, fontSize: 15, lineHeight: 1.7, margin: "0 0 20px", maxWidth: 680 }}>
                 Know someone in real estate who'd benefit from Sarah? If they sign up and go live, you earn a spotter fee — no fuss, no ongoing obligation. One referral, one payment, bank transfer within 7 days of client going live.
               </p>
+              <a href="/marketing/referral-schedule" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: TEAL, color: "#000", fontWeight: 800, padding: "11px 22px", borderRadius: 9, textDecoration: "none", fontSize: 14 }}>
+                <Gift size={15} /> Print / Save Fee Schedule PDF
+              </a>
             </div>
 
             {/* How it works */}

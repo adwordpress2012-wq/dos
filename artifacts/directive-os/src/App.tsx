@@ -48,6 +48,7 @@ import ProposalTemplate from "@/pages/marketing/proposal";
 import WebQuote from "@/pages/marketing/web-quote";
 import HealthCheck from "@/pages/marketing/health-check";
 import Brochure from "@/pages/marketing/brochure";
+import ReferralSchedule from "@/pages/marketing/referral-schedule";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -93,6 +94,7 @@ function Router() {
       <Route path="/marketing/web-quote" component={WebQuote} />
       <Route path="/marketing/health-check" component={HealthCheck} />
       <Route path="/marketing/brochure" component={Brochure} />
+      <Route path="/marketing/referral-schedule" component={ReferralSchedule} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/dashboard/leads" component={Leads} />
       <Route path="/dashboard/transcripts" component={Transcripts} />
