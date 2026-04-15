@@ -17,11 +17,25 @@ description: Directive OS client onboarding workflow, lead email system, dashboa
 - JWT payload: `{ type: "agency", agencyId, email }`
 - Full access: leads, transcripts, listings, staff management, billing, settings
 
-### 2. Staff Agent
-- Invited by agency owner from dashboard → Staff page
+### 2. Staff Member
+- Invited by agency owner from dashboard → Seat Management page
 - Login: same `/dashboard/login` — email + self-chosen password
 - JWT payload: `{ type: "staff", staffId, agencyId, email, role }`
-- Limited access: leads, transcripts, listings ONLY (no billing, no staff management)
+- Role-based access (see Roles & Access below)
+
+---
+
+## Roles & Access
+
+| Role | Value | Dashboard Tabs |
+|------|-------|----------------|
+| Principal | `principal` | All tabs — Command Centre, Leads, Transcripts, Listings, Billing, Seat Management, Protocols |
+| Admin | `admin` | Command Centre, Leads, Transcripts, Listings, Billing |
+| Sales Executive | `sales_executive` | Command Centre, Leads, Transcripts, Listings |
+| Sales Support | `sales_support` | Command Centre, Leads, Transcripts |
+
+Agency owner (`type: "agency"`) always has full access regardless of role.
+Principal staff members also get full access including Seat Management and Protocols.
 
 ---
 
@@ -124,7 +138,7 @@ Agency owner removes agent → DELETE /api/staff/:id
 | `password_set_token` | text | 48hr activation token |
 | `token_expiry` | timestamptz | Token expiry time |
 | `status` | text | "invited" \| "active" |
-| `role` | text | "agent" \| "admin" |
+| `role` | text | "principal" \| "admin" \| "sales_executive" \| "sales_support" |
 
 ---
 
