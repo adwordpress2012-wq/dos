@@ -366,7 +366,7 @@ export const GetStaffResponseItem = zod.object({
   clerkUserId: zod.string(),
   name: zod.string(),
   email: zod.string(),
-  role: zod.enum(["principal", "agent"]),
+  role: zod.enum(["principal", "admin", "sales_executive", "sales_support"]),
   status: zod.enum(["active", "invited", "inactive"]),
   createdAt: zod.coerce.date(),
 });
@@ -378,7 +378,7 @@ export const GetStaffResponse = zod.array(GetStaffResponseItem);
 export const InviteStaffBody = zod.object({
   name: zod.string(),
   email: zod.string(),
-  role: zod.enum(["principal", "agent"]),
+  role: zod.enum(["principal", "admin", "sales_executive", "sales_support"]),
 });
 
 /**

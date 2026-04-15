@@ -11,5 +11,7 @@ export type InviteStaffBodyRole =
 
 export const InviteStaffBodyRole = {
   principal: "principal",
-  agent: "agent",
+  admin: "admin",
+  sales_executive: "sales_executive",
+  sales_support: "sales_support",
 } as const;

@@ -42,12 +42,13 @@ function MobileTokenCard({ token }: { token?: string }) {
 }
 
 export default function SettingsPage() {
-  const { isAgencyOwner, loading: authLoading } = useClientAuth();
+  const { isAgencyOwner, staff, loading: authLoading } = useClientAuth();
   const [, navigate] = useLocation();
 
   useEffect(() => {
-    if (!authLoading && !isAgencyOwner) navigate("/dashboard");
-  }, [authLoading, isAgencyOwner]);
+    const canAccess = isAgencyOwner || staff?.role === "principal";
+    if (!authLoading && !canAccess) navigate("/dashboard");
+  }, [authLoading, isAgencyOwner, staff]);
 
   const queryClient = useQueryClient();
   const { data: agency, isLoading } = useGetMyAgency();

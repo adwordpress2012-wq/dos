@@ -38,12 +38,13 @@ function InvoiceStatusBadge({ status }: { status: string }) {
 }
 
 export default function Billing() {
-  const { isAgencyOwner, loading: authLoading } = useClientAuth();
+  const { isAgencyOwner, staff, loading: authLoading } = useClientAuth();
   const [, navigate] = useLocation();
 
   useEffect(() => {
-    if (!authLoading && !isAgencyOwner) navigate("/dashboard");
-  }, [authLoading, isAgencyOwner]);
+    const canAccess = isAgencyOwner || staff?.role === "principal" || staff?.role === "admin";
+    if (!authLoading && !canAccess) navigate("/dashboard");
+  }, [authLoading, isAgencyOwner, staff]);
 
   const { data: subscription, isLoading: subLoading } = useGetBillingSubscription();
   const { data: usage, isLoading: usageLoading } = useGetBillingUsage();

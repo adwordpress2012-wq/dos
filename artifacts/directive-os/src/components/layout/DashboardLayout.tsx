@@ -18,15 +18,29 @@ import { useGetMyAgency } from "@workspace/api-client-react";
 import { useSystemStatus } from "@/hooks/useSystemStatus";
 import { useClientAuth } from "@/hooks/useClientAuth";
 
-const ALL_NAV = [
-  { name: "Command Centre", href: "/dashboard", icon: LayoutDashboard, agencyOnly: false },
-  { name: "Lead Inbox", href: "/dashboard/leads", icon: Inbox, agencyOnly: false },
-  { name: "Communication Logs", href: "/dashboard/transcripts", icon: FileAudio, agencyOnly: false },
-  { name: "Property Intelligence", href: "/dashboard/listings", icon: Building2, agencyOnly: false },
-  { name: "Seat Management", href: "/dashboard/staff", icon: Users, agencyOnly: true },
-  { name: "Billing Command", href: "/dashboard/billing", icon: CreditCard, agencyOnly: true },
-  { name: "Protocols", href: "/dashboard/settings", icon: Settings, agencyOnly: true },
+type NavItem = {
+  name: string;
+  href: string;
+  icon: React.ElementType;
+  allowedRoles: string[] | null;
+};
+
+const ALL_NAV: NavItem[] = [
+  { name: "Command Centre",        href: "/dashboard",              icon: LayoutDashboard, allowedRoles: null },
+  { name: "Lead Inbox",            href: "/dashboard/leads",        icon: Inbox,           allowedRoles: null },
+  { name: "Communication Logs",    href: "/dashboard/transcripts",  icon: FileAudio,       allowedRoles: null },
+  { name: "Property Intelligence", href: "/dashboard/listings",     icon: Building2,       allowedRoles: ["principal", "admin", "sales_executive"] },
+  { name: "Billing Command",       href: "/dashboard/billing",      icon: CreditCard,      allowedRoles: ["principal", "admin"] },
+  { name: "Seat Management",       href: "/dashboard/staff",        icon: Users,           allowedRoles: ["principal"] },
+  { name: "Protocols",             href: "/dashboard/settings",     icon: Settings,        allowedRoles: ["principal"] },
 ];
+
+const ROLE_LABELS: Record<string, string> = {
+  principal: "Principal",
+  admin: "Admin",
+  sales_executive: "Sales Executive",
+  sales_support: "Sales Support",
+};
 
 function SystemStatusBadge() {
   const { data: status, isLoading, isError } = useSystemStatus();
@@ -78,8 +92,18 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { data: agency } = useGetMyAgency();
   const { agency: clientAgency, staff, isAgencyOwner, loading: authLoading, signOut } = useClientAuth();
 
-  const navigation = ALL_NAV.filter(item => !item.agencyOnly || isAgencyOwner);
+  const staffRole = staff?.role ?? null;
+
+  function canSeeItem(item: NavItem): boolean {
+    if (isAgencyOwner) return true;
+    if (!item.allowedRoles) return true;
+    if (!staffRole) return false;
+    return item.allowedRoles.includes(staffRole);
+  }
+
+  const navigation = ALL_NAV.filter(canSeeItem);
   const displayName = staff ? staff.name : (clientAgency?.contactEmail ?? "");
+  const roleLabel = isAgencyOwner ? "Owner" : (staffRole ? (ROLE_LABELS[staffRole] ?? staffRole) : "Staff");
 
   if (authLoading) {
     return (
@@ -144,7 +168,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         <div className="p-4 border-t border-border/50 space-y-1">
           <div className="px-3 py-1.5">
             <div className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">
-              {staff ? "Agent" : "Owner"}
+              {roleLabel}
             </div>
             <div className="text-xs font-medium text-foreground truncate">{displayName}</div>
           </div>
