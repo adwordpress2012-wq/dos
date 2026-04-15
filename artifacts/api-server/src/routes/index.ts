@@ -12,6 +12,7 @@ import dashboardRouter from "./dashboard";
 import systemRouter from "./system";
 import adminRouter from "./admin";
 import mobileRouter from "./mobile";
+import partnersRouter from "./partners";
 
 const DEMO_ORG_ID = "org_demo_001";
 
@@ -37,5 +38,6 @@ router.use(dashboardRouter);
 router.use(systemRouter);
 router.use(adminRouter);
 router.use(mobileRouter);
+router.use(partnersRouter);
 
 export default router;

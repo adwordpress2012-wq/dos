@@ -43,10 +43,20 @@ const whoItsFor = [
 
 export default function PartnersPage() {
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", phone: "", biz: "", note: "" });
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setLoading(true);
+    try {
+      await fetch("/api/partners/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+    } catch {}
+    setLoading(false);
     setSubmitted(true);
   }
 
@@ -261,12 +271,12 @@ export default function PartnersPage() {
                   }}
                 />
               </div>
-              <button type="submit" style={{
-                background: TEAL, color: NAVY, padding: "14px 0", borderRadius: 8,
-                border: "none", fontSize: 16, fontWeight: 900, cursor: "pointer",
-                marginTop: 4, boxShadow: `0 4px 20px ${TEAL}44`
+              <button type="submit" disabled={loading} style={{
+                background: loading ? "#0a7a6a" : TEAL, color: NAVY, padding: "14px 0", borderRadius: 8,
+                border: "none", fontSize: 16, fontWeight: 900, cursor: loading ? "not-allowed" : "pointer",
+                marginTop: 4, boxShadow: `0 4px 20px ${TEAL}44`, opacity: loading ? 0.8 : 1
               }}>
-                Register as a Partner →
+                {loading ? "Sending..." : "Register as a Partner →"}
               </button>
               <p style={{ textAlign: "center", color: "#374151", fontSize: 12, margin: 0 }}>
                 Or email directly:{" "}

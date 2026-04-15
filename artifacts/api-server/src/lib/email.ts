@@ -518,6 +518,39 @@ export async function sendInvoiceEmail(opts: {
   }
 }
 
+// ─── Partner Registration Notification ────────────────────────────────────────
+
+export async function sendPartnerRegistrationEmail(opts: {
+  name: string;
+  email: string;
+  phone: string;
+  biz: string;
+  note?: string;
+}): Promise<void> {
+  const subject = `🤝 New Partner Registration — ${opts.name} · ${opts.biz}`;
+  const html = `
+<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:600px;margin:auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;">
+  <div style="background:#07090f;padding:24px 28px;">
+    <div style="color:#00d1b2;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">Directive OS · Referral Partner Program</div>
+    <div style="color:#fff;font-size:20px;font-weight:800;">New Partner Registration</div>
+  </div>
+  <div style="padding:28px 28px;border-bottom:1px solid #f3f4f6;">
+    <table style="width:100%;font-size:14px;border-collapse:collapse;">
+      <tr><td style="padding:8px 0;color:#6b7280;width:120px;font-weight:600;">Name</td><td style="padding:8px 0;font-weight:700;color:#111;">${opts.name}</td></tr>
+      <tr><td style="padding:8px 0;color:#6b7280;font-weight:600;">Email</td><td style="padding:8px 0;color:#111;"><a href="mailto:${opts.email}" style="color:#00d1b2;text-decoration:none;">${opts.email}</a></td></tr>
+      <tr><td style="padding:8px 0;color:#6b7280;font-weight:600;">Phone</td><td style="padding:8px 0;color:#111;"><a href="tel:${opts.phone}" style="color:#00d1b2;text-decoration:none;">${opts.phone}</a></td></tr>
+      <tr><td style="padding:8px 0;color:#6b7280;font-weight:600;">Business / Role</td><td style="padding:8px 0;color:#111;">${opts.biz}</td></tr>
+      ${opts.note ? `<tr><td style="padding:8px 0;color:#6b7280;font-weight:600;vertical-align:top;">Note</td><td style="padding:8px 0;color:#555;font-style:italic;">${opts.note}</td></tr>` : ""}
+    </table>
+  </div>
+  <div style="padding:20px 28px;background:#f9fafb;">
+    <div style="font-size:13px;color:#6b7280;">Reply to this email or call them directly to confirm their partner status. Referral fee: <strong style="color:#111;">$500 per signed client</strong>, paid within 7 days.</div>
+  </div>
+</div>`;
+
+  await sendViaResend(OWNER_EMAILS, subject, html);
+}
+
 // ─── New client payment notification (to Jayson) ──────────────────────────────
 
 interface NewClientNotificationOpts {
