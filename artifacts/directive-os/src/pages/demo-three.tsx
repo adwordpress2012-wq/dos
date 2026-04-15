@@ -129,8 +129,7 @@ function MultilingualSection() {
   );
 }
 
-function ChatWidget() {
-  const [open, setOpen] = useState(false);
+function ChatWidget({ open, setOpen }: { open: boolean; setOpen: (v: boolean) => void }) {
   const [messages, setMessages] = useState<Message[]>([
     { role: "assistant", content: "G'day! I'm Sarah, your agency's AI receptionist. Whether you're buying, selling, or renting — I'm here 24/7. How can I help?" }
   ]);
@@ -233,6 +232,8 @@ function ChatWidget() {
 }
 
 export default function DemoThreePage() {
+  const [chatOpen, setChatOpen] = useState(false);
+
   return (
     <div style={{ minHeight: "100vh", background: DARK_BG, color: WHITE, fontFamily: "'Inter', -apple-system, sans-serif" }}>
 
@@ -243,8 +244,7 @@ export default function DemoThreePage() {
         borderBottom: `3px solid ${TEAL}`, position: "relative", zIndex: 200
       }}>
         <span style={{ background: TEAL, color: DARK_BG, padding: "2px 9px", fontWeight: 800, fontSize: 11, marginRight: 10, borderRadius: 4, letterSpacing: 1 }}>LIVE DEMO</span>
-        This is a live preview — your agency's custom version is built with your branding, your name, and your listings.{" "}
-        <a href="https://directiveos.com.au" target="_blank" rel="noreferrer" style={{ color: TEAL, fontWeight: 700, textDecoration: "none" }}>Directive OS</a>
+        This is a live preview — your agency's custom version is built with your branding, your name, and your listings.
       </div>
 
       {/* NAV */}
@@ -257,10 +257,7 @@ export default function DemoThreePage() {
         <DOSLogo size={36} />
         <div style={{ display: "flex", gap: 28, fontSize: 14 }}>
           {["Buy", "Sell", "Rent", "About Agent"].map(l => (
-            <a key={l} href="https://directiveos.com.au" target="_blank" rel="noreferrer"
-              style={{ color: "#555", textDecoration: "none", fontWeight: 500 }}
-              onMouseOver={e => (e.currentTarget.style.color = TEAL)}
-              onMouseOut={e => (e.currentTarget.style.color = "#555")}>{l}</a>
+            <span key={l} style={{ color: "#555", fontWeight: 500, cursor: "default" }}>{l}</span>
           ))}
         </div>
         <a href={`tel:${PHONE.replace(/\s/g, "")}`} style={{
@@ -303,14 +300,14 @@ export default function DemoThreePage() {
               textDecoration: "none", fontSize: 17, fontWeight: 900,
               boxShadow: `0 4px 28px ${TEAL}55`, letterSpacing: 0.5
             }}>📞 Call Sarah — {PHONE}</a>
-            <button onClick={() => document.getElementById("languages")?.scrollIntoView({ behavior: "smooth" })}
+            <button onClick={() => setChatOpen(true)}
               style={{
-                background: "transparent", border: `2px solid ${TEAL}44`, color: "#ccc",
-                padding: "16px 40px", borderRadius: 8, fontSize: 17, fontWeight: 700, cursor: "pointer", letterSpacing: 0.5
-              }}>See 9 Languages ↓</button>
+                background: "transparent", border: `2px solid ${TEAL}`, color: TEAL,
+                padding: "16px 40px", borderRadius: 8, fontSize: 17, fontWeight: 800, cursor: "pointer", letterSpacing: 0.5
+              }}>💬 Chat with Sarah →</button>
           </div>
           <p style={{ color: "#333", fontSize: 13, marginTop: 20 }}>
-            Call now — Sarah answers live. Try her in Mandarin, Arabic, Vietnamese, or any language.
+            Call or chat now — Sarah answers live, in any language.
           </p>
         </div>
       </section>
@@ -478,8 +475,12 @@ export default function DemoThreePage() {
             <a href={`tel:${PHONE.replace(/\s/g, "")}`} style={{
               background: TEAL, color: DARK_BG, padding: "14px 36px", borderRadius: 8,
               textDecoration: "none", fontSize: 16, fontWeight: 900,
-              display: "inline-block"
+              display: "inline-block", boxShadow: `0 4px 24px ${TEAL}55`
             }}>📞 Call Sarah — {PHONE}</a>
+            <button onClick={() => setChatOpen(true)} style={{
+              background: "transparent", border: `2px solid ${TEAL}`, color: TEAL,
+              padding: "14px 36px", borderRadius: 8, fontSize: 16, fontWeight: 800, cursor: "pointer"
+            }}>💬 Chat with Sarah →</button>
           </div>
           <p style={{ color: "#333", fontSize: 12, marginTop: 20 }}>
             Try after hours — that's when your competitors' phones go to voicemail.
@@ -492,15 +493,13 @@ export default function DemoThreePage() {
         <div style={{ maxWidth: 600, margin: "0 auto" }}>
           <DOSLogo size={30} />
           <p style={{ color: "#2a3a4a", fontSize: 12, marginTop: 16, lineHeight: 1.8 }}>
-            This demo page is powered by{" "}
-            <a href="https://directiveos.com.au" target="_blank" rel="noreferrer" style={{ color: TEAL, textDecoration: "none", fontWeight: 700 }}>Directive OS</a>
-            {" "}— AI Receptionist for Australian Real Estate Agencies.
-            <br />ABN 87 754 544 171 · directiveos.com.au
+            Directive OS — AI Receptionist for Australian Real Estate Agencies.
+            <br />ABN 87 754 544 171
           </p>
         </div>
       </footer>
 
-      <ChatWidget />
+      <ChatWidget open={chatOpen} setOpen={setChatOpen} />
     </div>
   );
 }
