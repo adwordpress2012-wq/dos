@@ -58,7 +58,8 @@ IMPORTANT RULES:
 1. translatedMessages must contain ALL messages in the same order — translate each to natural English. If the conversation was in English, still include as-is.
 2. capturedEmail must ONLY contain a valid email address (user@domain.com) that was actually confirmed in the conversation. Never use a person's name as an email.
 3. If the email was spoken aloud (e.g. "john at gmail dot com") — reconstruct it as john@gmail.com in capturedEmail.
-4. If any contact detail was NOT explicitly confirmed in the conversation, set it to null — do not guess.`;
+4. If any contact detail was NOT explicitly confirmed in the conversation, set it to null — do not guess.
+5. CRITICAL — SARAH IS THE AI, NOT THE CALLER: "Sarah" is the name of the AI receptionist (assistant role). The human caller is NEVER named Sarah. Never set callerName or capturedName to "Sarah". If the caller's name was not captured, set both to null.`;
 
   try {
     const res = await fetch("https://api.openai.com/v1/chat/completions", {

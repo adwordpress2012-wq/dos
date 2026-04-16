@@ -137,8 +137,9 @@ Every call MUST end with three pieces of information captured and CONFIRMED. Mis
 1. FULL NAME — ask in their language, confirm back:
    "Can I get your full name?" → repeat it back → "So that's [Name] — is that correct?"
 
-2. PHONE NUMBER — ask, then read back digit by digit:
-   "And your best contact number?" → "Just to confirm — that's 0-4-1-2, three-four-five, six-seven-eight?" Wait for "yes" before moving on.
+2. PHONE NUMBER — ask, then read back in groups exactly as the caller said it:
+   "And your best contact number?" → repeat it back in natural groups: "Just to confirm — 0411 888 115 — is that right?" Wait for "yes" before moving on.
+   CRITICAL: Australian mobile numbers are ALWAYS 10 digits (starting 04). Landlines are also 10 digits. After capturing the number, silently count the digits. If the total is not 10, say: "Just checking — that number only has [X] digits. Australian numbers are 10 digits — could you read it out again for me?" Do NOT accept a number that is not 10 digits.
 
 3. EMAIL ADDRESS — THIS IS WHERE MOST MISTAKES HAPPEN. FOLLOW THIS EXACTLY:
    - Ask: "And your email address?" (in their language)
@@ -220,7 +221,8 @@ CONTACT CAPTURE PROTOCOL — THE CORE OF YOUR JOB. NON-NEGOTIABLE:
 Every call MUST end with three pieces of information captured and CONFIRMED. In ANY language.
 
 1. FULL NAME — ask in their language, confirm back: "So that's [Name] — is that correct?"
-2. PHONE NUMBER — read back digit by digit: "Just to confirm — that's [digits]?" Wait for yes.
+2. PHONE NUMBER — read back in natural groups exactly as the caller said it: "Just to confirm — 0411 888 115 — is that right?" Wait for yes.
+   CRITICAL: Australian numbers are always 10 digits. After capturing, silently count. If not 10 digits, say: "Just checking — that number only has [X] digits. Could you read it out again?" Do NOT accept fewer than 10 digits.
 3. EMAIL ADDRESS — THE MOST CRITICAL. FOLLOW THIS EXACTLY IN ANY LANGUAGE:
    - Ask for it clearly (in their language): "And your email address?"
    - Listen as they say or spell it — build it character by character
@@ -312,6 +314,7 @@ interface CallSession {
   transcript: Array<{ role: "user" | "assistant"; content: string }>;
   openaiWs: WebSocket;
   twilioWs: WebSocket;
+  hangupScheduled: boolean;
 }
 
 function configureOpenAiSession(session: CallSession): void {
@@ -385,6 +388,7 @@ export function handleMediaStream(twilioWs: WebSocket): void {
       },
     }),
     twilioWs,
+    hangupScheduled: false,
   };
 
   // ── OpenAI Realtime session setup ──────────────────────────────────────────
@@ -428,6 +432,24 @@ export function handleMediaStream(twilioWs: WebSocket): void {
       if (event.type === "response.audio_transcript.done" && event.transcript) {
         session.transcript.push({ role: "assistant", content: event.transcript });
         logger.info({ content: event.transcript.substring(0, 80) }, "Sarah spoke");
+
+        // Auto-hangup: when Sarah delivers the goodbye, close the connection
+        // after 2 seconds so the audio finishes playing before the line drops.
+        // This prevents the caller's "bye back" from re-triggering Sarah endlessly.
+        const lower = (event.transcript as string).toLowerCase();
+        if (
+          !session.hangupScheduled &&
+          (lower.includes("wonderful day") || lower.includes("have a great day"))
+        ) {
+          session.hangupScheduled = true;
+          logger.info({ streamSid: session.streamSid }, "Goodbye phrase detected — hanging up in 2s");
+          setTimeout(() => {
+            try {
+              if (session.openaiWs.readyState === WebSocket.OPEN) session.openaiWs.close();
+              if (twilioWs.readyState === WebSocket.OPEN) twilioWs.close();
+            } catch (e) { /* already closed */ }
+          }, 2000);
+        }
       }
 
       if (
