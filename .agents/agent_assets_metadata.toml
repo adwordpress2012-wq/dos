@@ -77,3 +77,9 @@ id = "U3iyj5vMj1hdC10Btrl-J"
 uri = "file://exports/directive-os-website-widget-plan.pdf"
 type = "pdf"
 title = "Directive OS — Website Widget Add-On Build Plan"
+
+[[outputs]]
+id = "gRUE74oKJ_Ip39kr_dpEu"
+uri = "file://exports/directive-os-outreach-playbook.pdf"
+type = "pdf"
+title = "Directive OS — Outreach Playbook (Email · SMS · WhatsApp)"

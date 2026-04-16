@@ -545,6 +545,17 @@ Contains: 7 Products (expandable with pitch lines), Two Apps comparison, Print &
 
 **NEVER share the web quote calculator link with prospects** — internal use only. Send the Proposal Template PDF instead.
 
+## Outreach Playbook
+
+The canonical cold outreach playbook is `exports/directive-os-outreach-playbook.pdf` — Email, SMS, and WhatsApp 4-touch sequences in a friendly agent-to-agent tone.
+
+- **Schedule**: Day 0 intro → Day 2-3 follow-up → Day 5 soft close → Day 7-10 final
+- **Tone**: Warm, casual, professional. Always sign off with first name. Max 1 emoji.
+- **Channel strategy**: Email first → call same day on open/click → SMS/WhatsApp if no open in 48h
+- **Best times (AEST)**: Tue/Wed/Thu, 9-11am or 2-4pm. Avoid Mon, Fri PM, weekends.
+- **Regenerate PDF**: `node exports/generate_outreach_pdf.js`
+- **Skill**: `.agents/skills/dos-outreach-playbook/SKILL.md`
+
 ## Key Commands
 
 ```bash
