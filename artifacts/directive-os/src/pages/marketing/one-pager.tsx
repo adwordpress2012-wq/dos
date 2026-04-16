@@ -114,6 +114,29 @@ export default function OnePager() {
           </div>
         </div>
 
+        {/* ROI comparison */}
+        <div style={{ padding: "24px 32px", borderBottom: "1px solid #1e293b" }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: "#C9A84C", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 14 }}>What It Replaces — The ROI Case</div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+            {[
+              ["Part-time receptionist", "$40,000–$60,000 / year"],
+              ["Missed leads (1 call/wk)", "$10,000–$15,000 commission each"],
+              ["Agency website + hosting", "$2,000–$5,000 / year"],
+              ["After-hours answering service", "$200–$600 / month"],
+            ].map(([what, cost]) => (
+              <div key={what} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "#0a0f1a", border: "1px solid #1e293b", borderRadius: 6, padding: "8px 12px", gap: 8 }}>
+                <div style={{ fontSize: 10, color: "#94a3b8" }}>{what}</div>
+                <div style={{ fontSize: 10, fontWeight: 700, color: "#C9A84C", flexShrink: 0 }}>{cost}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{ marginTop: 10, padding: "10px 14px", background: "rgba(0,209,178,0.06)", borderRadius: 6, border: "1px solid rgba(0,209,178,0.15)" }}>
+            <div style={{ fontSize: 10, color: "#94a3b8", fontStyle: "italic", lineHeight: 1.6 }}>
+              "A part-time receptionist costs $40k a year. Sarah costs less than $3,600 — and works every Sunday night, every public holiday, and never calls in sick."
+            </div>
+          </div>
+        </div>
+
         {/* Footer CTA */}
         <div style={{ padding: "24px 32px", background: "rgba(0,209,178,0.05)", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
           <div>

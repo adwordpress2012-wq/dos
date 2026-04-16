@@ -5,7 +5,7 @@ import {
   Phone, MessageSquare, Building2, FileText, Zap, BarChart3, Smartphone,
   Download, CreditCard, Mail, PenLine, ClipboardList, Globe, BookOpen,
   ChevronDown, ChevronUp, ExternalLink, Star, Users, Layers, CheckCircle2,
-  Shield, ArrowRight, Gift, DollarSign, UserPlus, Banknote
+  Shield, ArrowRight, Gift, DollarSign, UserPlus, Banknote, TrendingUp
 } from "lucide-react";
 
 const TEAL = "#00d1b2";
@@ -197,6 +197,7 @@ const APPS = [
 const MATERIALS = [
   { href: "/marketing/brochure", icon: <BookOpen size={20} />, title: "Trifold Brochure", desc: "A4 trifold · door-knocking tool · print-ready" },
   { href: "/marketing/one-pager", icon: <FileText size={20} />, title: "Sales One-Pager", desc: "A4 pitch sheet · print or email to prospects" },
+  { href: "/marketing/leave-behind", icon: <TrendingUp size={20} />, title: "ROI Leave-Behind", desc: "Face-to-face sales tool · \"What's the $1,800 for?\" answered" },
   { href: "/marketing/business-card", icon: <CreditCard size={20} />, title: "Business Card", desc: "Print-ready front & back · 3.5\" × 2\"" },
   { href: "/marketing/proposal", icon: <ClipboardList size={20} />, title: "Proposal Template", desc: "Editable client proposal · 3 plan options" },
   { href: "/marketing/email-campaign", icon: <Mail size={20} />, title: "Email Campaign", desc: "3-part cold outreach sequence · copy & paste ready" },
