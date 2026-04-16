@@ -1,9 +1,173 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 
 const GOLD = "#F2B838";
 const BLACK = "#111111";
 const PHONE = "0410 567 777";
 const API_BASE = "/api";
+const AGENCY_ID = 1;
+
+interface Listing {
+  id: number;
+  address: string;
+  suburb: string;
+  state: string;
+  postcode: string;
+  price: string;
+  listingType: string;
+  bedrooms: number;
+  bathrooms: number;
+  carSpaces?: number | null;
+  agentName?: string | null;
+  inspectionTimes?: string[] | null;
+  photoUrl?: string | null;
+  status: string;
+  auctionDate?: string | null;
+  auctionTime?: string | null;
+}
+
+function PropertyListings() {
+  const [listings, setListings] = useState<Listing[]>([]);
+  const [filter, setFilter] = useState<"all" | "sale" | "rental">("all");
+  const [loading, setLoading] = useState(true);
+
+  const fetchListings = useCallback(async () => {
+    try {
+      const res = await fetch(`${API_BASE}/public/listings?agencyId=${AGENCY_ID}`);
+      if (res.ok) {
+        const data = await res.json();
+        setListings(Array.isArray(data) ? data : []);
+      }
+    } catch {
+      setListings([]);
+    }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { void fetchListings(); }, [fetchListings]);
+
+  const visible = listings.filter(l => {
+    if (filter === "sale") return l.listingType === "sale";
+    if (filter === "rental") return l.listingType === "rental";
+    return true;
+  });
+
+  const tabStyle = (active: boolean): React.CSSProperties => ({
+    padding: "8px 22px", fontSize: 13, fontWeight: 700, cursor: "pointer",
+    border: active ? "none" : `1px solid ${GOLD}`,
+    borderRadius: 0, transition: "all 0.2s",
+    background: active ? BLACK : "transparent",
+    color: active ? GOLD : BLACK,
+    letterSpacing: 0.5,
+  });
+
+  return (
+    <section style={{ padding: "80px 32px", background: "#fff", borderTop: "1px solid #e8e8e8" }}>
+      <div style={{ maxWidth: 1120, margin: "0 auto" }}>
+        <div style={{ textAlign: "center", marginBottom: 40 }}>
+          <div style={{ display: "inline-block", border: `2px solid ${GOLD}`, padding: "4px 20px", fontSize: 12, fontWeight: 800, letterSpacing: 2, textTransform: "uppercase", color: BLACK, marginBottom: 16 }}>
+            Current Listings
+          </div>
+          <h2 style={{ fontSize: 32, fontWeight: 900, color: BLACK, marginBottom: 8 }}>Properties Available Now</h2>
+          <div style={{ width: 60, height: 3, background: GOLD, margin: "0 auto 24px" }} />
+          <p style={{ color: "#666", fontSize: 15, marginBottom: 28 }}>Browse our latest sales and rentals across Seven Hills and Western Sydney</p>
+          <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap" }}>
+            {(["all", "sale", "rental"] as const).map(f => (
+              <button key={f} style={tabStyle(filter === f)} onClick={() => setFilter(f)}>
+                {f === "all" ? "All Listings" : f === "sale" ? "For Sale" : "For Rent"}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {loading ? (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 24 }}>
+            {[1, 2, 3].map(i => (
+              <div key={i} style={{ background: "#f5f5f5", overflow: "hidden", border: "1px solid #e8e8e8" }}>
+                <div style={{ height: 200, background: "#e8e8e8", animation: "pulse 1.5s infinite" }} />
+                <div style={{ padding: 20 }}>
+                  <div style={{ height: 16, background: "#e8e8e8", borderRadius: 2, marginBottom: 10, width: "70%", animation: "pulse 1.5s infinite" }} />
+                  <div style={{ height: 12, background: "#f0f0f0", borderRadius: 2, width: "50%", animation: "pulse 1.5s infinite" }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : visible.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "60px 24px", color: "#aaa" }}>
+            <div style={{ fontSize: 48, marginBottom: 16 }}>🏡</div>
+            <p style={{ fontSize: 16, color: "#666" }}>No listings currently available. Check back soon or call us on <a href={`tel:${PHONE.replace(/\s/g,"")}`} style={{ color: BLACK, fontWeight: 700 }}>{PHONE}</a></p>
+          </div>
+        ) : (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 24 }}>
+            {visible.map(l => (
+              <div key={l.id} style={{
+                background: "#fff", border: "1px solid #e8e8e8",
+                overflow: "hidden", transition: "box-shadow 0.2s, transform 0.2s",
+                boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
+              }}
+                onMouseOver={e => { (e.currentTarget as HTMLElement).style.boxShadow = `0 4px 24px rgba(0,0,0,0.12)`; (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)"; }}
+                onMouseOut={e => { (e.currentTarget as HTMLElement).style.boxShadow = "0 1px 4px rgba(0,0,0,0.06)"; (e.currentTarget as HTMLElement).style.transform = "none"; }}>
+                <div style={{ position: "relative", height: 210, overflow: "hidden", background: "#f5f5f5" }}>
+                  {l.photoUrl ? (
+                    <img src={l.photoUrl} alt={l.address} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  ) : (
+                    <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 48 }}>🏠</div>
+                  )}
+                  <div style={{
+                    position: "absolute", top: 12, left: 12,
+                    background: l.listingType === "rental" ? BLACK : GOLD,
+                    color: l.listingType === "rental" ? GOLD : BLACK,
+                    fontSize: 11, fontWeight: 800, padding: "4px 12px",
+                    letterSpacing: 0.5, textTransform: "uppercase"
+                  }}>
+                    {l.listingType === "rental" ? "For Rent" : "For Sale"}
+                  </div>
+                  {l.auctionDate && (
+                    <div style={{ position: "absolute", top: 12, right: 12, background: "#e53e3e", color: "#fff", fontSize: 10, fontWeight: 800, padding: "3px 10px", textTransform: "uppercase" }}>
+                      Auction {l.auctionDate}
+                    </div>
+                  )}
+                </div>
+                <div style={{ padding: "18px 20px 20px" }}>
+                  <div style={{ fontSize: 24, fontWeight: 900, color: BLACK, marginBottom: 4 }}>{l.price}</div>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: BLACK, marginBottom: 2 }}>{l.address}</div>
+                  <div style={{ fontSize: 13, color: "#888", marginBottom: 14 }}>{l.suburb} {l.state} {l.postcode}</div>
+                  <div style={{ display: "flex", gap: 16, marginBottom: 14, fontSize: 13, color: "#555", borderTop: `2px solid ${GOLD}`, paddingTop: 12 }}>
+                    <span>🛏 {l.bedrooms} bed</span>
+                    <span>🚿 {l.bathrooms} bath</span>
+                    {l.carSpaces ? <span>🚗 {l.carSpaces} car</span> : null}
+                  </div>
+                  {l.inspectionTimes && l.inspectionTimes.length > 0 && (
+                    <div style={{ marginBottom: 14 }}>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: "#aaa", textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 }}>Inspections</div>
+                      {l.inspectionTimes.slice(0, 2).map((t, i) => (
+                        <div key={i} style={{ fontSize: 12, color: "#555", padding: "4px 10px", background: `${GOLD}15`, borderLeft: `2px solid ${GOLD}`, marginBottom: 4 }}>📅 {t}</div>
+                      ))}
+                    </div>
+                  )}
+                  {l.agentName && (
+                    <div style={{ fontSize: 12, color: "#aaa", marginBottom: 14 }}>
+                      Agent: <span style={{ color: "#666", fontWeight: 600 }}>{l.agentName}</span>
+                    </div>
+                  )}
+                  <button
+                    onClick={() => document.querySelector<HTMLElement>("[data-chat-trigger]")?.click()}
+                    style={{
+                      width: "100%", background: BLACK, color: GOLD,
+                      border: "none", padding: "11px 0", fontSize: 14,
+                      fontWeight: 800, cursor: "pointer", letterSpacing: 0.5
+                    }}>
+                    Enquire with Sarah →
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }`}</style>
+    </section>
+  );
+}
 
 interface Message { role: "user" | "assistant"; content: string; }
 
@@ -114,7 +278,7 @@ function ChatWidget() {
           </div>
         </div>
       )}
-      <button onClick={() => setOpen(p => !p)} style={{
+      <button data-chat-trigger onClick={() => setOpen(p => !p)} style={{
         position: "fixed", bottom: 24, right: 24, width: 60, height: 60,
         background: GOLD, border: "none", cursor: "pointer",
         boxShadow: "0 4px 20px rgba(242,184,56,0.5)",
@@ -394,6 +558,9 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* LISTINGS */}
+      <PropertyListings />
 
       {/* CTA */}
       <section style={{ padding: "88px 32px", textAlign: "center", background: GOLD }}>

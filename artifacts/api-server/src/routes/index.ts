@@ -14,6 +14,7 @@ import adminRouter from "./admin";
 import mobileRouter from "./mobile";
 import partnersRouter from "./partners";
 import clientAuthRouter from "./clientAuth";
+import publicListingsRouter from "./publicListings";
 
 const DEMO_ORG_ID = "org_demo_001";
 
@@ -41,5 +42,6 @@ router.use(adminRouter);
 router.use(mobileRouter);
 router.use(partnersRouter);
 router.use(clientAuthRouter);
+router.use(publicListingsRouter);
 
 export default router;
