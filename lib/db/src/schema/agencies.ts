@@ -20,6 +20,7 @@ export const agenciesTable = pgTable("agencies", {
   aiMinutesIncluded: integer("ai_minutes_included").notNull().default(100),
   mobileToken: text("mobile_token").unique(),
   passwordHash: text("password_hash"),
+  pastDueSince: timestamp("past_due_since", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });

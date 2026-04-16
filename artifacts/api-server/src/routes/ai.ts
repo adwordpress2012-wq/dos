@@ -223,8 +223,21 @@ router.post("/ai/chat", async (req, res): Promise<void> => {
   // Priority: agencyNameOverride (demo pages) > DB lookup by agencyId > null (platform Sarah)
   let agencyName: string | null = agencyNameOverride;
   if (!agencyName && agencyId) {
-    const [ag] = await db.select({ name: agenciesTable.name }).from(agenciesTable).where(eq(agenciesTable.id, agencyId));
-    if (ag) agencyName = ag.name;
+    const [ag] = await db.select({
+      name: agenciesTable.name,
+      subscriptionStatus: agenciesTable.subscriptionStatus,
+      pastDueSince: agenciesTable.pastDueSince,
+    }).from(agenciesTable).where(eq(agenciesTable.id, agencyId));
+    if (ag) {
+      agencyName = ag.name;
+      // Suspension check — block chat if service is suspended
+      const daysPastDue = ag.pastDueSince ? (Date.now() - new Date(ag.pastDueSince).getTime()) / 86_400_000 : 0;
+      const isSuspended = ag.subscriptionStatus === "cancelled" || (ag.subscriptionStatus === "past_due" && daysPastDue >= 5);
+      if (isSuspended) {
+        res.json({ reply: "I'm sorry, this chat service is temporarily unavailable. Please contact the agency directly by phone or email. We apologise for the inconvenience." });
+        return;
+      }
+    }
   }
 
   // Build AI response using OpenAI GPT-4o-mini

@@ -281,7 +281,29 @@ router.post(["/voice/incoming", "/voice/inbound"], async (req: Request, res: Res
         const matched = agencies.find(
           (a) => a.contactPhone && phonesMatch(a.contactPhone, toNumber)
         );
-        if (matched) agencyId = matched.id;
+        if (matched) {
+          agencyId = matched.id;
+
+          // ── Suspension check — block call if service is suspended ──────────
+          const status = matched.subscriptionStatus;
+          const pastDueSince = matched.pastDueSince ? new Date(matched.pastDueSince) : null;
+          const daysPastDue = pastDueSince ? (Date.now() - pastDueSince.getTime()) / 86_400_000 : 0;
+          const isSuspended = status === "cancelled" || (status === "past_due" && daysPastDue >= 5);
+
+          if (isSuspended) {
+            logger.warn({ agencyId, status, daysPastDue }, "Service suspended — blocking incoming call");
+            const suspendedTwiml = `<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Say voice="Polly.Nicole" language="en-AU">
+    Thank you for calling. We're sorry, but this phone service is temporarily unavailable.
+    Please contact the agency directly by email or visit their website.
+    We apologise for any inconvenience.
+  </Say>
+</Response>`;
+            res.type("text/xml").send(suspendedTwiml);
+            return;
+          }
+        }
       } catch (err) {
         logger.warn({ err }, "Agency phone lookup failed — defaulting to Directive OS persona");
       }

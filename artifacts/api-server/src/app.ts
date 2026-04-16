@@ -4,7 +4,7 @@ import pinoHttp from "pino-http";
 import Stripe from "stripe";
 import router from "./routes";
 import { logger } from "./lib/logger";
-import { sendNewClientNotification, sendClientWelcomeEmail, sendPaymentFailedAlert, sendSubscriptionCanceledAlert } from "./lib/email";
+import { sendNewClientNotification, sendClientWelcomeEmail, sendPaymentFailedAlert, sendSubscriptionCanceledAlert, sendClientPaymentWarning } from "./lib/email";
 import { db, agenciesTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 
@@ -101,12 +101,22 @@ app.post("/api/billing/webhook", express.raw({ type: "application/json" }), asyn
           .where(eq(agenciesTable.stripeCustomerId, customerId));
 
         if (agency) {
-          // Mark as past_due in our DB
+          const attemptCount = invoice.attempt_count ?? 1;
+          const now = new Date();
+
+          // Set pastDueSince on first failure only (don't reset on subsequent retries)
+          const pastDueSince = agency.pastDueSince ? new Date(agency.pastDueSince) : now;
+          const suspensionDeadline = new Date(pastDueSince.getTime() + 5 * 86_400_000);
+          const suspensionDateStr = suspensionDeadline.toLocaleDateString("en-AU", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+
           await db.update(agenciesTable)
-            .set({ subscriptionStatus: "past_due" })
+            .set({
+              subscriptionStatus: "past_due",
+              pastDueSince: agency.pastDueSince ?? now,
+            })
             .where(eq(agenciesTable.id, agency.id));
 
-          const attemptCount = invoice.attempt_count ?? 1;
+          // Alert Jayson
           const nextRetry = invoice.next_payment_attempt
             ? new Date(invoice.next_payment_attempt * 1000).toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" })
             : undefined;
@@ -119,7 +129,19 @@ app.post("/api/billing/webhook", express.raw({ type: "application/json" }), asyn
             nextRetryDate: nextRetry,
           });
 
-          logger.info({ agencyName: agency.name, attemptCount }, "Payment failed — marked past_due");
+          // Warn the client — only on first failure (attempt 1)
+          if (attemptCount === 1 && agency.contactEmail) {
+            const contactName = agency.name; // fallback — use agency name as salutation
+            void sendClientPaymentWarning({
+              agencyName: agency.name,
+              contactEmail: agency.contactEmail,
+              contactName,
+              amountCents: invoice.amount_due ?? 0,
+              suspensionDate: suspensionDateStr,
+            });
+          }
+
+          logger.info({ agencyName: agency.name, attemptCount, suspensionDateStr }, "Payment failed — marked past_due, client warned");
         }
       } catch (err) {
         logger.warn({ err }, "Failed to handle invoice.payment_failed");
@@ -175,8 +197,10 @@ app.post("/api/billing/webhook", express.raw({ type: "application/json" }), asyn
             : agency.subscriptionStatus; // leave unchanged for other statuses
 
           if (ourStatus !== agency.subscriptionStatus) {
+            // Clear pastDueSince when recovering to active so the 5-day clock resets
+            const clearPastDue = ourStatus === "active";
             await db.update(agenciesTable)
-              .set({ subscriptionStatus: ourStatus })
+              .set({ subscriptionStatus: ourStatus, ...(clearPastDue ? { pastDueSince: null } : {}) })
               .where(eq(agenciesTable.id, agency.id));
             logger.info({ agencyName: agency.name, from: agency.subscriptionStatus, to: ourStatus }, "Subscription status synced from Stripe");
           }

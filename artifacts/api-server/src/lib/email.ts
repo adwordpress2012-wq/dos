@@ -1012,6 +1012,86 @@ export async function sendClientWelcomeEmail(opts: ClientWelcomeEmailOpts): Prom
   }
 }
 
+// ─── Client Payment Warning Email ────────────────────────────────────────────
+
+export async function sendClientPaymentWarning(opts: {
+  agencyName: string;
+  contactEmail: string;
+  contactName: string;
+  amountCents: number;
+  suspensionDate: string;
+}): Promise<void> {
+  const apiKey = process.env.DOS_RESEND_KEY || process.env.RESEND_API_KEY;
+  if (!apiKey) return;
+
+  const amount = new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD" }).format(opts.amountCents / 100);
+
+  const html = `<!DOCTYPE html><html><body style="margin:0;background:#f1f5f9;font-family:Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:32px 16px;">
+<table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;">
+
+  <tr><td style="background:#0a0e1a;padding:28px 40px;text-align:center;">
+    <div style="color:#00d1b2;font-size:13px;font-weight:700;letter-spacing:2px;margin-bottom:8px;">DIRECTIVE OS</div>
+    <div style="font-size:20px;font-weight:800;color:#ffffff;">Action Required — Payment Unsuccessful</div>
+  </td></tr>
+
+  <tr><td style="padding:32px 40px;">
+    <p style="margin:0 0 16px;color:#1e293b;font-size:15px;">Hi ${opts.contactName},</p>
+    <p style="margin:0 0 24px;color:#475569;font-size:14px;line-height:1.6;">
+      We weren't able to process your monthly subscription payment of <strong>${amount}</strong> for <strong>${opts.agencyName}</strong>.
+      This may be due to an expired card, insufficient funds, or a bank block on the transaction.
+    </p>
+
+    <div style="background:#fef9c3;border:1px solid #fde047;border-radius:10px;padding:20px;margin-bottom:24px;">
+      <p style="margin:0 0 8px;color:#854d0e;font-size:14px;font-weight:700;">⚠️ Important — Service Suspension Notice</p>
+      <p style="margin:0;color:#92400e;font-size:14px;line-height:1.6;">
+        If payment is not received by <strong>${opts.suspensionDate}</strong>, Sarah's phone and chat services for your agency will be temporarily paused until the account is brought up to date.
+      </p>
+    </div>
+
+    <p style="margin:0 0 8px;color:#1e293b;font-size:14px;font-weight:700;">To resolve this quickly:</p>
+    <ol style="margin:0 0 24px;padding-left:20px;color:#475569;font-size:14px;line-height:1.8;">
+      <li>Contact your bank to remove any block on the transaction</li>
+      <li>Update your card details if they've expired</li>
+      <li>Reply to this email or call Jayson directly — we'll sort it out right away</li>
+    </ol>
+
+    <div style="text-align:center;margin-bottom:24px;">
+      <a href="mailto:jayson@directiveos.com.au" style="display:inline-block;padding:14px 32px;background:#00d1b2;color:#0a0e1a;text-decoration:none;font-weight:700;font-size:14px;border-radius:8px;">Contact Jayson Now</a>
+    </div>
+
+    <p style="margin:0;color:#94a3b8;font-size:13px;line-height:1.6;text-align:center;">
+      Once payment is processed, your service will resume automatically within minutes. We value your partnership and want to keep Sarah working for you 24/7.
+    </p>
+  </td></tr>
+
+  <tr><td style="padding:20px 40px;background:#f1f5f9;text-align:center;border-top:1px solid #e2e8f0;">
+    <p style="margin:0 0 4px;color:#64748b;font-size:12px;">Directive OS — AI Receptionist Platform</p>
+    <p style="margin:0;color:#94a3b8;font-size:11px;">directiveos.com.au · jayson@directiveos.com.au · ABN 87 754 544 171</p>
+  </td></tr>
+
+</table></td></tr></table>
+</body></html>`;
+
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        from: "Jayson at Directive OS <jayson@directiveos.com.au>",
+        to: [opts.contactEmail],
+        bcc: OWNER_EMAILS,
+        subject: `Action Required — Your Directive OS payment was unsuccessful`,
+        html,
+      }),
+    });
+    if (!res.ok) logger.warn({ status: res.status }, "Failed to send client payment warning");
+    else logger.info({ contactEmail: opts.contactEmail }, "Client payment warning sent");
+  } catch (err) {
+    logger.warn({ err }, "Error sending client payment warning");
+  }
+}
+
 // ─── Payment Failed Alert ─────────────────────────────────────────────────────
 
 export async function sendPaymentFailedAlert(opts: {
