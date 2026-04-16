@@ -26,7 +26,7 @@ export async function generateEnglishSummary(
   channel: "voice" | "chat",
   durationSeconds?: number
 ): Promise<ConversationSummary | null> {
-  const apiKey = process.env.OPENAI_API_KEY;
+  const apiKey = process.env.DOS_API_KEY || process.env.OPENAI_API_KEY;
   if (!apiKey || messages.length === 0) return null;
 
   const transcriptText = messages

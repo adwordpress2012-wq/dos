@@ -312,9 +312,9 @@ function configureOpenAiSession(session: CallSession): void {
       session: {
         turn_detection: {
           type: "server_vad",
-          silence_duration_ms: 600,
-          threshold: 0.5,
-          prefix_padding_ms: 200,
+          silence_duration_ms: 800,
+          threshold: 0.4,
+          prefix_padding_ms: 300,
         },
         input_audio_format: "g711_ulaw",
         output_audio_format: "g711_ulaw",
@@ -404,6 +404,15 @@ export function handleMediaStream(twilioWs: WebSocket): void {
           media: { payload: event.delta },
         });
         if (twilioWs.readyState === WebSocket.OPEN) twilioWs.send(twilioMsg);
+      }
+
+      // When caller starts speaking, clear Twilio's audio buffer so Sarah stops
+      // mid-word immediately instead of continuing to play buffered audio.
+      // This is the primary fix for choppy/overlapping audio.
+      if (event.type === "input_audio_buffer.speech_started" && session.streamSid) {
+        if (twilioWs.readyState === WebSocket.OPEN) {
+          twilioWs.send(JSON.stringify({ event: "clear", streamSid: session.streamSid }));
+        }
       }
 
       if (event.type === "response.audio_transcript.done" && event.transcript) {
