@@ -12,13 +12,10 @@ version = "1.0.0"
 [[services]]
 name = "web"
 paths = [ "/" ]
-localPort = 25037
+localPort = 25038
 
 [services.development]
 run = "pnpm --filter @workspace/directive-os run dev"
-
-[services.development.health.startup]
-path = "/"
 
 [services.production]
 build = [ "pnpm", "--filter", "@workspace/directive-os", "run", "build" ]
@@ -30,5 +27,5 @@ from = "/*"
 to = "/index.html"
 
 [services.env]
-PORT = "25037"
+PORT = "25038"
 BASE_PATH = "/"
