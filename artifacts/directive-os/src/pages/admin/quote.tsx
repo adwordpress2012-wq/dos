@@ -40,6 +40,12 @@ export default function AdminQuote() {
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState("");
 
+  const PRESETS = [
+    { label: "Core Only", desc: "No add-ons", addons: [] },
+    { label: "Core + Widget", desc: "+$50/mo website widget", addons: ["widget"] },
+    { label: "Full Suite", desc: "+$149/mo both add-ons", addons: ["widget", "crm"] },
+  ];
+
   const selected = TIERS.find(t => t.id === tier)!;
   const additionalSeats = Math.max(0, seats - 1);
   const addonMonthly = ADDONS.filter(a => addons.includes(a.id)).reduce((s, a) => s + a.monthly, 0);
@@ -110,6 +116,30 @@ export default function AdminQuote() {
         </div>
 
         <div className="grid gap-6">
+          {/* Quick presets */}
+          <div style={card}>
+            <div className="text-xs font-mono font-bold tracking-wider mb-4" style={{ color: "rgba(0,209,178,0.6)" }}>QUICK PRESETS</div>
+            <div className="grid grid-cols-3 gap-3">
+              {PRESETS.map(p => {
+                const active = JSON.stringify([...addons].sort()) === JSON.stringify([...p.addons].sort());
+                return (
+                  <button
+                    key={p.label}
+                    onClick={() => setAddons(p.addons)}
+                    className="rounded-lg p-3 text-left transition-all"
+                    style={{
+                      background: active ? "rgba(0,209,178,0.12)" : "rgba(255,255,255,0.02)",
+                      border: `1px solid ${active ? "rgba(0,209,178,0.4)" : "rgba(0,209,178,0.08)"}`,
+                    }}
+                  >
+                    <div className="text-sm font-bold text-white mb-1">{p.label}</div>
+                    <div className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>{p.desc}</div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           {/* Tier selector */}
           <div style={card}>
             <div className="text-xs font-mono font-bold tracking-wider mb-4" style={{ color: "rgba(0,209,178,0.6)" }}>SELECT TIER</div>
