@@ -29,10 +29,19 @@ The platform includes a **master portal site** (Directive OS) and **industry-spe
 ## Admin Command Centre (Captain's Bridge)
 
 - **Route**: `/admin` on the master site — Jayson-only access
-- **Access code**: `directive-captain-2024` (change via `ADMIN_SECRET` env var)
-- **Modules**: Bridge Overview, Fleet Manifest (clients + CSV), Financial Ops (P&L + expenses + CSV), Strategic Command (CRM pipeline), Intel Feed (AI activity all agencies)
+- **Auth**: `localStorage` keys `adminAuth` + `adminSecret`. Username: `captainjaze`, password via `ADMIN_PASSWORD` env var. Header: `x-admin-secret`
+- **Modules**:
+  - Bridge Overview — live status of all clients
+  - Fleet Manifest — client list + CSV export
+  - **Mission Target** (`/admin/goals`) — live $200k revenue goal tracker with MRR, closes chart, milestones
+  - Quote Builder — client proposal generator
+  - Listings Ops — property listings
+  - Financial Ops — P&L + expenses + CSV
+  - Strategic Command — CRM pipeline
+  - Intel Feed — AI activity log across all agencies
 - **API**: All endpoints at `/api/admin/*` protected by `x-admin-secret` header
 - **DB tables added**: `admin_expenses`, `admin_pipeline`
+- **Goal constants**: `GOAL_CENTS` = $200k | `MRR_TARGET_CENTS` = $15,847 | `CLIENT_TARGET` = 53
 
 ## Demo Dashboard (Meridian)
 
@@ -463,16 +472,67 @@ Each paying client gets a standalone branded landing page hosted at `directiveos
 - Agency lookup by Twilio number for voice calls (currently hardcoded `agencyId: 1`)
 - Requires Clerk auth to be live first
 
+## Billing & Subscription System
+
+### Stripe Webhook Events Handled (`artifacts/api-server/src/app.ts`)
+
+| Event | Action |
+|---|---|
+| `checkout.session.completed` | New landing page signup → create agency record, send welcome emails |
+| `invoice.payment_failed` | Mark `past_due`, set `pastDueSince`, alert Jayson, warn client (attempt 1 only) |
+| `customer.subscription.updated` | Sync status from Stripe; if `active` → clear `pastDueSince` |
+| `customer.subscription.deleted` | Mark `cancelled`, alert Jayson |
+
+### Service Suspension (5-Day Grace Period)
+
+- **DB field**: `pastDueSince` (timestamp, nullable) on agencies table
+- **Trigger**: Set when `invoice.payment_failed` fires (first attempt only — not reset on retries)
+- **Suspension condition**: `status === "cancelled"` OR (`status === "past_due"` AND `pastDueSince` is 5+ days ago)
+- **Check location**: Runtime — evaluated on every incoming voice call and chat message
+- **Voice block**: Returns TwiML `<Say>` instead of `<Connect>` (Polly.Nicole AU voice)
+- **Chat block**: Returns static message from `ai.ts` before hitting OpenAI
+- **Auto-recovery**: Payment succeeds → `customer.subscription.updated` → `pastDueSince` cleared, status `active`, service resumes immediately
+- **Demo number bypass**: 0259506382 (agencyId 7) always passes — demo never suspended
+
+### Email Functions (`artifacts/api-server/src/lib/email.ts`)
+
+| Function | Recipient | Trigger |
+|---|---|---|
+| `sendPaymentFailedAlert()` | Jayson (OWNER_EMAILS) | Every failed attempt |
+| `sendClientPaymentWarning()` | Client contactEmail | First failed attempt only |
+| `sendSubscriptionCanceledAlert()` | Jayson (OWNER_EMAILS) | Stripe cancels subscription |
+
+---
+
+## Transcript Translation System
+
+All voice and chat transcripts are processed by `generateEnglishSummary()` in `email.ts` after every call/conversation.
+
+- **Model**: `gpt-4o` (upgraded from mini — 16 April 2026)
+- **Temperature**: 0.1 (precision extraction)
+- **max_tokens**: 3000
+- Translates all messages to clean English in `translatedMessages[]`
+- Extracts: `capturedName`, `capturedPhone`, `capturedEmail`, `intent`, `outcome`, `nextAction`
+- Handles multilingual phone digit words (Filipino, Mandarin, Arabic, Vietnamese, Korean, Hindi, Russian, Spanish)
+- Handles Filipino email notation: tuldok=dot, sa=@, gitling=hyphen, salungguhit=underscore
+- Key rule: Sarah's digit readback = confirmed phone number; character readback = confirmed email
+
+---
+
 ## System Skills & Documentation
 
 All official Directive OS business knowledge is saved as agent skills in `.agents/skills/`:
 
-| Skill | File | Contents |
-|---|---|---|
-| `directive-os-system` | `.agents/skills/directive-os-system/SKILL.md` | Master system skill — workspace architecture, tech stack, pricing, products, client workflow, environment variables, known gaps |
-| `directive-os-system` | `.agents/skills/directive-os-system/products-pricing.md` | Full product catalog (7 products) with pitch lines, pricing breakdown, and the two-app comparison |
-| `directive-os-system` | `.agents/skills/directive-os-system/business-system-plan.md` | Business plan — revenue model, sales system, growth targets, competitive position, automation roadmap, legal |
-| `dos-onboarding` | `.agents/skills/dos-onboarding/SKILL.md` | Client onboarding workflow, lead email system, dashboard access, payment flow |
+| Skill | Contents |
+|---|---|
+| `directive-os-system` | Master system skill — architecture, tech stack, pricing, products, env vars |
+| `dos-onboarding` | Client onboarding workflow, payment flow, dashboard access |
+| `command-bridge-mobile` | Complete mobile app architecture — all 4 tabs, API hooks, auth flow |
+| `dos-session-2025-04-15` | AI contact capture overhaul, spoken email parsing, voice persona double-word ban, multilingual email translation |
+| `dos-session-2025-04-15-2` | Multilingual inspection booking compliance, full transcript translation pipeline |
+| `dos-session-2025-04-16` | Goal tracker, Tagalog approval, GPT-4o transcript upgrade, billing webhook system, 5-day suspension system |
+| `eastwood-rhodes-prospects` | 20 real estate agencies in Eastwood/Epping/Rhodes/Concord West for outreach |
+| `weekly-prospect-list` | Automated Monday 8am email with 10 agencies per rotating Sydney suburb |
 
 **Always read the `directive-os-system` skill before making changes to any artifact in this workspace.**
 
