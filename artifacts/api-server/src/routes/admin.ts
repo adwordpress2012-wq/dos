@@ -230,6 +230,22 @@ router.delete("/admin/expenses/:id", adminAuth, async (req: Request, res: Respon
   res.json({ ok: true });
 });
 
+// ─── Demo Swap ───────────────────────────────────────────────────────────────
+const DEMO_AGENCY_ID = 7;
+
+router.get("/admin/demo-swap", adminAuth, async (_req: Request, res: Response): Promise<void> => {
+  const [agency] = await db.select({ id: agenciesTable.id, name: agenciesTable.name, contactPhone: agenciesTable.contactPhone, address: agenciesTable.address })
+    .from(agenciesTable).where(eq(agenciesTable.id, DEMO_AGENCY_ID));
+  res.json(agency ?? { id: DEMO_AGENCY_ID, name: "Demo Agency", contactPhone: "0259506382", address: "" });
+});
+
+router.patch("/admin/demo-swap", adminAuth, async (req: Request, res: Response): Promise<void> => {
+  const { name, address } = req.body as { name?: string; address?: string };
+  if (!name?.trim()) { res.status(400).json({ error: "name required" }); return; }
+  await db.update(agenciesTable).set({ name: name.trim(), address: address?.trim() ?? null, updatedAt: new Date() }).where(eq(agenciesTable.id, DEMO_AGENCY_ID));
+  res.json({ ok: true, name: name.trim() });
+});
+
 router.get("/admin/pipeline", adminAuth, async (_req: Request, res: Response): Promise<void> => {
   const pipeline = await db.select().from(adminPipelineTable).orderBy(desc(adminPipelineTable.updatedAt));
   res.json(pipeline);

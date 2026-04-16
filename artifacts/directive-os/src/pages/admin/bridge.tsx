@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import {
   TrendingUp, Users, DollarSign, Activity, Zap, Phone, MessageSquare,
-  Clock, AlertTriangle, ChevronRight, ArrowUpRight,
+  Clock, AlertTriangle, ChevronRight, ArrowUpRight, RefreshCw, Check,
 } from "lucide-react";
 
 const API = import.meta.env.VITE_API_BASE_URL ?? "/api";
@@ -85,6 +85,81 @@ function ActivityFeed({ items }: { items: Array<{ id: number; leadName: string |
           </div>
         </div>
       ))}
+    </div>
+  );
+}
+
+function DemoSwapCard() {
+  const [name, setName] = useState("");
+  const [address, setAddress] = useState("");
+  const [current, setCurrent] = useState("Demo Agency");
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  const load = useCallback(async () => {
+    try {
+      const r = await fetch(`${API}/admin/demo-swap`, { headers: { "x-admin-secret": secret() } });
+      const d = await r.json();
+      setCurrent(d.name);
+      setName(d.name);
+      setAddress(d.address ?? "");
+    } catch { /* ignore */ }
+  }, []);
+
+  useEffect(() => { void load(); }, [load]);
+
+  async function save() {
+    if (!name.trim()) return;
+    setSaving(true);
+    try {
+      await fetch(`${API}/admin/demo-swap`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", "x-admin-secret": secret() },
+        body: JSON.stringify({ name: name.trim(), address: address.trim() }),
+      });
+      setCurrent(name.trim());
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="rounded-xl p-5" style={{ background: "rgba(5,14,26,0.9)", border: "1px solid rgba(99,102,241,0.25)" }}>
+      <div className="flex items-center gap-2 mb-1">
+        <Phone className="w-3.5 h-3.5" style={{ color: "#6366f1" }} />
+        <div className="text-xs font-mono font-bold tracking-wider" style={{ color: "#6366f1" }}>DEMO SWAP</div>
+      </div>
+      <div className="text-[10px] mb-3 font-mono" style={{ color: "rgba(255,255,255,0.35)" }}>
+        02 5950 6382 · currently: <span style={{ color: "#a5b4fc", fontWeight: 700 }}>{current}</span>
+      </div>
+      <div className="space-y-2">
+        <input
+          value={name}
+          onChange={e => setName(e.target.value)}
+          placeholder="Agency name for demo…"
+          className="w-full px-3 py-2 text-xs rounded-lg"
+          style={{ background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.25)", color: "white", outline: "none" }}
+        />
+        <input
+          value={address}
+          onChange={e => setAddress(e.target.value)}
+          placeholder="Suburbs (e.g. Seven Hills, Blacktown)"
+          className="w-full px-3 py-2 text-xs rounded-lg"
+          style={{ background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.25)", color: "white", outline: "none" }}
+        />
+        <button
+          onClick={save}
+          disabled={saving || !name.trim()}
+          className="w-full flex items-center justify-center gap-1.5 py-2 text-xs font-bold rounded-lg transition-all"
+          style={{
+            background: saved ? "#10b981" : "rgba(99,102,241,0.8)",
+            color: "white", opacity: saving ? 0.6 : 1, cursor: saving ? "not-allowed" : "pointer"
+          }}>
+          {saved ? <><Check className="w-3 h-3" /> SARAH UPDATED</> : saving ? <><RefreshCw className="w-3 h-3 animate-spin" /> UPDATING…</> : "SWAP PERSONA →"}
+        </button>
+      </div>
     </div>
   );
 }
@@ -225,6 +300,8 @@ export default function AdminBridge() {
                 ))}
               </div>
             </div>
+
+            <DemoSwapCard />
 
             <div className="rounded-xl p-5" style={{ background: "rgba(5,14,26,0.9)", border: "1px solid rgba(0,209,178,0.12)" }}>
               <div className="text-xs font-mono font-bold tracking-wider mb-3" style={{ color: "#00d1b2" }}>AI SYSTEM PERFORMANCE</div>
