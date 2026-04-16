@@ -71,3 +71,9 @@ id = "WKnGc1M6hwUdIM2d-OHWe"
 uri = "file://Directive_OS_Demo_Pipeline.csv"
 type = "table"
 title = "Directive OS — Demo Pipeline Tracker"
+
+[[outputs]]
+id = "U3iyj5vMj1hdC10Btrl-J"
+uri = "file://exports/directive-os-website-widget-plan.pdf"
+type = "pdf"
+title = "Directive OS — Website Widget Add-On Build Plan"
