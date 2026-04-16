@@ -1012,4 +1012,150 @@ export async function sendClientWelcomeEmail(opts: ClientWelcomeEmailOpts): Prom
   }
 }
 
+// ─── Payment Failed Alert ─────────────────────────────────────────────────────
+
+export async function sendPaymentFailedAlert(opts: {
+  agencyName: string;
+  contactEmail: string;
+  amountCents: number;
+  attemptCount: number;
+  nextRetryDate?: string;
+}): Promise<void> {
+  const apiKey = process.env.DOS_RESEND_KEY || process.env.RESEND_API_KEY;
+  if (!apiKey) return;
+
+  const amount = new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD" }).format(opts.amountCents / 100);
+  const retryNote = opts.nextRetryDate
+    ? `Stripe will automatically retry on <strong>${opts.nextRetryDate}</strong>.`
+    : opts.attemptCount >= 3
+      ? "This was the final retry attempt. If payment is not resolved, the subscription may be cancelled by Stripe."
+      : "Stripe will automatically retry the charge in the coming days.";
+
+  const html = `<!DOCTYPE html><html><body style="margin:0;background:#f1f5f9;font-family:Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:32px 16px;">
+<table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;">
+
+  <tr><td style="background:#0a0e1a;padding:28px 40px;text-align:center;">
+    <div style="font-size:20px;font-weight:800;color:#ffffff;letter-spacing:-0.5px;">⚠️ Payment Failed — Action Required</div>
+    <div style="color:#00d1b2;font-size:13px;margin-top:6px;">Directive OS Billing Alert</div>
+  </td></tr>
+
+  <tr><td style="padding:32px 40px;">
+    <p style="margin:0 0 16px;color:#1e293b;font-size:15px;">Hi Jayson,</p>
+    <p style="margin:0 0 24px;color:#475569;font-size:14px;line-height:1.6;">
+      A recurring payment has <strong style="color:#dc2626;">failed</strong> for one of your clients. Here are the details:
+    </p>
+
+    <table width="100%" cellpadding="12" cellspacing="0" style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;margin-bottom:24px;">
+      <tr><td style="color:#64748b;font-size:13px;width:40%;">Agency</td><td style="color:#1e293b;font-size:14px;font-weight:700;">${opts.agencyName}</td></tr>
+      <tr><td style="color:#64748b;font-size:13px;border-top:1px solid #fecaca;">Contact Email</td><td style="color:#1e293b;font-size:14px;border-top:1px solid #fecaca;">${opts.contactEmail}</td></tr>
+      <tr><td style="color:#64748b;font-size:13px;border-top:1px solid #fecaca;">Amount</td><td style="color:#dc2626;font-size:14px;font-weight:700;border-top:1px solid #fecaca;">${amount}</td></tr>
+      <tr><td style="color:#64748b;font-size:13px;border-top:1px solid #fecaca;">Attempt #</td><td style="color:#1e293b;font-size:14px;border-top:1px solid #fecaca;">${opts.attemptCount} of 3</td></tr>
+    </table>
+
+    <p style="margin:0 0 24px;color:#475569;font-size:14px;line-height:1.6;">${retryNote}</p>
+
+    <p style="margin:0 0 8px;color:#1e293b;font-size:14px;font-weight:700;">Recommended actions:</p>
+    <ul style="margin:0 0 24px;padding-left:20px;color:#475569;font-size:14px;line-height:1.8;">
+      <li>Call the client directly to check if their card details need updating</li>
+      <li>Send them a payment link via the Stripe dashboard</li>
+      <li>If uncontactable after 3 attempts, consider pausing Sarah for that agency</li>
+    </ul>
+
+    <div style="text-align:center;">
+      <a href="https://dashboard.stripe.com/customers" style="display:inline-block;padding:12px 28px;background:#00d1b2;color:#0a0e1a;text-decoration:none;font-weight:700;font-size:13px;border-radius:8px;">View in Stripe Dashboard</a>
+    </div>
+  </td></tr>
+
+  <tr><td style="padding:20px 40px;background:#f1f5f9;text-align:center;border-top:1px solid #e2e8f0;">
+    <p style="margin:0;color:#64748b;font-size:12px;">Directive OS Billing · directiveos.com.au</p>
+  </td></tr>
+
+</table></td></tr></table>
+</body></html>`;
+
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        from: "Directive OS Billing <leads@directiveos.com.au>",
+        to: OWNER_EMAILS,
+        subject: `⚠️ Payment Failed — ${opts.agencyName} (Attempt ${opts.attemptCount}/3)`,
+        html,
+      }),
+    });
+    if (!res.ok) logger.warn({ status: res.status }, "Failed to send payment failed alert");
+    else logger.info({ agencyName: opts.agencyName }, "Payment failed alert sent");
+  } catch (err) {
+    logger.warn({ err }, "Error sending payment failed alert");
+  }
+}
+
+// ─── Subscription Canceled Alert ──────────────────────────────────────────────
+
+export async function sendSubscriptionCanceledAlert(opts: {
+  agencyName: string;
+  contactEmail: string;
+  reason: string;
+}): Promise<void> {
+  const apiKey = process.env.DOS_RESEND_KEY || process.env.RESEND_API_KEY;
+  if (!apiKey) return;
+
+  const html = `<!DOCTYPE html><html><body style="margin:0;background:#f1f5f9;font-family:Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:32px 16px;">
+<table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;">
+
+  <tr><td style="background:#0a0e1a;padding:28px 40px;text-align:center;">
+    <div style="font-size:20px;font-weight:800;color:#ffffff;letter-spacing:-0.5px;">🔴 Subscription Cancelled</div>
+    <div style="color:#f87171;font-size:13px;margin-top:6px;">Directive OS Billing Alert</div>
+  </td></tr>
+
+  <tr><td style="padding:32px 40px;">
+    <p style="margin:0 0 16px;color:#1e293b;font-size:15px;">Hi Jayson,</p>
+    <p style="margin:0 0 24px;color:#475569;font-size:14px;line-height:1.6;">
+      Stripe has <strong style="color:#dc2626;">cancelled</strong> the subscription for the following client after repeated failed payments:
+    </p>
+
+    <table width="100%" cellpadding="12" cellspacing="0" style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;margin-bottom:24px;">
+      <tr><td style="color:#64748b;font-size:13px;width:40%;">Agency</td><td style="color:#1e293b;font-size:14px;font-weight:700;">${opts.agencyName}</td></tr>
+      <tr><td style="color:#64748b;font-size:13px;border-top:1px solid #fecaca;">Contact Email</td><td style="color:#1e293b;font-size:14px;border-top:1px solid #fecaca;">${opts.contactEmail}</td></tr>
+      <tr><td style="color:#64748b;font-size:13px;border-top:1px solid #fecaca;">Reason</td><td style="color:#dc2626;font-size:14px;border-top:1px solid #fecaca;">${opts.reason}</td></tr>
+      <tr><td style="color:#64748b;font-size:13px;border-top:1px solid #fecaca;">Status Updated</td><td style="color:#1e293b;font-size:14px;border-top:1px solid #fecaca;">Marked as "cancelled" in Directive OS dashboard</td></tr>
+    </table>
+
+    <p style="margin:0 0 24px;color:#475569;font-size:14px;line-height:1.6;">
+      Sarah's services for this agency are now flagged as inactive in your dashboard. Reach out to the client if you'd like to reactivate.
+    </p>
+
+    <div style="text-align:center;">
+      <a href="https://directiveos.com.au/admin/clients" style="display:inline-block;padding:12px 28px;background:#00d1b2;color:#0a0e1a;text-decoration:none;font-weight:700;font-size:13px;border-radius:8px;">View Clients Dashboard</a>
+    </div>
+  </td></tr>
+
+  <tr><td style="padding:20px 40px;background:#f1f5f9;text-align:center;border-top:1px solid #e2e8f0;">
+    <p style="margin:0;color:#64748b;font-size:12px;">Directive OS Billing · directiveos.com.au</p>
+  </td></tr>
+
+</table></td></tr></table>
+</body></html>`;
+
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        from: "Directive OS Billing <leads@directiveos.com.au>",
+        to: OWNER_EMAILS,
+        subject: `🔴 Subscription Cancelled — ${opts.agencyName}`,
+        html,
+      }),
+    });
+    if (!res.ok) logger.warn({ status: res.status }, "Failed to send subscription cancelled alert");
+    else logger.info({ agencyName: opts.agencyName }, "Subscription cancelled alert sent");
+  } catch (err) {
+    logger.warn({ err }, "Error sending subscription cancelled alert");
+  }
+}
+
 export { OWNER_EMAILS, detectContact };
