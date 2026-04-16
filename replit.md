@@ -265,6 +265,27 @@ Any future build that touches `voice.ts`, `ai.ts`, or any system prompt must be 
 
 ---
 
+## ✅ APPROVED SARAH CONFIGURATION — 16 April 2026
+
+**Status: DO NOT CHANGE without explicit user approval.**
+
+The Sarah voice persona as it exists in `artifacts/api-server/src/routes/voice.ts` (both `DIRECTIVE_OS_PERSONA` and `buildAgencyPersona()`) has been **user-tested and approved in Filipino/Tagalog**. Feedback from live call testing:
+- Tagalog language detection and switching: ✅ WORKING
+- Timing / pacing (not rushing, waiting for caller to finish): ✅ CLEAR
+- Asking for details (name, number, email confirmation): ✅ CLEAR
+
+**Key settings that are working (do not alter):**
+- Language list: 9 languages — EN-AU, Mandarin, Filipino/Tagalog, Russian, Arabic, Korean, Vietnamese, Hindi, Spanish
+- Filipino/Tagalog rule: `"respond entirely in Filipino/Tagalog, warm and conversational"`
+- ONE short sentence per turn rule — active
+- Anti-repetition / double-word ban — active
+- Contact capture: ask → repeat back digit-by-digit / character-by-character → explicit confirmation
+- Inspection rule: NEVER say "You're booked in" in ANY language — active
+
+Any modification to the Sarah prompt must be tested in Tagalog before deployment. If performance degrades, revert to this commit baseline.
+
+---
+
 ## Client Onboarding Workflow
 
 ### Full Journey (what happens after a client signs & pays)
