@@ -65,3 +65,9 @@ id = "6lQ0amp-n_fxpa0uJvd-f"
 uri = "file://DOS_Eastwood_Rhodes_Prospects.xlsx"
 type = "table"
 title = "DOS Prospect List — Eastwood, Epping, Rhodes & Concord West"
+
+[[outputs]]
+id = "WKnGc1M6hwUdIM2d-OHWe"
+uri = "file://Directive_OS_Demo_Pipeline.csv"
+type = "table"
+title = "Directive OS — Demo Pipeline Tracker"
