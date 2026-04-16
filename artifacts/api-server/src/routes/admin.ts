@@ -417,8 +417,8 @@ router.post("/admin/clients", adminAuth, async (req: Request, res: Response): Pr
 });
 
 router.post("/admin/quote", adminAuth, async (req: Request, res: Response): Promise<void> => {
-  const { tier = "small", seats = 1, contactName = "", email, agencyName } = req.body as {
-    tier?: string; seats?: number; contactName?: string; email?: string; agencyName?: string;
+  const { tier = "small", seats = 1, contactName = "", email, agencyName, addons = [] } = req.body as {
+    tier?: string; seats?: number; contactName?: string; email?: string; agencyName?: string; addons?: string[];
   };
   if (!email || !agencyName) { res.status(400).json({ error: "email and agencyName required" }); return; }
 
@@ -428,11 +428,11 @@ router.post("/admin/quote", adminAuth, async (req: Request, res: Response): Prom
   let stripe: Stripe;
   try { stripe = getStripe(); } catch { res.status(500).json({ error: "Stripe not configured" }); return; }
 
-  const priceOnboarding = process.env.STRIPE_PRICE_ONBOARDING;
-  if (!priceOnboarding) { res.status(500).json({ error: "STRIPE_PRICE_ONBOARDING not set" }); return; }
-
   const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
-    { price: priceOnboarding, quantity: 1 },
+    {
+      price_data: { currency: "aud", product_data: { name: `Directive OS Setup & Onboarding — ${t.label} Agency` }, unit_amount: t.setupCents },
+      quantity: 1,
+    },
     {
       price_data: { currency: "aud", product_data: { name: `Directive OS Licence — Month 1 (${t.label})`, description: `Then A$${(t.monthlyCents / 100).toFixed(0)}/month from Month 2` }, unit_amount: t.monthlyCents },
       quantity: 1,
@@ -443,6 +443,20 @@ router.post("/admin/quote", adminAuth, async (req: Request, res: Response): Prom
     lineItems.push({
       price_data: { currency: "aud", product_data: { name: `Additional Seats — Month 1 (${additionalSeats} × A$${(t.perSeatCents / 100).toFixed(0)})` }, unit_amount: t.perSeatCents },
       quantity: additionalSeats,
+    });
+  }
+
+  if (addons.includes("widget")) {
+    lineItems.push({
+      price_data: { currency: "aud", product_data: { name: "Website Widget Add-On — Month 1", description: "Embed Sarah on your existing website. Then A$50/month." }, unit_amount: 5000 },
+      quantity: 1,
+    });
+  }
+
+  if (addons.includes("crm")) {
+    lineItems.push({
+      price_data: { currency: "aud", product_data: { name: "CRM Auto-Sync Add-On — Month 1", description: "Auto-sync listings from VaultRE or Rex. Then A$99/month." }, unit_amount: 9900 },
+      quantity: 1,
     });
   }
 
