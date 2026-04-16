@@ -3,7 +3,7 @@ import { AdminLayout } from "@/components/layout/AdminLayout";
 import { Plus, Trash2, Pencil, Building2, Bed, Bath, Car, X, Check, RefreshCw, ChevronDown } from "lucide-react";
 
 const API = import.meta.env.VITE_API_BASE_URL ?? "/api";
-const secret = () => sessionStorage.getItem("adminSecret") || "";
+const secret = () => localStorage.getItem("adminSecret") || "";
 
 const AUS_STATES = ["NSW", "VIC", "QLD", "WA", "SA", "TAS", "ACT", "NT"];
 const LISTING_TYPES = ["sale", "rental", "commercial", "land"];

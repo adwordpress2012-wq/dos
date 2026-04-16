@@ -3,7 +3,7 @@ import { AdminLayout } from "@/components/layout/AdminLayout";
 import { Copy, Check, FileText, Zap } from "lucide-react";
 
 const API = import.meta.env.VITE_API_BASE_URL ?? "/api";
-const secret = () => sessionStorage.getItem("adminSecret") || "";
+const secret = () => localStorage.getItem("adminSecret") || "";
 
 const TIERS = [
   { id: "small",  label: "Small",  setup: 1800, monthly: 299, perSeat: 89 },

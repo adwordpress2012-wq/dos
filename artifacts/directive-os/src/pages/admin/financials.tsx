@@ -4,7 +4,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 
 import { Download, Plus, Trash2, DollarSign, TrendingUp, TrendingDown, AlertTriangle } from "lucide-react";
 
 const API = import.meta.env.VITE_API_BASE_URL ?? "/api";
-const secret = () => sessionStorage.getItem("adminSecret") || "";
+const secret = () => localStorage.getItem("adminSecret") || "";
 
 function fmt(cents: number) {
   return new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD", minimumFractionDigits: 0 }).format(cents / 100);

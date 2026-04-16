@@ -3,7 +3,7 @@ import { AdminLayout } from "@/components/layout/AdminLayout";
 import { Plus, Phone, Mail, Trash2, Edit3, Check, X, GitBranch } from "lucide-react";
 
 const API = import.meta.env.VITE_API_BASE_URL ?? "/api";
-const secret = () => sessionStorage.getItem("adminSecret") || "";
+const secret = () => localStorage.getItem("adminSecret") || "";
 
 const STAGES = [
   { id: "lead", label: "LEAD", color: "#6366f1" },

@@ -3,7 +3,7 @@ import { AdminLayout } from "@/components/layout/AdminLayout";
 import { Phone, MessageSquare, Radio, Search, Clock, User } from "lucide-react";
 
 const API = import.meta.env.VITE_API_BASE_URL ?? "/api";
-const secret = () => sessionStorage.getItem("adminSecret") || "";
+const secret = () => localStorage.getItem("adminSecret") || "";
 
 function ChannelBadge({ channel }: { channel: string }) {
   const isVoice = channel === "voice";

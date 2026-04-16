@@ -12,7 +12,7 @@ export default function AdminLogin() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  if (sessionStorage.getItem("adminAuth") === "granted") {
+  if (localStorage.getItem("adminAuth") === "granted") {
     navigate("/admin/bridge");
     return null;
   }
@@ -29,8 +29,8 @@ export default function AdminLogin() {
       });
       const data = await res.json();
       if (data.ok) {
-        sessionStorage.setItem("adminAuth", "granted");
-        sessionStorage.setItem("adminSecret", password);
+        localStorage.setItem("adminAuth", "granted");
+        localStorage.setItem("adminSecret", password);
         navigate("/admin/bridge");
       } else {
         setError("Access denied. Invalid username or password.");

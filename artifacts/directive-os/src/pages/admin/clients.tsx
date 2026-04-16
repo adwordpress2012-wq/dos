@@ -3,7 +3,7 @@ import { AdminLayout } from "@/components/layout/AdminLayout";
 import { Download, Search, Users, CheckCircle, AlertCircle, Clock, XCircle, KeyRound, RotateCcw } from "lucide-react";
 
 const API = import.meta.env.VITE_API_BASE_URL ?? "/api";
-const secret = () => sessionStorage.getItem("adminSecret") || "";
+const secret = () => localStorage.getItem("adminSecret") || "";
 
 function fmt(cents: number) {
   return new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD", minimumFractionDigits: 0 }).format(cents / 100);
@@ -163,7 +163,7 @@ export default function AdminClients() {
               <AlertCircle className="w-8 h-8 mx-auto mb-2" style={{ color: "#ef4444" }} />
               <div className="text-xs font-mono mb-3" style={{ color: "#ef4444" }}>{fetchError}</div>
               <button
-                onClick={() => window.location.href = "/admin/login"}
+                onClick={() => window.location.href = "/admin"}
                 className="px-4 py-2 rounded-lg text-xs font-bold tracking-wider"
                 style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)", color: "#ef4444" }}
               >

@@ -53,6 +53,12 @@ export function AdminLayout({ children, title }: { children: React.ReactNode; ti
   const [time, setTime] = useState(new Date());
 
   useEffect(() => {
+    if (localStorage.getItem("adminAuth") !== "granted") {
+      window.location.href = "/admin";
+    }
+  }, []);
+
+  useEffect(() => {
     const iv = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(iv);
   }, []);
@@ -141,8 +147,8 @@ export function AdminLayout({ children, title }: { children: React.ReactNode; ti
           href="/admin"
           className="flex items-center gap-2 px-2 py-1.5 rounded text-white/30 hover:text-white/60 transition-colors"
           onClick={() => {
-            sessionStorage.removeItem("adminAuth");
-            sessionStorage.removeItem("adminSecret");
+            localStorage.removeItem("adminAuth");
+            localStorage.removeItem("adminSecret");
           }}
         >
           <LogOut className="w-3 h-3" />
