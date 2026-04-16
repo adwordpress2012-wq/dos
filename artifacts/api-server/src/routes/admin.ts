@@ -4,9 +4,15 @@ import bcrypt from "bcryptjs";
 import Stripe from "stripe";
 import {
   db, agenciesTable, leadsTable, transcriptsTable, chatSessionsTable,
-  adminExpensesTable, adminPipelineTable, listingsTable,
+  adminExpensesTable, adminPipelineTable, listingsTable, quoteLinksTable,
 } from "@workspace/db";
+
 import { generatePassword, sendPasswordEmail } from "./clientAuth";
+
+function makeShortCode(len = 6): string {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
+  return Array.from({ length: len }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+}
 
 const router: IRouter = Router();
 
@@ -474,7 +480,13 @@ router.post("/admin/quote", adminAuth, async (req: Request, res: Response): Prom
       success_url: `${BASE_URL}/welcome?name=${encodeURIComponent(contactName || agencyName)}&agency=${encodeURIComponent(agencyName)}`,
       cancel_url: `${BASE_URL}/admin/quote`,
     });
-    res.json({ url: session.url });
+
+    const stripeUrl = session.url!;
+    const code = makeShortCode();
+    await db.insert(quoteLinksTable).values({ code, stripeUrl, agencyName });
+    const shortUrl = `${BASE_URL}/q/${code}`;
+
+    res.json({ url: stripeUrl, shortUrl, code });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
     res.status(500).json({ error: message });

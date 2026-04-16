@@ -5,7 +5,7 @@ import Stripe from "stripe";
 import router from "./routes";
 import { logger } from "./lib/logger";
 import { sendNewClientNotification, sendClientWelcomeEmail, sendPaymentFailedAlert, sendSubscriptionCanceledAlert, sendClientPaymentWarning } from "./lib/email";
-import { db, agenciesTable } from "@workspace/db";
+import { db, agenciesTable, quoteLinksTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 
 const app: Express = express();
@@ -238,5 +238,17 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/api", router);
+
+// ─── Short quote link redirect ─────────────────────────────────────────────
+app.get("/q/:code", async (req: Request, res: Response): Promise<void> => {
+  const { code } = req.params;
+  try {
+    const rows = await db.select().from(quoteLinksTable).where(eq(quoteLinksTable.code, code));
+    if (!rows[0]) { res.status(404).send("Link not found or has expired."); return; }
+    res.redirect(302, rows[0].stripeUrl);
+  } catch {
+    res.status(500).send("Something went wrong.");
+  }
+});
 
 export default app;

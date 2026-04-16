@@ -5,3 +5,4 @@ export * from "./transcripts";
 export * from "./staff";
 export * from "./chat_sessions";
 export * from "./admin";
+export * from "./quote_links";

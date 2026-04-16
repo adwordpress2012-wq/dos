@@ -37,6 +37,7 @@ export default function AdminQuote() {
   const [addons, setAddons] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [link, setLink] = useState("");
+  const [shortUrl, setShortUrl] = useState("");
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState("");
 
@@ -62,6 +63,7 @@ export default function AdminQuote() {
     setError("");
     setLoading(true);
     setLink("");
+    setShortUrl("");
     try {
       const res = await fetch(`${API}/admin/quote`, {
         method: "POST",
@@ -69,14 +71,18 @@ export default function AdminQuote() {
         body: JSON.stringify({ tier, seats, contactName: name, email, agencyName, addons }),
       });
       const data = await res.json();
-      if (data.url) setLink(data.url);
-      else setError(data.error ?? "Failed to generate link.");
+      if (data.url) {
+        setLink(data.url);
+        setShortUrl(data.shortUrl ?? data.url);
+      } else {
+        setError(data.error ?? "Failed to generate link.");
+      }
     } catch { setError("Connection error. Try again."); }
     finally { setLoading(false); }
   }
 
   function copy() {
-    navigator.clipboard.writeText(link);
+    navigator.clipboard.writeText(shortUrl || link);
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
   }
@@ -268,15 +274,22 @@ export default function AdminQuote() {
 
             {link ? (
               <div className="space-y-3">
-                <div className="p-3 rounded-lg text-xs font-mono break-all" style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(0,209,178,0.2)", color: "#00d1b2" }}>
-                  {link}
+                {/* Short link — primary */}
+                <div className="p-4 rounded-lg" style={{ background: "rgba(0,209,178,0.06)", border: "1px solid rgba(0,209,178,0.3)" }}>
+                  <div className="text-xs font-mono font-bold mb-1" style={{ color: "rgba(0,209,178,0.6)" }}>SHORT LINK — SEND THIS</div>
+                  <div className="text-base font-mono font-bold" style={{ color: "#00d1b2" }}>{shortUrl || link}</div>
                 </div>
+                {/* Full Stripe link — secondary */}
+                <details className="text-xs">
+                  <summary className="cursor-pointer font-mono" style={{ color: "rgba(255,255,255,0.25)" }}>Show full Stripe link</summary>
+                  <div className="mt-2 p-2 rounded-lg font-mono break-all" style={{ background: "rgba(0,0,0,0.3)", color: "rgba(255,255,255,0.3)", fontSize: 10 }}>{link}</div>
+                </details>
                 <div className="flex gap-2">
                   <button onClick={copy} className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-bold transition-all flex-1 justify-center" style={{ background: copied ? "rgba(16,185,129,0.15)" : "rgba(0,209,178,0.15)", border: "1px solid rgba(0,209,178,0.3)", color: copied ? "#10b981" : "#00d1b2" }}>
                     {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                    {copied ? "Copied!" : "Copy Link"}
+                    {copied ? "Copied!" : "Copy Short Link"}
                   </button>
-                  <button onClick={() => { setLink(""); setName(""); setEmail(""); setAgencyName(""); setSeats(1); setAddons([]); }} className="px-4 py-2.5 rounded-lg text-sm font-bold" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.5)" }}>
+                  <button onClick={() => { setLink(""); setShortUrl(""); setName(""); setEmail(""); setAgencyName(""); setSeats(1); setAddons([]); }} className="px-4 py-2.5 rounded-lg text-sm font-bold" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.5)" }}>
                     New Quote
                   </button>
                 </div>
