@@ -2,7 +2,7 @@ import { Link, useLocation } from "wouter";
 import { useState, useEffect } from "react";
 import {
   Activity, Users, BarChart3, GitBranch, Radio, LogOut,
-  ChevronRight, Cpu, Wifi, Shield, Zap, Menu, Building2, FileText,
+  ChevronRight, Cpu, Wifi, Shield, Zap, Menu, Building2, FileText, Target,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -18,6 +18,7 @@ function stardate() {
 const NAV = [
   { name: "BRIDGE OVERVIEW", href: "/admin/bridge", icon: Activity, sub: "STATUS" },
   { name: "FLEET MANIFEST", href: "/admin/clients", icon: Users, sub: "CLIENTS" },
+  { name: "MISSION TARGET", href: "/admin/goals", icon: Target, sub: "GOALS" },
   { name: "QUOTE BUILDER", href: "/admin/quote", icon: FileText, sub: "QUOTE" },
   { name: "LISTINGS OPS", href: "/admin/listings", icon: Building2, sub: "PROPS" },
   { name: "FINANCIAL OPS", href: "/admin/financials", icon: BarChart3, sub: "ECON" },

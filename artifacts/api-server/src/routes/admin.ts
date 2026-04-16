@@ -498,4 +498,72 @@ router.post("/admin/clients/:id/set-password", adminAuth, async (req: Request, r
   res.json({ ok: true, message: "Password updated" });
 });
 
+router.get("/admin/goals", adminAuth, async (_req: Request, res: Response): Promise<void> => {
+  const GOAL_CENTS = 20_000_000;
+  const MRR_TARGET_CENTS = 1_584_700;
+  const CLIENT_TARGET = 53;
+
+  const agencies = await db.select().from(agenciesTable).orderBy(agenciesTable.createdAt);
+
+  const totalClients = agencies.length;
+  const activeClients = agencies.filter(a => a.subscriptionStatus === "active").length;
+  const currentMRRCents = activeClients * MONTHLY_SUB_CENTS;
+
+  const now = new Date();
+
+  let totalRevenueCents = 0;
+  for (const a of agencies) {
+    if (a.setupFeePaid) totalRevenueCents += SETUP_FEE_CENTS;
+    if (a.subscriptionStatus === "active" && a.createdAt) {
+      const msActive = now.getTime() - new Date(a.createdAt).getTime();
+      const monthsActive = Math.max(0, Math.floor(msActive / (30.44 * 24 * 60 * 60 * 1000)));
+      totalRevenueCents += monthsActive * MONTHLY_SUB_CENTS;
+    }
+  }
+
+  const months: Record<string, number> = {};
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    months[key] = 0;
+  }
+  for (const a of agencies) {
+    if (a.createdAt) {
+      const d = new Date(a.createdAt);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      if (key in months) months[key]++;
+    }
+  }
+
+  const monthlyCloses = Object.entries(months).map(([month, count]) => ({ month, count }));
+  const totalClosed = monthlyCloses.reduce((s, m) => s + m.count, 0);
+  const nonZeroMonths = monthlyCloses.filter(m => m.count > 0).length || 1;
+  const avgClosesPerMonth = Math.round((totalClosed / nonZeroMonths) * 10) / 10;
+
+  const currentMonth = now.getMonth();
+  const remainingMonths = Math.max(1, 12 - currentMonth);
+  const projectedNewClients = Math.round(avgClosesPerMonth * remainingMonths);
+  const projectedFinalActive = activeClients + projectedNewClients;
+  const projectedMRRCents = projectedFinalActive * MONTHLY_SUB_CENTS;
+  const projectedSetup = projectedNewClients * SETUP_FEE_CENTS;
+  const projectedSubRevenue = Math.round((projectedMRRCents + currentMRRCents) / 2) * remainingMonths;
+  const projectedYearEndCents = totalRevenueCents + projectedSetup + projectedSubRevenue;
+
+  res.json({
+    goalCents: GOAL_CENTS,
+    mrrTargetCents: MRR_TARGET_CENTS,
+    clientTarget: CLIENT_TARGET,
+    totalClients,
+    activeClients,
+    currentMRRCents,
+    totalRevenueCents,
+    projectedYearEndCents,
+    monthlyCloses,
+    avgClosesPerMonth,
+    progressPct: Math.min(100, Math.round((totalRevenueCents / GOAL_CENTS) * 100)),
+    mrrProgressPct: Math.min(100, Math.round((currentMRRCents / MRR_TARGET_CENTS) * 100)),
+    clientProgressPct: Math.min(100, Math.round((activeClients / CLIENT_TARGET) * 100)),
+  });
+});
+
 export default router;
