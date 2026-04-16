@@ -264,15 +264,25 @@ router.post(["/voice/incoming", "/voice/inbound"], async (req: Request, res: Res
   const toNumber = (req.body?.To as string | undefined) ?? "";
   let agencyId = 0; // 0 = Directive OS main line
 
+  // The demo swap number is hardcoded so it always resolves to the demo agency
+  // regardless of whether the DB record exists in this environment.
+  const DEMO_SWAP_PHONE = "0259506382";
+  const DEMO_AGENCY_ID_CONST = 7;
+
   if (toNumber) {
-    try {
-      const agencies = await db.select().from(agenciesTable);
-      const matched = agencies.find(
-        (a) => a.contactPhone && phonesMatch(a.contactPhone, toNumber)
-      );
-      if (matched) agencyId = matched.id;
-    } catch (err) {
-      logger.warn({ err }, "Agency phone lookup failed — defaulting to Directive OS persona");
+    if (phonesMatch(DEMO_SWAP_PHONE, toNumber)) {
+      agencyId = DEMO_AGENCY_ID_CONST;
+      logger.info({ toNumber, agencyId }, "Demo swap number matched — using demo agency");
+    } else {
+      try {
+        const agencies = await db.select().from(agenciesTable);
+        const matched = agencies.find(
+          (a) => a.contactPhone && phonesMatch(a.contactPhone, toNumber)
+        );
+        if (matched) agencyId = matched.id;
+      } catch (err) {
+        logger.warn({ err }, "Agency phone lookup failed — defaulting to Directive OS persona");
+      }
     }
   }
 

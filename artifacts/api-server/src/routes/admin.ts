@@ -242,7 +242,21 @@ router.get("/admin/demo-swap", adminAuth, async (_req: Request, res: Response): 
 router.patch("/admin/demo-swap", adminAuth, async (req: Request, res: Response): Promise<void> => {
   const { name, address } = req.body as { name?: string; address?: string };
   if (!name?.trim()) { res.status(400).json({ error: "name required" }); return; }
-  await db.update(agenciesTable).set({ name: name.trim(), address: address?.trim() ?? null, updatedAt: new Date() }).where(eq(agenciesTable.id, DEMO_AGENCY_ID));
+  // Upsert: creates agency 7 if it doesn't exist in this environment (e.g. production),
+  // or updates it if it does. This ensures demo swap works across all deployments.
+  await db.insert(agenciesTable).values({
+    id: DEMO_AGENCY_ID,
+    clerkOrgId: "org_demo_swap",
+    name: name.trim(),
+    abn: "",
+    contactEmail: "jayson@directiveos.com.au",
+    contactPhone: "0259506382",
+    address: address?.trim() ?? null,
+    updatedAt: new Date(),
+  }).onConflictDoUpdate({
+    target: agenciesTable.id,
+    set: { name: name.trim(), address: address?.trim() ?? null, updatedAt: new Date() },
+  });
   res.json({ ok: true, name: name.trim() });
 });
 
