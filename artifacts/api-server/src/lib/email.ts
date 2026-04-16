@@ -33,33 +33,69 @@ export async function generateEnglishSummary(
     .map(m => `${m.role === "user" ? "Caller/Visitor" : "Sarah (AI)"}: ${m.content}`)
     .join("\n");
 
-  const systemPrompt = `You are an assistant that analyses real estate AI receptionist conversations for Australian agencies. Always respond in English regardless of the conversation language.
+  const systemPrompt = `You are a specialist analyst for an Australian real estate AI receptionist platform. Your job is to extract contact details and translate conversations with PERFECT accuracy. Always respond in English.
 
-Return ONLY a valid JSON object with this exact shape — no markdown, no code blocks, just raw JSON:
+Return ONLY a valid JSON object — no markdown, no code blocks, just raw JSON:
 {
   "language": "the primary language detected (e.g. English, Arabic, Mandarin, Vietnamese, Hindi, Korean, Spanish, Filipino, Russian)",
   "callerName": "full name if captured, otherwise null",
   "capturedName": "the caller's full name exactly as confirmed in the conversation — null if not captured",
-  "capturedEmail": "the exact email address confirmed in the conversation in standard format (e.g. john.smith@gmail.com) — null if not captured or not confirmed. CRITICAL: this must be a real email address in user@domain.com format. Never put a person's name here.",
-  "capturedPhone": "the exact phone number confirmed in the conversation — null if not captured",
+  "capturedEmail": "the exact email address confirmed in the conversation in standard user@domain.com format — null if not captured or not confirmed. CRITICAL: must be a real email address. Never use a person's name here.",
+  "capturedPhone": "the exact phone number as a clean digit string, e.g. 0412345678 or 0412 345 678 — null if not captured",
   "intent": "one of: buyer | tenant | vendor | landlord | general_enquiry | sales_enquiry",
-  "keyDetails": ["array of 3-6 concise bullet point strings summarising what was discussed — always in English"],
-  "contactsCaptured": ["human-readable list of what was captured e.g. 'Name: Ahmed Hassan', 'Phone: 0412 345 678', 'Email: ahmed@gmail.com' — empty array if none captured"],
-  "outcome": "one sentence in English describing the outcome of the conversation",
+  "keyDetails": ["3-6 concise English bullet strings summarising what was discussed"],
+  "contactsCaptured": ["e.g. 'Name: Maria Santos', 'Phone: 0412 345 678', 'Email: maria@gmail.com' — empty array if none"],
+  "outcome": "one sentence in English describing the outcome",
   "nextAction": "one sentence in English describing the recommended next action for the agency",
-  "isEnglish": true or false (true only if the conversation was primarily in English),
+  "isEnglish": true or false,
   "translatedMessages": [
-    {"role": "user", "content": "English translation of this message"},
-    {"role": "assistant", "content": "English translation of this message"}
+    {"role": "user", "content": "Clean, natural English translation — no typos, proper grammar"},
+    {"role": "assistant", "content": "Clean, natural English translation — no typos, proper grammar"}
   ]
 }
 
-IMPORTANT RULES:
-1. translatedMessages must contain ALL messages in the same order — translate each to natural English. If the conversation was in English, still include as-is.
-2. capturedEmail must ONLY contain a valid email address (user@domain.com) that was actually confirmed in the conversation. Never use a person's name as an email.
-3. If the email was spoken aloud (e.g. "john at gmail dot com") — reconstruct it as john@gmail.com in capturedEmail.
-4. If any contact detail was NOT explicitly confirmed in the conversation, set it to null — do not guess.
-5. CRITICAL — SARAH IS THE AI, NOT THE CALLER: "Sarah" is the name of the AI receptionist (assistant role). The human caller is NEVER named Sarah. Never set callerName or capturedName to "Sarah". If the caller's name was not captured, set both to null.`;
+═══ CONTACT DETAIL EXTRACTION — MOST IMPORTANT PART ═══
+
+PHONE NUMBER EXTRACTION:
+Sarah always reads phone numbers back to confirm them. When you see Sarah reading back digits, THAT is the confirmed phone number.
+- Look for Sarah's read-back pattern: "Just to confirm — 0-4-1-2, three-four-five..." or equivalent in any language
+- Reconstruct the number from spoken digits and output as: 0412 345 678
+- MULTILINGUAL DIGIT WORDS — recognise these as numbers:
+  Filipino/Tagalog: sero=0, isa=1, dalawa=2, tatlo=3, apat=4, lima=5, anim=6, pito=7, walo=8, siyam=9
+  Mandarin: 零=0, 一=1, 二/两=2, 三=3, 四=4, 五=5, 六=6, 七=7, 八=8, 九=9
+  Arabic: صفر=0, واحد=1, اثنين=2, ثلاثة=3, أربعة=4, خمسة=5, ستة=6, سبعة=7, ثمانية=8, تسعة=9
+  Vietnamese: không=0, một=1, hai=2, ba=3, bốn=4, năm=5, sáu=6, bảy=7, tám=8, chín=9
+  Korean: 영/공=0, 일=1, 이=2, 삼=3, 사=4, 오=5, 육=6, 칠=7, 팔=8, 구=9
+  Hindi: शून्य=0, एक=1, दो=2, तीन=3, चार=4, पाँच=5, छह=6, सात=7, आठ=8, नौ=9
+  Russian: ноль=0, один=1, два=2, три=3, четыре=4, пять=5, шесть=6, семь=7, восемь=8, девять=9
+  Spanish: cero=0, uno=1, dos=2, tres=3, cuatro=4, cinco=5, seis=6, siete=7, ocho=8, nueve=9
+- Australian mobile: always 10 digits, starts with 04. Landlines also 10 digits. If you reconstruct 10 digits, it is correct.
+
+EMAIL EXTRACTION:
+Sarah always reads back the email character by character. Reconstruct it precisely.
+- MULTILINGUAL EMAIL NOTATION:
+  "at" / "arroba" / "sa" (Filipino) / "@" = @ symbol
+  "dot" / "tuldok" (Filipino) / "punto" / "." = . (period)
+  "dash" / "gitling" (Filipino) / "-" = hyphen
+  "underscore" / "salungguhit" (Filipino) / "_" = underscore
+- Example: Sarah says "j-o-h-n tuldok s-m-i-t-h sa g-m-a-i-l tuldok com" → john.smith@gmail.com
+- Only set capturedEmail if Sarah explicitly confirmed it and the caller said yes
+
+NAME EXTRACTION:
+- The caller's name is whatever the caller told Sarah, confirmed by Sarah repeating it back
+- Common Filipino names: Maria, Jose, Juan, Ana, Rosa, Marco, Jayson, Mark, Carlo, etc.
+- Never set capturedName to "Sarah" — Sarah is the AI
+
+═══ TRANSLATION QUALITY RULES ═══
+1. translatedMessages: include EVERY message in the same order — translate ALL to clean, natural, grammatically correct English. Zero typos. Zero awkward phrasing. Read each translation as if it were originally written in English.
+2. If the conversation was already in English, copy each message as-is (still include all of them).
+3. Translate the meaning naturally — do not do a word-for-word literal translation that sounds robotic.
+4. Phone numbers, email addresses, proper nouns: keep them exactly as spoken, do not translate.
+
+═══ ABSOLUTE RULES ═══
+- SARAH IS THE AI. The caller/visitor is the human. Never name the caller "Sarah".
+- capturedEmail must be user@domain.com format only — never a person's name, never null if Sarah confirmed it.
+- If a detail was not confirmed, set to null. Do not guess. Do not fabricate.`;
 
   try {
     const res = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -69,13 +105,13 @@ IMPORTANT RULES:
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-4o-mini",
+        model: "gpt-4o",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: `Channel: ${channel}${durationSeconds ? ` | Duration: ${Math.floor(durationSeconds / 60)}m ${durationSeconds % 60}s` : ""}\n\nTranscript:\n${transcriptText}` },
         ],
-        temperature: 0.2,
-        max_tokens: 2000,
+        temperature: 0.1,
+        max_tokens: 3000,
       }),
     });
 
