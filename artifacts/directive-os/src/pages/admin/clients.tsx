@@ -33,6 +33,7 @@ function StatusBadge({ status }: { status: string }) {
 export default function AdminClients() {
   const [clients, setClients] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("createdAt");
   const [resetting, setResetting] = useState<number | null>(null);
@@ -59,7 +60,16 @@ export default function AdminClients() {
 
   useEffect(() => {
     fetch(`${API}/admin/clients`, { headers: { "x-admin-secret": secret() } })
-      .then(r => r.json()).then(setClients).finally(() => setLoading(false));
+      .then(async r => {
+        const data = await r.json();
+        if (!r.ok) {
+          setFetchError(r.status === 401 ? "Session expired — please log in again." : `Error ${r.status}`);
+          return;
+        }
+        setClients(Array.isArray(data) ? data : []);
+      })
+      .catch(() => setFetchError("Could not reach server — check your connection."))
+      .finally(() => setLoading(false));
   }, []);
 
   const filtered = clients
@@ -147,6 +157,18 @@ export default function AdminClients() {
           {loading ? (
             <div className="text-center py-12 text-xs font-mono" style={{ color: "rgba(0,209,178,0.4)", background: "rgba(5,14,26,0.9)" }}>
               SCANNING FLEET...
+            </div>
+          ) : fetchError ? (
+            <div className="text-center py-12" style={{ background: "rgba(5,14,26,0.9)" }}>
+              <AlertCircle className="w-8 h-8 mx-auto mb-2" style={{ color: "#ef4444" }} />
+              <div className="text-xs font-mono mb-3" style={{ color: "#ef4444" }}>{fetchError}</div>
+              <button
+                onClick={() => window.location.href = "/admin/login"}
+                className="px-4 py-2 rounded-lg text-xs font-bold tracking-wider"
+                style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)", color: "#ef4444" }}
+              >
+                GO TO LOGIN
+              </button>
             </div>
           ) : filtered.length === 0 ? (
             <div className="text-center py-12" style={{ background: "rgba(5,14,26,0.9)" }}>
