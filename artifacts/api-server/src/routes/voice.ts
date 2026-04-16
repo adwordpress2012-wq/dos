@@ -253,7 +253,7 @@ function phonesMatch(a: string, b: string): boolean {
 
 // ─── TwiML Entry Point ────────────────────────────────────────────────────────
 
-router.post("/voice/incoming", async (req: Request, res: Response) => {
+router.post(["/voice/incoming", "/voice/inbound"], async (req: Request, res: Response) => {
   // CRITICAL: The WebSocket host MUST match the host that served this TwiML response.
   const forwardedHost = req.headers["x-forwarded-host"] as string | undefined;
   const rawHost = forwardedHost || req.headers.host || "directiveos.com.au";
