@@ -58,6 +58,7 @@ import HealthCheck from "@/pages/marketing/health-check";
 import Brochure from "@/pages/marketing/brochure";
 import ReferralSchedule from "@/pages/marketing/referral-schedule";
 import LeaveBehind from "@/pages/marketing/leave-behind";
+import QuoteRedirect from "@/pages/q";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -127,6 +128,7 @@ function Router() {
       <Route path="/admin/quote" component={AdminQuote} />
       <Route path="/admin/goals" component={AdminGoals} />
       <Route path="/dashboard/set-password" component={SetPassword} />
+      <Route path="/q/:code" component={QuoteRedirect} />
       <Route component={NotFound} />
     </Switch>
   );

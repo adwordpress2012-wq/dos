@@ -592,4 +592,16 @@ router.get("/admin/goals", adminAuth, async (_req: Request, res: Response): Prom
   });
 });
 
+// ─── Short quote link redirect ─────────────────────────────────────────────
+router.get("/q/:code", async (req: Request, res: Response): Promise<void> => {
+  const { code } = req.params;
+  try {
+    const rows = await db.select().from(quoteLinksTable).where(eq(quoteLinksTable.code, code));
+    if (!rows[0]) { res.status(404).json({ error: "Link not found." }); return; }
+    res.json({ url: rows[0].stripeUrl });
+  } catch {
+    res.status(500).json({ error: "Something went wrong." });
+  }
+});
+
 export default router;
