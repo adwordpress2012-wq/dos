@@ -400,6 +400,17 @@ Each paying client gets a standalone branded landing page hosted at `directiveos
 
 ---
 
+## Session Notes — 17 April 2026
+
+### Sarah Voice Auto-Hangup Fix — DONE ✅
+- **Issue:** Sarah dropped Jayson's test call at 2 minutes 57 seconds while he still wanted to keep talking.
+- **Cause:** `artifacts/api-server/src/routes/voice.ts` was matching the substring `"wonderful day"` or `"have a great day"` anywhere in Sarah's speech and immediately scheduling a hangup. Friendly mid-call closers triggered it.
+- **Fix:** The hangup now requires BOTH the full scripted goodbye from Sarah (`"lovely chatting" + "wonderful day"`) AND a real farewell in the caller's last utterance (bye, thanks, cheers, that's all, talk later, etc).
+- **Result:** No artificial time limit. Calls only end when the caller hangs up or both sides exchange a real goodbye.
+- Full write-up: `.agents/skills/dos-session-2026-04-17/SKILL.md`
+
+---
+
 ## Session Notes — 14 April 2026
 
 ### SPA Routing Fix — DONE ✅
