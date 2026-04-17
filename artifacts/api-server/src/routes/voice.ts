@@ -455,16 +455,29 @@ export function handleMediaStream(twilioWs: WebSocket): void {
         session.transcript.push({ role: "assistant", content: event.transcript });
         logger.info({ content: event.transcript.substring(0, 80) }, "Sarah spoke");
 
-        // Auto-hangup: when Sarah delivers the goodbye, close the connection
-        // after 2 seconds so the audio finishes playing before the line drops.
-        // This prevents the caller's "bye back" from re-triggering Sarah endlessly.
+        // Auto-hangup: only when Sarah delivers the FULL scripted goodbye
+        // AND the caller has already said a farewell. This prevents accidental
+        // hangups when Sarah uses friendly closers like "have a wonderful day at
+        // the inspection" mid-conversation.
         const lower = (event.transcript as string).toLowerCase();
-        if (
-          !session.hangupScheduled &&
-          (lower.includes("wonderful day") || lower.includes("have a great day"))
-        ) {
+        const sarahFullGoodbye =
+          (lower.includes("lovely chatting") && lower.includes("wonderful day")) ||
+          (lower.includes("been lovely") && lower.includes("wonderful day"));
+
+        // Look at the last user message — must contain a farewell word
+        const lastUserMsg = [...session.transcript].reverse().find((m) => m.role === "user");
+        const callerSaidGoodbye = lastUserMsg
+          ? /\b(bye|goodbye|see ya|see you|cheers|talk later|talk soon|thanks(?: a lot)?|thank you|that'?s all|that is all|all good|nothing else|no(?:thing)? more|appreciate it|have a good one)\b/i.test(
+              lastUserMsg.content,
+            )
+          : false;
+
+        if (!session.hangupScheduled && sarahFullGoodbye && callerSaidGoodbye) {
           session.hangupScheduled = true;
-          logger.info({ streamSid: session.streamSid }, "Goodbye phrase detected — hanging up in 2s");
+          logger.info(
+            { streamSid: session.streamSid },
+            "Full goodbye exchange detected — hanging up in 2s",
+          );
           setTimeout(() => {
             try {
               if (session.openaiWs.readyState === WebSocket.OPEN) session.openaiWs.close();
