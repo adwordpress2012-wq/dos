@@ -1,0 +1,1231 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: Directive OS API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: agencies
+    description: Agency management
+  - name: listings
+    description: Property listings
+  - name: leads
+    description: Lead management
+  - name: transcripts
+    description: Conversation transcripts
+  - name: staff
+    description: Staff management
+  - name: billing
+    description: Billing and subscription management
+  - name: ai
+    description: AI receptionist
+  - name: dashboard
+    description: Dashboard summaries
+
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /agencies/me:
+    get:
+      operationId: getMyAgency
+      tags: [agencies]
+      summary: Get current agency
+      responses:
+        "200":
+          description: Agency details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Agency"
+        "404":
+          description: Agency not found
+    patch:
+      operationId: updateMyAgency
+      tags: [agencies]
+      summary: Update agency details
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAgencyBody"
+      responses:
+        "200":
+          description: Updated agency
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Agency"
+
+  /agencies/onboard:
+    post:
+      operationId: onboardAgency
+      tags: [agencies]
+      summary: Onboard a new agency
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OnboardAgencyBody"
+      responses:
+        "201":
+          description: Agency created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Agency"
+
+  /listings:
+    get:
+      operationId: getListings
+      tags: [listings]
+      summary: Get all property listings for the agency
+      responses:
+        "200":
+          description: List of listings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Listing"
+    post:
+      operationId: createListing
+      tags: [listings]
+      summary: Create a new listing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateListingBody"
+      responses:
+        "201":
+          description: Created listing
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Listing"
+
+  /listings/{id}:
+    get:
+      operationId: getListing
+      tags: [listings]
+      summary: Get a specific listing
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Listing
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Listing"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateListing
+      tags: [listings]
+      summary: Update a listing
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateListingBody"
+      responses:
+        "200":
+          description: Updated listing
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Listing"
+    delete:
+      operationId: deleteListing
+      tags: [listings]
+      summary: Delete a listing
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /listings/sync-vaultre:
+    post:
+      operationId: syncVaultRE
+      tags: [listings]
+      summary: Sync listings from VaultRE CRM
+      responses:
+        "200":
+          description: Sync result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SyncResult"
+
+  /leads:
+    get:
+      operationId: getLeads
+      tags: [leads]
+      summary: Get all leads for the agency
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [new, contacted, qualified, closed]
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [buyer, tenant, landlord, vendor]
+      responses:
+        "200":
+          description: List of leads
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Lead"
+    post:
+      operationId: createLead
+      tags: [leads]
+      summary: Create a new lead
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateLeadBody"
+      responses:
+        "201":
+          description: Created lead
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lead"
+
+  /leads/{id}:
+    get:
+      operationId: getLead
+      tags: [leads]
+      summary: Get a specific lead
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Lead
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lead"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateLead
+      tags: [leads]
+      summary: Update lead status or details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateLeadBody"
+      responses:
+        "200":
+          description: Updated lead
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lead"
+
+  /transcripts:
+    get:
+      operationId: getTranscripts
+      tags: [transcripts]
+      summary: Get all transcripts for the agency
+      parameters:
+        - name: leadId
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: channel
+          in: query
+          schema:
+            type: string
+            enum: [voice, chat]
+      responses:
+        "200":
+          description: List of transcripts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Transcript"
+
+  /transcripts/{id}:
+    get:
+      operationId: getTranscript
+      tags: [transcripts]
+      summary: Get a specific transcript with messages
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Transcript with messages
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TranscriptDetail"
+        "404":
+          description: Not found
+
+  /staff:
+    get:
+      operationId: getStaff
+      tags: [staff]
+      summary: Get all staff members in the agency
+      responses:
+        "200":
+          description: List of staff
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/StaffMember"
+    post:
+      operationId: inviteStaff
+      tags: [staff]
+      summary: Invite a new staff member
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InviteStaffBody"
+      responses:
+        "201":
+          description: Invited
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StaffMember"
+
+  /staff/{id}:
+    delete:
+      operationId: removeStaff
+      tags: [staff]
+      summary: Remove a staff member
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Removed
+
+  /billing/subscription:
+    get:
+      operationId: getBillingSubscription
+      tags: [billing]
+      summary: Get current subscription details
+      responses:
+        "200":
+          description: Subscription info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Subscription"
+
+  /billing/usage:
+    get:
+      operationId: getBillingUsage
+      tags: [billing]
+      summary: Get current AI minutes usage
+      responses:
+        "200":
+          description: Usage summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsageSummary"
+
+  /billing/checkout:
+    post:
+      operationId: createCheckout
+      tags: [billing]
+      summary: Create hybrid Stripe checkout (onboarding fee + subscription)
+      responses:
+        "200":
+          description: Checkout URL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckoutResponse"
+
+  /billing/success:
+    get:
+      operationId: billingSuccess
+      tags: [billing]
+      summary: Redirect to billing success page after Stripe checkout
+      parameters:
+        - name: session_id
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "302":
+          description: Redirect to frontend success page
+
+  /billing/portal:
+    post:
+      operationId: createBillingPortal
+      tags: [billing]
+      summary: Create Stripe customer portal session
+      responses:
+        "200":
+          description: Portal URL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckoutResponse"
+
+  /billing/invoices:
+    get:
+      operationId: getBillingInvoices
+      tags: [billing]
+      summary: Get billing invoices
+      responses:
+        "200":
+          description: Invoice list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Invoice"
+
+  /ai/chat:
+    post:
+      operationId: aiChat
+      tags: [ai]
+      summary: AI receptionist chat message
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AiChatBody"
+      responses:
+        "200":
+          description: AI response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiChatResponse"
+
+  /ai/send-form:
+    post:
+      operationId: aiSendForm
+      tags: [ai]
+      summary: Email tenancy application form to prospect
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendFormBody"
+      responses:
+        "200":
+          description: Form sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SendFormResponse"
+
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get dashboard metrics summary
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
+  /dashboard/recent-leads:
+    get:
+      operationId: getRecentLeads
+      tags: [dashboard]
+      summary: Get recent leads (last 10)
+      responses:
+        "200":
+          description: Recent leads
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Lead"
+
+  /dashboard/lead-breakdown:
+    get:
+      operationId: getLeadBreakdown
+      tags: [dashboard]
+      summary: Get lead type breakdown counts
+      responses:
+        "200":
+          description: Lead breakdown
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LeadBreakdown"
+
+  /dashboard/activity:
+    get:
+      operationId: getDashboardActivity
+      tags: [dashboard]
+      summary: Get recent activity feed
+      responses:
+        "200":
+          description: Activity items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ActivityItem"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    Agency:
+      type: object
+      properties:
+        id:
+          type: integer
+        clerkOrgId:
+          type: string
+        name:
+          type: string
+        abn:
+          type: string
+        contactEmail:
+          type: string
+        contactPhone:
+          type: ["string", "null"]
+        address:
+          type: ["string", "null"]
+        logoUrl:
+          type: ["string", "null"]
+        stripeCustomerId:
+          type: ["string", "null"]
+        subscriptionStatus:
+          type: string
+          enum: [pending, active, past_due, canceled, trialing]
+        setupFeePaid:
+          type: boolean
+        termsAccepted:
+          type: boolean
+        seatCount:
+          type: integer
+        aiMinutesUsed:
+          type: integer
+        aiMinutesIncluded:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - clerkOrgId
+        - name
+        - abn
+        - contactEmail
+        - subscriptionStatus
+        - setupFeePaid
+        - termsAccepted
+        - seatCount
+        - aiMinutesUsed
+        - aiMinutesIncluded
+        - createdAt
+
+    UpdateAgencyBody:
+      type: object
+      properties:
+        name:
+          type: string
+        contactEmail:
+          type: string
+        contactPhone:
+          type: string
+        address:
+          type: string
+        logoUrl:
+          type: string
+
+    OnboardAgencyBody:
+      type: object
+      properties:
+        clerkOrgId:
+          type: string
+        name:
+          type: string
+        abn:
+          type: string
+        contactEmail:
+          type: string
+        contactPhone:
+          type: string
+        seatCount:
+          type: integer
+        termsAccepted:
+          type: boolean
+      required:
+        - clerkOrgId
+        - name
+        - abn
+        - contactEmail
+        - seatCount
+        - termsAccepted
+
+    Listing:
+      type: object
+      properties:
+        id:
+          type: integer
+        agencyId:
+          type: integer
+        address:
+          type: string
+        suburb:
+          type: string
+        state:
+          type: string
+        postcode:
+          type: string
+        price:
+          type: ["string", "null"]
+        listingType:
+          type: string
+          enum: [sale, rental]
+        bedrooms:
+          type: ["integer", "null"]
+        bathrooms:
+          type: ["integer", "null"]
+        agentName:
+          type: string
+        agentMobile:
+          type: string
+        inspectionTimes:
+          type: array
+          items:
+            type: string
+        vaultreId:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [active, under_offer, sold, leased]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - agencyId
+        - address
+        - suburb
+        - state
+        - postcode
+        - listingType
+        - agentName
+        - agentMobile
+        - inspectionTimes
+        - status
+        - createdAt
+
+    CreateListingBody:
+      type: object
+      properties:
+        address:
+          type: string
+        suburb:
+          type: string
+        state:
+          type: string
+        postcode:
+          type: string
+        price:
+          type: string
+        listingType:
+          type: string
+          enum: [sale, rental]
+        bedrooms:
+          type: integer
+        bathrooms:
+          type: integer
+        agentName:
+          type: string
+        agentMobile:
+          type: string
+        inspectionTimes:
+          type: array
+          items:
+            type: string
+      required:
+        - address
+        - suburb
+        - state
+        - postcode
+        - listingType
+        - agentName
+        - agentMobile
+
+    UpdateListingBody:
+      type: object
+      properties:
+        price:
+          type: string
+        status:
+          type: string
+          enum: [active, under_offer, sold, leased]
+        inspectionTimes:
+          type: array
+          items:
+            type: string
+        agentMobile:
+          type: string
+
+    SyncResult:
+      type: object
+      properties:
+        synced:
+          type: integer
+        added:
+          type: integer
+        updated:
+          type: integer
+        message:
+          type: string
+      required:
+        - synced
+        - added
+        - updated
+        - message
+
+    Lead:
+      type: object
+      properties:
+        id:
+          type: integer
+        agencyId:
+          type: integer
+        name:
+          type: string
+        email:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
+        leadType:
+          type: string
+          enum: [buyer, tenant, landlord, vendor, unknown]
+        status:
+          type: string
+          enum: [new, contacted, qualified, closed]
+        listingId:
+          type: ["integer", "null"]
+        listingAddress:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        formRequested:
+          type: boolean
+        hotLead:
+          type: boolean
+        channel:
+          type: string
+          enum: [voice, chat, web]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - agencyId
+        - name
+        - leadType
+        - status
+        - formRequested
+        - hotLead
+        - channel
+        - createdAt
+
+    CreateLeadBody:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        leadType:
+          type: string
+          enum: [buyer, tenant, landlord, vendor, unknown]
+        listingId:
+          type: integer
+        notes:
+          type: string
+        channel:
+          type: string
+          enum: [voice, chat, web]
+      required:
+        - name
+        - leadType
+        - channel
+
+    UpdateLeadBody:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [new, contacted, qualified, closed]
+        notes:
+          type: string
+        hotLead:
+          type: boolean
+        formRequested:
+          type: boolean
+
+    Transcript:
+      type: object
+      properties:
+        id:
+          type: integer
+        agencyId:
+          type: integer
+        leadId:
+          type: ["integer", "null"]
+        leadName:
+          type: ["string", "null"]
+        channel:
+          type: string
+          enum: [voice, chat]
+        duration:
+          type: ["integer", "null"]
+        summary:
+          type: ["string", "null"]
+        recordingUrl:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - agencyId
+        - channel
+        - createdAt
+
+    TranscriptDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+        agencyId:
+          type: integer
+        leadId:
+          type: ["integer", "null"]
+        leadName:
+          type: ["string", "null"]
+        channel:
+          type: string
+          enum: [voice, chat]
+        duration:
+          type: ["integer", "null"]
+        summary:
+          type: ["string", "null"]
+        recordingUrl:
+          type: ["string", "null"]
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/TranscriptMessage"
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - agencyId
+        - channel
+        - messages
+        - createdAt
+
+    TranscriptMessage:
+      type: object
+      properties:
+        id:
+          type: integer
+        role:
+          type: string
+          enum: [assistant, user]
+        content:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+      required:
+        - id
+        - role
+        - content
+        - timestamp
+
+    StaffMember:
+      type: object
+      properties:
+        id:
+          type: integer
+        agencyId:
+          type: integer
+        clerkUserId:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          enum: [principal, agent]
+        status:
+          type: string
+          enum: [active, invited, inactive]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - agencyId
+        - clerkUserId
+        - name
+        - email
+        - role
+        - status
+        - createdAt
+
+    InviteStaffBody:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          enum: [principal, agent]
+      required:
+        - name
+        - email
+        - role
+
+    Subscription:
+      type: object
+      properties:
+        status:
+          type: string
+        planName:
+          type: string
+        seatCount:
+          type: integer
+        baseFeeAud:
+          type: number
+        perSeatFeeAud:
+          type: number
+        totalMonthlyAud:
+          type: number
+        nextBillingDate:
+          type: ["string", "null"]
+        setupFeePaid:
+          type: boolean
+      required:
+        - status
+        - planName
+        - seatCount
+        - baseFeeAud
+        - perSeatFeeAud
+        - totalMonthlyAud
+        - setupFeePaid
+
+    UsageSummary:
+      type: object
+      properties:
+        minutesUsed:
+          type: integer
+        minutesIncluded:
+          type: integer
+        overageBlocks:
+          type: integer
+        overageCostAud:
+          type: number
+        periodStart:
+          type: string
+          format: date-time
+        periodEnd:
+          type: string
+          format: date-time
+      required:
+        - minutesUsed
+        - minutesIncluded
+        - overageBlocks
+        - overageCostAud
+        - periodStart
+        - periodEnd
+
+    CheckoutBody:
+      type: object
+      properties:
+        successUrl:
+          type: string
+        cancelUrl:
+          type: string
+      required:
+        - successUrl
+        - cancelUrl
+
+    SubscriptionCheckoutBody:
+      type: object
+      properties:
+        seatCount:
+          type: integer
+        successUrl:
+          type: string
+        cancelUrl:
+          type: string
+      required:
+        - seatCount
+        - successUrl
+        - cancelUrl
+
+    CheckoutResponse:
+      type: object
+      properties:
+        url:
+          type: string
+      required:
+        - url
+
+    Invoice:
+      type: object
+      properties:
+        id:
+          type: string
+        number:
+          type: string
+        amountAud:
+          type: number
+        status:
+          type: string
+          enum: [paid, open, void, draft]
+        description:
+          type: string
+        pdfUrl:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - number
+        - amountAud
+        - status
+        - description
+        - createdAt
+
+    AiChatBody:
+      type: object
+      properties:
+        sessionId:
+          type: string
+        message:
+          type: string
+        agencyId:
+          type: ["integer", "null"]
+      required:
+        - sessionId
+        - message
+
+    AiChatResponse:
+      type: object
+      properties:
+        reply:
+          type: string
+        action:
+          type: ["string", "null"]
+          enum: [send_form, transfer_call, collect_lead, null]
+        leadData:
+          type: object
+          properties:
+            name:
+              type: string
+            email:
+              type: string
+            phone:
+              type: string
+            leadType:
+              type: string
+          additionalProperties: true
+      required:
+        - reply
+
+    SendFormBody:
+      type: object
+      properties:
+        email:
+          type: string
+        name:
+          type: string
+        listingAddress:
+          type: string
+        agencyName:
+          type: string
+      required:
+        - email
+        - name
+
+    SendFormResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+      required:
+        - success
+        - message
+
+    DashboardSummary:
+      type: object
+      properties:
+        totalLeads:
+          type: integer
+        newLeadsToday:
+          type: integer
+        activeListings:
+          type: integer
+        aiMinutesUsed:
+          type: integer
+        aiMinutesIncluded:
+          type: integer
+        formsRequested:
+          type: integer
+        hotLeads:
+          type: integer
+        transcriptsThisMonth:
+          type: integer
+      required:
+        - totalLeads
+        - newLeadsToday
+        - activeListings
+        - aiMinutesUsed
+        - aiMinutesIncluded
+        - formsRequested
+        - hotLeads
+        - transcriptsThisMonth
+
+    LeadBreakdown:
+      type: object
+      properties:
+        buyers:
+          type: integer
+        tenants:
+          type: integer
+        landlords:
+          type: integer
+        vendors:
+          type: integer
+        unknown:
+          type: integer
+      required:
+        - buyers
+        - tenants
+        - landlords
+        - vendors
+        - unknown
+
+    ActivityItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+          enum: [new_lead, transcript, form_request, hot_lead, listing_sync]
+        description:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        metadata:
+          type: object
+          additionalProperties: true
+      required:
+        - id
+        - type
+        - description
+        - timestamp
