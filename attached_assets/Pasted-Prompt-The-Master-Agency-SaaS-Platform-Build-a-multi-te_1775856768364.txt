@@ -1,0 +1,71 @@
+Prompt: The "Master Agency" SaaS Platform
+Build a multi-tenant SaaS platform called [Your Brand Name] (focused on Real Estate AI but expandable to other sectors).
+
+1. Multi-Tenant Architecture & Auth
+Stack: React (Frontend), Node.js/Express (Backend), PostgreSQL (Database).
+
+Authentication: Use Clerk to manage "Organizations."
+
+The Principal (Admin) can invite Staff Members (Agents) via email.
+
+Data must be strictly siloed by agency_id.
+
+2. Seat-Based & Usage Billing (Stripe Integration)
+Setup Fee: One-time checkout of $1,500 AUD for Training & Onboarding.
+
+Subscription Logic:
+
+Base: $299/mo (Includes 1st User).
+
+Additional Seats: $89/user/month (automatically calculated based on Clerk organization size).
+
+Metered Billing: Track AI minutes. Include 100 mins/mo. Trigger $25 per 10-minute block overage.
+
+Invoicing: Automate GST-compliant Tax Invoices sent via Stripe.
+
+3. AI Receptionist (Voice & Chat)
+Integration: OpenAI (LLM) + Vapi.ai (Voice) + Twilio (Phone Numbers).
+
+CRM Sync: Create a bridge for VaultRE API to fetch listings (Address, Price, Inspection Times, Agent Contact).
+
+The "Tenant" Path: - If a user asks to apply, provide the RealEstate.com.au link.
+
+Offer a "Paper/PDF" option. If selected, trigger an email via SendGrid with the NSW Fair Trading Standard Tenancy Form and a custom Agency PDF attached.
+
+Live Handoff: If a "hot lead" is detected (e.g., "I want to make an offer"), the AI must trigger a call transfer to the Listing Agent's mobile.
+
+4. Principal Dashboard (The Command Centre)
+Lead Inbox: Show all AI chat/voice transcripts and call recordings.
+
+Form Log: Track which prospective tenants requested paper applications.
+
+Staff Management: Add/Remove agents (this must sync with Stripe billing quantity).
+
+Billing Tab: Show usage credits and history.
+
+5. Legal & Onboarding (Master Website)
+Sign-up Funnel: Step-by-step onboarding (Agency Details -> User Count -> Payment).
+
+Legal Gate: A mandatory checkbox for SaaS Terms and Conditions and Privacy Policy (Australian Privacy Act & AI Disclosure compliant).
+
+Resources: A tab to download the "Client Manual PDF."
+
+6. Design Aesthetic
+Style: "Professional Enterprise."
+
+Colors: Deep Navy, Slate Gray, and Emerald Green (success/growth color).
+
+Responsive: Optimized for Principals viewing leads on their iPhones while on the road.
+
+Crucial Setup Note for You (After pasting):
+Once the Agent starts building, it will ask for Environment Variables (Secrets). You will need to provide:
+
+STRIPE_SECRET_KEY (From your Stripe Dashboard)
+
+CLERK_SECRET_KEY (From your Clerk Dashboard)
+
+OPENAI_API_KEY (From OpenAI)
+
+VAULTRE_API_KEY (Your developer key)
+
+SENDGRID_API_KEY (For emailing the PDF forms)

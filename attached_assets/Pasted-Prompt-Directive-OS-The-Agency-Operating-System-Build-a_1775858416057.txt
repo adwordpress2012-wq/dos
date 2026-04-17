@@ -1,0 +1,49 @@
+Prompt: Directive OS – The Agency Operating System
+Build a multi-tenant SaaS platform called Directive OS (hosted at directiveos.com.au and directive.ai). This is a business "Operating System" designed to automate lead flow and receptionist duties for Real Estate Agencies.
+
+1. Brand Identity & "System" Logic
+Brand Name: Directive OS
+
+Concept: Position the software as the Core Infrastructure of the agency.
+
+UI Design: The dashboard must feel like a "Command Bridge." Use a modular, high-tech interface (Slate Gray, Navy, and Gold accents).
+
+Terminology: Use system-centric language: "Communication Protocols" instead of "Settings," "System Logs" instead of "History," and "Station Intelligence" for the AI persona.
+
+2. Multi-Tenant Architecture & Auth
+Stack: React (Frontend), Node.js (Backend), PostgreSQL (Database).
+
+Authentication: Use Clerk Organizations.
+
+Principals: Control the "Master System" and billing.
+
+Agents: Assigned to specific "Seats" with access to their own leads.
+
+Siloing: Data must be strictly partitioned by agency_id to comply with the Australian Privacy Act.
+
+3. Seat-Based Billing (Stripe Integration)
+The "Onboarding Protocol": A one-time checkout of $1,500 AUD.
+
+The "License Fee": - Base: $299/mo (includes the first seat).
+
+Additional Seats: Automatically detect Clerk organization size and charge $89/user/month.
+
+Overage: Metered billing for AI minutes ($25 per 10-min block after the first 100 mins).
+
+4. AI Receptionist & CRM Bridge
+Integrations: OpenAI (GPT-4o) + Vapi.ai (Voice) + Twilio.
+
+VaultRE Sync: Fetch property listings and agent mobile numbers in real-time.
+
+Automated Forms: - When the AI identifies a tenant lead, offer to email the NSW Fair Trading Standard Tenancy Form.
+
+Trigger emails via SendGrid with the PDF attached.
+
+Protocol Handoff: If a caller expresses high intent (e.g., "I want to buy"), the AI must execute a live transfer to the listing agent.
+
+5. Legal Gate & Master Site
+Onboarding Funnel: Agency ABN entry -> Seat selection -> Stripe Payment.
+
+Mandatory Agreement: Use a checkbox for the "SaaS Terms and Conditions" (Drafted for Australian Law and AI Disclosure). The system must not provision the account until this is checked.
+
+Client Resources: A "Manual" section providing the Agency Operations Guide.
