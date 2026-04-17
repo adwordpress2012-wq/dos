@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>How It Works | HomePath Western Sydney</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <script>
+    tailwind.config = {
+      theme: { extend: { fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] } } }
+    }
+  </script>
+  <style>
+    * { font-family: 'Inter', system-ui, sans-serif; }
+    html { scroll-behavior: smooth; }
+    .chat-panel { transform: translateY(16px); opacity: 0; pointer-events: none; transition: all 0.25s ease; }
+    .chat-panel.open { transform: translateY(0); opacity: 1; pointer-events: all; }
+    .step-line::after {
+      content: '';
+      position: absolute;
+      top: 28px;
+      left: calc(50% + 28px);
+      width: calc(100% - 56px);
+      height: 2px;
+      background: linear-gradient(90deg, #dc2626, #1f2937);
+    }
+    .dot-grid { background-image: radial-gradient(circle, #dc2626 1px, transparent 1px); background-size: 28px 28px; }
+  </style>
+</head>
+<body class="bg-white text-gray-900 antialiased">
+
+  <!-- HEADER -->
+  <header class="fixed top-0 w-full z-50 bg-black border-b border-red-700">
+    <div class="max-w-7xl mx-auto px-5 lg:px-8 flex items-center justify-between h-16">
+      <a href="index.html" class="flex items-center gap-3">
+        <span class="text-white font-black text-xl tracking-tight">HOME<span class="text-red-600">PATH</span></span>
+        <span class="hidden sm:block text-gray-500 text-xs font-medium tracking-[0.2em] uppercase border-l border-gray-700 pl-3">Western Sydney</span>
+      </a>
+      <nav class="hidden md:flex items-center gap-8">
+        <a href="index.html" class="text-gray-400 hover:text-white text-sm font-medium transition-colors">Home</a>
+        <a href="how-it-works.html" class="text-red-500 text-sm font-semibold">How It Works</a>
+        <a href="contact.html" class="text-gray-400 hover:text-white text-sm font-medium transition-colors">Contact</a>
+      </nav>
+      <a href="tel:0400000000" class="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded text-sm font-bold transition-colors">
+        <i class="fas fa-phone text-xs"></i>
+        <span>Call Sarah</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- PAGE HERO -->
+  <section class="relative bg-black pt-32 pb-24 overflow-hidden">
+    <div class="absolute inset-0 opacity-5 dot-grid"></div>
+    <div class="absolute inset-0 bg-gradient-to-br from-black via-black to-red-950 opacity-90"></div>
+    <div class="relative z-10 max-w-4xl mx-auto px-5 text-center">
+      <span class="inline-block text-red-500 text-xs font-bold tracking-[0.35em] uppercase mb-5 border border-red-800 px-4 py-1.5 rounded-full">Simple. Fast. Trusted.</span>
+      <h1 class="text-5xl md:text-6xl font-black text-white leading-tight mb-6">
+        How <span class="text-red-600">HomePath</span><br />Works
+      </h1>
+      <p class="text-gray-400 text-lg max-w-2xl mx-auto leading-relaxed">
+        From first search to settled — our streamlined process makes buying or renting a property in Western Sydney effortless.
+      </p>
+    </div>
+  </section>
+
+  <!-- PROCESS STEPS -->
+  <section class="py-24 bg-white">
+    <div class="max-w-7xl mx-auto px-5 lg:px-8">
+      <div class="text-center mb-16">
+        <span class="text-red-600 text-xs font-bold tracking-[0.3em] uppercase">The Process</span>
+        <h2 class="text-4xl font-black text-black mt-2">Four Steps to Your New Home</h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8 relative">
+
+        <!-- Step 1 -->
+        <div class="text-center group">
+          <div class="relative inline-block mb-6">
+            <div class="w-14 h-14 bg-red-600 rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform shadow-lg shadow-red-600/30">
+              <i class="fas fa-search text-white text-lg"></i>
+            </div>
+            <span class="absolute -top-2 -right-2 w-6 h-6 bg-black text-white text-xs font-black rounded-full flex items-center justify-center border-2 border-red-600">1</span>
+          </div>
+          <h3 class="font-black text-black text-xl mb-3">Browse & Discover</h3>
+          <p class="text-gray-500 text-sm leading-relaxed">Search our curated listings using smart filters — suburb, price, bedrooms, property type. Shortlist your favourites instantly.</p>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="text-center group">
+          <div class="relative inline-block mb-6">
+            <div class="w-14 h-14 bg-red-600 rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform shadow-lg shadow-red-600/30">
+              <i class="fas fa-user-tie text-white text-lg"></i>
+            </div>
+            <span class="absolute -top-2 -right-2 w-6 h-6 bg-black text-white text-xs font-black rounded-full flex items-center justify-center border-2 border-red-600">2</span>
+          </div>
+          <h3 class="font-black text-black text-xl mb-3">Connect with Sarah</h3>
+          <p class="text-gray-500 text-sm leading-relaxed">Chat, call or email Sarah directly. She'll understand your needs, answer every question and guide you with honest local expertise.</p>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="text-center group">
+          <div class="relative inline-block mb-6">
+            <div class="w-14 h-14 bg-red-600 rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform shadow-lg shadow-red-600/30">
+              <i class="fas fa-home text-white text-lg"></i>
+            </div>
+            <span class="absolute -top-2 -right-2 w-6 h-6 bg-black text-white text-xs font-black rounded-full flex items-center justify-center border-2 border-red-600">3</span>
+          </div>
+          <h3 class="font-black text-black text-xl mb-3">Tour Properties</h3>
+          <p class="text-gray-500 text-sm leading-relaxed">Book in-person inspections or explore immersive 3D virtual tours from anywhere. See every detail before you commit.</p>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="text-center group">
+          <div class="relative inline-block mb-6">
+            <div class="w-14 h-14 bg-red-600 rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform shadow-lg shadow-red-600/30">
+              <i class="fas fa-handshake text-white text-lg"></i>
+            </div>
+            <span class="absolute -top-2 -right-2 w-6 h-6 bg-black text-white text-xs font-black rounded-full flex items-center justify-center border-2 border-red-600">4</span>
+          </div>
+          <h3 class="font-black text-black text-xl mb-3">Secure Your Home</h3>
+          <p class="text-gray-500 text-sm leading-relaxed">We handle every contract, negotiation and settlement step. Move in with confidence — zero stress, zero surprises.</p>
+        </div>
+
+      </div>
+
+      <!-- Connecting line -->
+      <div class="hidden md:flex items-center mt-2 px-16">
+        <div class="flex-1 h-0.5 bg-gradient-to-r from-red-600 via-gray-300 to-red-600 opacity-30"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES GRID -->
+  <section class="py-24 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-5 lg:px-8">
+      <div class="text-center mb-16">
+        <span class="text-red-600 text-xs font-bold tracking-[0.3em] uppercase">Platform Features</span>
+        <h2 class="text-4xl font-black text-black mt-2">Everything You Need</h2>
+        <p class="text-gray-500 text-lg mt-3 max-w-xl mx-auto">A complete end-to-end property platform built for Western Sydney buyers and renters.</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        <div class="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg hover:border-red-100 transition-all group">
+          <div class="w-12 h-12 bg-red-50 group-hover:bg-red-600 rounded-xl flex items-center justify-center mb-5 transition-colors">
+            <i class="fas fa-sliders-h text-red-600 group-hover:text-white transition-colors"></i>
+          </div>
+          <h3 class="font-bold text-black text-lg mb-2">Smart Search Filters</h3>
+          <p class="text-gray-500 text-sm leading-relaxed">Filter by suburb, price range, property type, bedrooms, school zones and more. Find exactly what you want, fast.</p>
+        </div>
+
+        <div class="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg hover:border-red-100 transition-all group">
+          <div class="w-12 h-12 bg-red-50 group-hover:bg-red-600 rounded-xl flex items-center justify-center mb-5 transition-colors">
+            <i class="fas fa-vr-cardboard text-red-600 group-hover:text-white transition-colors"></i>
+          </div>
+          <h3 class="font-bold text-black text-lg mb-2">3D Virtual Tours</h3>
+          <p class="text-gray-500 text-sm leading-relaxed">Walk through every property from your lounge room. Immersive 360° tours let you inspect every room before booking.</p>
+        </div>
+
+        <div class="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg hover:border-red-100 transition-all group">
+          <div class="w-12 h-12 bg-red-50 group-hover:bg-red-600 rounded-xl flex items-center justify-center mb-5 transition-colors">
+            <i class="fas fa-chart-line text-red-600 group-hover:text-white transition-colors"></i>
+          </div>
+          <h3 class="font-bold text-black text-lg mb-2">Live Market Insights</h3>
+          <p class="text-gray-500 text-sm leading-relaxed">Real-time suburb data, median prices, auction clearance rates and growth trends so you can buy with confidence.</p>
+        </div>
+
+        <div class="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg hover:border-red-100 transition-all group">
+          <div class="w-12 h-12 bg-red-50 group-hover:bg-red-600 rounded-xl flex items-center justify-center mb-5 transition-colors">
+            <i class="fas fa-bell text-red-600 group-hover:text-white transition-colors"></i>
+          </div>
+          <h3 class="font-bold text-black text-lg mb-2">Instant Alerts</h3>
+          <p class="text-gray-500 text-sm leading-relaxed">Never miss a new listing. Set your search criteria and receive instant SMS and email notifications the moment a match goes live.</p>
+        </div>
+
+        <div class="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg hover:border-red-100 transition-all group">
+          <div class="w-12 h-12 bg-red-50 group-hover:bg-red-600 rounded-xl flex items-center justify-center mb-5 transition-colors">
+            <i class="fas fa-file-contract text-red-600 group-hover:text-white transition-colors"></i>
+          </div>
+          <h3 class="font-bold text-black text-lg mb-2">Digital Contracts</h3>
+          <p class="text-gray-500 text-sm leading-relaxed">Sign, review and manage all documents securely online. Our digital contract system means no printing, no faxing, no delays.</p>
+        </div>
+
+        <div class="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg hover:border-red-100 transition-all group">
+          <div class="w-12 h-12 bg-red-50 group-hover:bg-red-600 rounded-xl flex items-center justify-center mb-5 transition-colors">
+            <i class="fas fa-comments text-red-600 group-hover:text-white transition-colors"></i>
+          </div>
+          <h3 class="font-bold text-black text-lg mb-2">24/7 Chat with Sarah</h3>
+          <p class="text-gray-500 text-sm leading-relaxed">Questions at midnight? Sarah's available. Use the chat widget any time to get instant expert answers about any property.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section class="py-20 bg-black">
+    <div class="max-w-7xl mx-auto px-5 lg:px-8">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+        <div class="border border-gray-800 rounded-2xl p-8 hover:border-red-600 transition-colors">
+          <p class="text-5xl font-black text-white mb-2">500<span class="text-red-600">+</span></p>
+          <p class="text-gray-500 text-sm font-medium uppercase tracking-widest">Active Listings</p>
+        </div>
+        <div class="border border-gray-800 rounded-2xl p-8 hover:border-red-600 transition-colors">
+          <p class="text-5xl font-black text-white mb-2">1,200<span class="text-red-600">+</span></p>
+          <p class="text-gray-500 text-sm font-medium uppercase tracking-widest">Happy Clients</p>
+        </div>
+        <div class="border border-gray-800 rounded-2xl p-8 hover:border-red-600 transition-colors">
+          <p class="text-5xl font-black text-white mb-2">15<span class="text-red-600">+</span></p>
+          <p class="text-gray-500 text-sm font-medium uppercase tracking-widest">Years Experience</p>
+        </div>
+        <div class="border border-gray-800 rounded-2xl p-8 hover:border-red-600 transition-colors">
+          <p class="text-5xl font-black text-white mb-2">$2B<span class="text-red-600">+</span></p>
+          <p class="text-gray-500 text-sm font-medium uppercase tracking-widest">Total Sales</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIAL -->
+  <section class="py-24 bg-white">
+    <div class="max-w-4xl mx-auto px-5 text-center">
+      <span class="text-red-600 text-xs font-bold tracking-[0.3em] uppercase">Client Stories</span>
+      <h2 class="text-4xl font-black text-black mt-2 mb-14">What Our Clients Say</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="text-left p-8 border border-gray-100 rounded-2xl shadow-sm">
+          <div class="flex gap-1 mb-4">
+            <i class="fas fa-star text-red-600 text-sm"></i><i class="fas fa-star text-red-600 text-sm"></i><i class="fas fa-star text-red-600 text-sm"></i><i class="fas fa-star text-red-600 text-sm"></i><i class="fas fa-star text-red-600 text-sm"></i>
+          </div>
+          <p class="text-gray-600 text-sm leading-relaxed mb-5">"Sarah found us our Penrith home in under two weeks. The process was seamless and she was available every step of the way."</p>
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 bg-black rounded-full flex items-center justify-center text-white text-sm font-bold">M</div>
+            <div><p class="text-black font-semibold text-sm">Mark & Lisa T.</p><p class="text-gray-400 text-xs">Penrith, NSW</p></div>
+          </div>
+        </div>
+        <div class="text-left p-8 border border-gray-100 rounded-2xl shadow-sm">
+          <div class="flex gap-1 mb-4">
+            <i class="fas fa-star text-red-600 text-sm"></i><i class="fas fa-star text-red-600 text-sm"></i><i class="fas fa-star text-red-600 text-sm"></i><i class="fas fa-star text-red-600 text-sm"></i><i class="fas fa-star text-red-600 text-sm"></i>
+          </div>
+          <p class="text-gray-600 text-sm leading-relaxed mb-5">"The virtual tours saved us so much time. We could narrow down to 3 properties before ever leaving home. Absolutely brilliant."</p>
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 bg-red-600 rounded-full flex items-center justify-center text-white text-sm font-bold">J</div>
+            <div><p class="text-black font-semibold text-sm">James K.</p><p class="text-gray-400 text-xs">Marsden Park, NSW</p></div>
+          </div>
+        </div>
+        <div class="text-left p-8 border border-gray-100 rounded-2xl shadow-sm">
+          <div class="flex gap-1 mb-4">
+            <i class="fas fa-star text-red-600 text-sm"></i><i class="fas fa-star text-red-600 text-sm"></i><i class="fas fa-star text-red-600 text-sm"></i><i class="fas fa-star text-red-600 text-sm"></i><i class="fas fa-star text-red-600 text-sm"></i>
+          </div>
+          <p class="text-gray-600 text-sm leading-relaxed mb-5">"As a first-time buyer I was terrified. Sarah walked me through every step. I'm now in my own CBD apartment and couldn't be happier."</p>
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 bg-gray-800 rounded-full flex items-center justify-center text-white text-sm font-bold">A</div>
+            <div><p class="text-black font-semibold text-sm">Aisha R.</p><p class="text-gray-400 text-xs">Sydney CBD, NSW</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="py-20 bg-red-600">
+    <div class="max-w-3xl mx-auto px-5 text-center">
+      <h2 class="text-4xl font-black text-white mb-4">Ready to Get Started?</h2>
+      <p class="text-red-100 text-lg mb-8">Talk to Sarah today and take the first step toward your new home.</p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="contact.html" class="bg-white text-red-600 hover:bg-gray-100 px-8 py-4 font-bold tracking-widest uppercase text-sm rounded transition-colors">Contact Us</a>
+        <a href="index.html" class="border-2 border-white text-white hover:bg-red-700 px-8 py-4 font-bold tracking-widest uppercase text-sm rounded transition-colors">Browse Listings</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="bg-black border-t border-gray-900 pt-16 pb-8">
+    <div class="max-w-7xl mx-auto px-5 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
+        <div>
+          <span class="text-white text-xl font-black">HOME<span class="text-red-600">PATH</span></span>
+          <p class="text-gray-500 text-sm mt-3 leading-relaxed">Western Sydney's premier real estate platform. Helping families find their dream home since 2010.</p>
+          <div class="flex gap-3 mt-5">
+            <a href="#" class="w-8 h-8 bg-gray-800 hover:bg-red-600 rounded-full flex items-center justify-center transition-colors"><i class="fab fa-facebook-f text-white text-xs"></i></a>
+            <a href="#" class="w-8 h-8 bg-gray-800 hover:bg-red-600 rounded-full flex items-center justify-center transition-colors"><i class="fab fa-instagram text-white text-xs"></i></a>
+            <a href="#" class="w-8 h-8 bg-gray-800 hover:bg-red-600 rounded-full flex items-center justify-center transition-colors"><i class="fab fa-linkedin-in text-white text-xs"></i></a>
+          </div>
+        </div>
+        <div>
+          <h4 class="text-white font-bold text-sm mb-5 tracking-wide">Properties</h4>
+          <ul class="space-y-3 text-gray-500 text-sm">
+            <li><a href="index.html" class="hover:text-red-500 transition-colors">Buy</a></li>
+            <li><a href="index.html" class="hover:text-red-500 transition-colors">Rent</a></li>
+            <li><a href="#" class="hover:text-red-500 transition-colors">Sell</a></li>
+            <li><a href="#" class="hover:text-red-500 transition-colors">New Homes</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-white font-bold text-sm mb-5 tracking-wide">Company</h4>
+          <ul class="space-y-3 text-gray-500 text-sm">
+            <li><a href="how-it-works.html" class="hover:text-red-500 transition-colors">How It Works</a></li>
+            <li><a href="contact.html" class="hover:text-red-500 transition-colors">Contact</a></li>
+            <li><a href="#" class="hover:text-red-500 transition-colors">About Us</a></li>
+            <li><a href="#" class="hover:text-red-500 transition-colors">Privacy Policy</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-white font-bold text-sm mb-5 tracking-wide">Contact Sarah</h4>
+          <ul class="space-y-3 text-gray-500 text-sm">
+            <li class="flex items-center gap-2.5"><i class="fas fa-phone text-red-600 w-3"></i> 0400 000 000</li>
+            <li class="flex items-center gap-2.5"><i class="fas fa-envelope text-red-600 w-3"></i> sarah@homepath.com.au</li>
+            <li class="flex items-center gap-2.5"><i class="fas fa-map-marker-alt text-red-600 w-3"></i> Penrith NSW 2750</li>
+          </ul>
+        </div>
+      </div>
+      <div class="border-t border-gray-900 pt-8 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <p class="text-gray-700 text-xs">© 2024 HomePath Western Sydney. All rights reserved. Licensed Real Estate Agent.</p>
+        <p class="text-gray-700 text-xs">Built by <span class="text-red-500 font-semibold">Directive OS</span></p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- FLOATING CHAT WIDGET -->
+  <div class="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+    <div id="chatPanel" class="chat-panel bg-white rounded-2xl shadow-2xl border border-gray-200 w-80 mb-4 overflow-hidden">
+      <div class="bg-black px-4 py-3.5 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-full bg-red-600 flex items-center justify-center text-white font-bold text-sm">S</div>
+          <div>
+            <p class="text-white font-semibold text-sm">Sarah</p>
+            <p class="text-green-400 text-xs flex items-center gap-1.5"><span class="w-1.5 h-1.5 bg-green-400 rounded-full inline-block animate-pulse"></span>Online now</p>
+          </div>
+        </div>
+        <button onclick="toggleChat()" class="text-gray-500 hover:text-white transition-colors w-7 h-7 flex items-center justify-center"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="p-4 h-52 overflow-y-auto bg-gray-50 flex flex-col gap-3">
+        <div class="flex gap-2">
+          <div class="w-7 h-7 bg-red-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1 text-white text-xs font-bold">S</div>
+          <div class="bg-white rounded-2xl rounded-tl-none px-3.5 py-2.5 shadow-sm text-sm text-gray-800 max-w-[220px]">👋 Hi! I'm Sarah. Looking to buy or rent in Western Sydney?</div>
+        </div>
+        <div class="flex gap-2">
+          <div class="w-7 h-7 bg-red-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1 text-white text-xs font-bold">S</div>
+          <div class="bg-white rounded-2xl rounded-tl-none px-3.5 py-2.5 shadow-sm text-sm text-gray-800 max-w-[220px]">I'd love to help you find your perfect home! 🏡 What's your budget?</div>
+        </div>
+      </div>
+      <div class="p-3 border-t border-gray-100 flex gap-2 bg-white">
+        <input type="text" placeholder="Type a message…" class="flex-1 bg-gray-100 rounded-full px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-red-500 transition-all" />
+        <button class="w-9 h-9 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center transition-colors flex-shrink-0">
+          <i class="fas fa-paper-plane text-white text-xs"></i>
+        </button>
+      </div>
+    </div>
+    <button onclick="toggleChat()" class="flex items-center gap-2.5 bg-red-600 hover:bg-red-700 text-white pl-4 pr-5 py-3 rounded-full shadow-2xl transition-all hover:scale-105 font-semibold text-sm">
+      <i class="fas fa-comments text-base"></i>
+      Chat with Sarah
+    </button>
+  </div>
+
+  <script>
+    function toggleChat() {
+      document.getElementById('chatPanel').classList.toggle('open');
+    }
+  </script>
+</body>
+</html>
