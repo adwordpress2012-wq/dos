@@ -83,3 +83,15 @@ id = "gRUE74oKJ_Ip39kr_dpEu"
 uri = "file://exports/directive-os-outreach-playbook.pdf"
 type = "pdf"
 title = "Directive OS — Outreach Playbook (Email · SMS · WhatsApp)"
+
+[[outputs]]
+id = "p47zYyyL1PEDo3Yu5hq6V"
+uri = "file://exports/signature/jayson-signature.png"
+type = "image"
+title = "Jayson Ocampo — Director of AI Solutions (PNG)"
+
+[[outputs]]
+id = "YwChbphFxt2zJrg8N1Aqk"
+uri = "file://exports/signature/jayson-signature.jpg"
+type = "image"
+title = "Jayson Ocampo — Director of AI Solutions (JPEG)"

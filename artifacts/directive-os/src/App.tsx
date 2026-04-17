@@ -59,6 +59,7 @@ import Brochure from "@/pages/marketing/brochure";
 import ReferralSchedule from "@/pages/marketing/referral-schedule";
 import LeaveBehind from "@/pages/marketing/leave-behind";
 import Signature from "@/pages/signature";
+import SignatureCard from "@/pages/signature-card";
 import QuoteRedirect from "@/pages/q";
 
 const queryClient = new QueryClient({
@@ -112,6 +113,7 @@ function Router() {
       <Route path="/marketing/referral-schedule" component={ReferralSchedule} />
       <Route path="/marketing/leave-behind" component={LeaveBehind} />
       <Route path="/signature" component={Signature} />
+      <Route path="/signature-card" component={SignatureCard} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/dashboard/leads" component={Leads} />
       <Route path="/dashboard/transcripts" component={Transcripts} />
