@@ -95,3 +95,15 @@ id = "YwChbphFxt2zJrg8N1Aqk"
 uri = "file://exports/signature/jayson-signature.jpg"
 type = "image"
 title = "Jayson Ocampo — Director of AI Solutions (JPEG)"
+
+[[outputs]]
+id = "pRWHpIreJeILFfsm5swYm"
+uri = "file://exports/signature/jayson-signature-dark.png"
+type = "image"
+title = "Jayson Ocampo — Director of AI Solutions (Dark PNG)"
+
+[[outputs]]
+id = "OnbpUiL8qBo8SN-6tjmd2"
+uri = "file://exports/signature/jayson-signature-dark.jpg"
+type = "image"
+title = "Jayson Ocampo — Director of AI Solutions (Dark JPEG)"
