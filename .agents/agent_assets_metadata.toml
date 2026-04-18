@@ -107,3 +107,9 @@ id = "OnbpUiL8qBo8SN-6tjmd2"
 uri = "file://exports/signature/jayson-signature-dark.jpg"
 type = "image"
 title = "Jayson Ocampo — Director of AI Solutions (Dark JPEG)"
+
+[[outputs]]
+id = "yCqqsc2QRYssHFEh8vpYL"
+uri = "file://exports/bookos-build-plan.pdf"
+type = "pdf"
+title = "BookOS — Build Plan & Workflow (PDF)"

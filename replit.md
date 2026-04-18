@@ -400,6 +400,21 @@ Each paying client gets a standalone branded landing page hosted at `directiveos
 
 ---
 
+## BookOS — Sister Product (Approved 17 April 2026)
+
+A stripped-down, SMB-priced sister product to Directive OS — Sarah-powered AI receptionist for hairdressers, barbers, beauty studios, plumbers, and small AU service businesses.
+
+- **Brand:** BookOS — separate from Directive OS
+- **Domain:** `bookos.com.au` preferred (subdomain `bookos.directiveos.com.au` as fallback)
+- **Booking model:** Sarah captures details + sends customer a Calendly link via SMS. NO end-customer payment.
+- **Pricing:** Solo $499 setup / $99 mo · Studio $799 / $149 mo · Multi $1,499 / $249 mo
+- **Tech:** Same `api-server`, same Postgres, same Sarah brain. New `vertical` column on agencies routes the persona.
+- **Build estimate:** ~355 AI minutes total (~6 hours), splittable into Sprint A (MVP, ~3.5h) + Sprint B (polish, ~2.5h).
+- **Full plan:** `.agents/skills/bookos-build-plan/SKILL.md`
+- **PDF:** `exports/bookos-build-plan.pdf`
+
+---
+
 ## Session Notes — 17 April 2026
 
 ### Sarah Voice Auto-Hangup Fix — DONE ✅
