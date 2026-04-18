@@ -1,1 +1,8 @@
-{"version": "2.0","services": {"api-server": {"type": "node","buildCommand": "pnpm install","startCommand": "pnpm start"},"directive-os": {"type": "node","buildCommand": "pnpm install","startCommand": "pnpm start"},"realestate-demo": {"type": "node","buildCommand": "pnpm install","startCommand": "pnpm start"}}}
+{
+  "build": {
+    "buildCommand": "pnpm install && pnpm --filter @workspace/directive-os build"
+  },
+  "deploy": {
+    "startCommand": "pnpm --filter @workspace/directive-os preview --host 0.0.0.0 --port 3000"
+  }
+}
