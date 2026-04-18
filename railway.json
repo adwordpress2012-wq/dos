@@ -1,0 +1,1 @@
+{"version": "2.0","services": {"api-server": {"type": "node","buildCommand": "pnpm install","startCommand": "pnpm start"},"directive-os": {"type": "node","buildCommand": "pnpm install","startCommand": "pnpm start"},"realestate-demo": {"type": "node","buildCommand": "pnpm install","startCommand": "pnpm start"}}}
