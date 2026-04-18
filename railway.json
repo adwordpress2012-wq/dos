@@ -1,8 +1,0 @@
-{
-  "build": {
-    "buildCommand": "pnpm install && pnpm --filter @workspace/directive-os build"
-  },
-  "deploy": {
-    "startCommand": "pnpm --filter @workspace/directive-os preview --host 0.0.0.0 --port 3000"
-  }
-}
