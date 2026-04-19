@@ -216,6 +216,30 @@ inspectionTimes: jsonb — array of strings "Sat 3 May, 10:00-10:30am"
 - All prices ex-GST
 - Calendly: https://calendly.com/adwordpress2012/directive-os-agency-onboarding
 
+## BookOS Pricing Model
+
+### Solo
+- $499 setup
+- $99/month
+- 1 seat / 1 chair / 1 tradie
+- 200 voice minutes included
+
+### Studio
+- $799 setup
+- $149/month
+- 2–5 seats
+- 400 voice minutes included
+
+### Multi-Location
+- $1,499 setup
+- $249/month
+- 6+ seats / multiple sites
+- 800 voice minutes included
+
+### Add-ons
+- Voice overage: $20 per 10 minutes
+- Per-seat add-on: +$25/month on Studio and Multi
+
 ## Stripe (test mode)
 
 - Secret key: `STRIPE_SECRET_KEY` env var
