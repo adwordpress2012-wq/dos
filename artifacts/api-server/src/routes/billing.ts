@@ -699,4 +699,95 @@ router.get("/billing/invoices", async (req, res): Promise<void> => {
   res.json(invoices);
 });
 
+// ─── PUBLIC: BookOS Checkout — called from bookos.com.au marketing site ───────
+// Creates a Stripe Checkout session with setup fee + subscription for chosen tier.
+// Uses env-var Price IDs — never computes prices in code.
+
+const BOOKOS_DOMAIN = process.env.BOOKOS_DOMAIN ?? "https://bookos.com.au";
+
+const BOOKOS_TIER_COPY: Record<string, { name: string; setupAud: number; subAud: number; minutes: number }> = {
+  solo:   { name: "Solo",           setupAud: 499,  subAud: 99,  minutes: 200 },
+  studio: { name: "Studio",         setupAud: 799,  subAud: 149, minutes: 400 },
+  multi:  { name: "Multi-Location", setupAud: 1499, subAud: 249, minutes: 800 },
+};
+
+router.post("/billing/bookos-checkout", async (req, res): Promise<void> => {
+  const {
+    tier = "solo",
+    businessName,
+    contactName,
+    email,
+    phone,
+    vertical = "salon",
+  } = req.body as {
+    tier?: string; businessName?: string; contactName?: string;
+    email?: string; phone?: string; vertical?: string;
+  };
+
+  if (!email || !businessName) {
+    res.status(400).json({ error: "email and businessName are required" }); return;
+  }
+
+  const t = tier.toLowerCase() as "solo" | "studio" | "multi";
+
+  const setupPriceId = process.env[`STRIPE_BOOKOS_${t.toUpperCase()}_SETUP_PRICE_ID`];
+  const subPriceId   = process.env[`STRIPE_BOOKOS_${t.toUpperCase()}_SUB_PRICE_ID`];
+
+  if (!setupPriceId || !subPriceId) {
+    res.status(500).json({
+      error: `BookOS Stripe Price IDs not configured for tier "${t}". Set STRIPE_BOOKOS_${t.toUpperCase()}_SETUP_PRICE_ID and STRIPE_BOOKOS_${t.toUpperCase()}_SUB_PRICE_ID.`,
+    });
+    return;
+  }
+
+  let stripe: Stripe;
+  try { stripe = getStripe(); } catch {
+    res.status(500).json({ error: "Stripe is not configured." }); return;
+  }
+
+  const tierCopy = BOOKOS_TIER_COPY[t] ?? BOOKOS_TIER_COPY.solo;
+
+  try {
+    const session = await stripe.checkout.sessions.create({
+      mode: "payment",
+      payment_method_types: ["card"],
+      customer_email: email,
+      payment_intent_data: {
+        setup_future_usage: "off_session",
+        metadata: { businessName, contactName: contactName ?? "", phone: phone ?? "", tier: t, vertical, source: "bookos_signup" },
+      },
+      line_items: [
+        { price: setupPriceId, quantity: 1 },
+        {
+          price_data: {
+            currency: "aud",
+            product_data: {
+              name: `BookOS ${tierCopy.name} — Month 1`,
+              description: `Then A$${tierCopy.subAud}/mo. Includes ${tierCopy.minutes} AI voice minutes.`,
+            },
+            unit_amount: tierCopy.subAud * 100,
+          },
+          quantity: 1,
+        },
+      ],
+      metadata: {
+        businessName,
+        contactName: contactName ?? "",
+        email,
+        phone: phone ?? "",
+        tier: t,
+        vertical,
+        source: "bookos_signup",
+      },
+      success_url: `${BOOKOS_DOMAIN}/signup/success?name=${encodeURIComponent(contactName ?? businessName)}`,
+      cancel_url: `${BOOKOS_DOMAIN}/pricing`,
+    });
+
+    res.json({ url: session.url });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    res.status(500).json({ error: `Failed to create BookOS checkout: ${message}` });
+  }
+});
+
 export default router;

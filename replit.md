@@ -567,6 +567,137 @@ The canonical cold outreach playbook is `exports/directive-os-outreach-playbook.
 - **Regenerate PDF**: `node exports/generate_outreach_pdf.js`
 - **Skill**: `.agents/skills/dos-outreach-playbook/SKILL.md`
 
+## BookOS — Sister Product (Sprint A — built 19 April 2026)
+
+BookOS is an AI receptionist for salons, trades businesses, and wellness providers. It shares the same api-server, Postgres DB, Twilio account, and OpenAI Realtime "Sarah" brain as Directive OS. No code fork.
+
+### What Was Built
+
+**Phase 1 — DB Schema** (`lib/db/src/schema/agencies.ts`)
+- Added `vertical text NOT NULL DEFAULT 'real_estate'` — enum: `real_estate | salon | trades | wellness | other`
+- Added `calendlyUrl text` — Calendly booking URL for BookOS agencies
+- Added `bookosTier text` — `solo | studio | multi`
+- All existing agencies default to `vertical = 'real_estate'` — no behavior change.
+- After any DB schema change: `DATABASE_URL=<url> pnpm --filter @workspace/db push`
+
+**Phase 2 — BookOS Personas** (`artifacts/api-server/src/routes/voice.ts`)
+- `buildSalonPersona(agency)` — warm, friendly salon receptionist, Calendly SMS closer
+- `buildTradesPersona(agency)` — efficient, straight-talking trades receptionist
+- `buildWellnessPersona(agency)` — calm, reassuring wellness receptionist
+- Persona routing in `handleMediaStream`: checks `agency.vertical` → calls the matching builder. `real_estate` and `other` use original `buildAgencyPersona()` unchanged.
+
+**Phase 3 — Calendly SMS Handoff** (`artifacts/api-server/src/routes/voice.ts`)
+- `sendCalendlyLinkSms(toNumber, businessName, calendlyUrl, summary)` — sends an SMS via Twilio REST API after every BookOS call
+- Fires in `onCallEnd()` when: `agency.vertical ∈ {salon, trades, wellness}` AND `callerPhone` captured AND `agency.calendlyUrl` set
+- SMS includes business name, Calendly link, one-line summary, and disclaimer
+- Requires env vars: `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER`
+
+**Phase 4 — BookOS Marketing Site** (`artifacts/bookos/`)
+- Vite + React 19 + Tailwind v3, standalone within pnpm workspace
+- Pages: Home, Pricing, How It Works, Demo, Sign-up, Login, Contact, SignUpSuccess
+- Hero: "Sarah answers every call. Your customers book themselves. You stay focused on the chair / the job."
+- "Try Sarah Now" CTA dials `VITE_BOOKOS_DEMO_NUMBER` (env var, default 02 5850 4038)
+- Signup → Stripe Checkout → `POST /api/billing/bookos-checkout` → uses env-var Price IDs
+- Railway deploy: `build = pnpm --filter @workspace/bookos build`, `start = pnpm --filter @workspace/bookos start`
+
+**Phase 7 — BookOS Bridge (Admin)** (`artifacts/api-server/src/routes/admin.ts` + `artifacts/directive-os/src/pages/admin/bridge.tsx`)
+- Captain's Bridge now has a "DIRECTIVE OS / BOOKOS BRIDGE" toggle at the top
+- **BookOS Bridge panel**: lists all non-real_estate agencies, has "CREATE CLIENT" button
+- **Create BookOS Client form**: business name, ABN, address, Calendly URL, tier, vertical, contact email/phone
+- On submit → `POST /api/admin/bookos/provision-client`:
+  1. Auto-purchases a Twilio AU local number (Sydney area code) if no phone supplied
+  2. Sets voice webhook to `BOOKOS_VOICE_WEBHOOK_URL` (default: `https://directiveos.com.au/api/voice/incoming`)
+  3. Inserts agency row with vertical, calendlyUrl, bookosTier, passwordHash
+  4. Emails temp login password to client
+- `GET /api/admin/bookos/clients` — lists BookOS agencies
+- `PATCH /api/admin/bookos/clients/:id` — update tier, calendlyUrl, vertical, phone
+
+**Stripe Webhook Extension** (`artifacts/api-server/src/app.ts`)
+- New handler: `checkout.session.completed` where `meta.source === 'bookos_signup'`
+- Creates `pending_setup` agency record, sends Jayson notification + client welcome email
+- Existing DOS/real-estate webhook behavior completely unchanged
+
+### BookOS Env Vars
+
+#### api-server (add to existing .env)
+```
+# BookOS Twilio — SMS for Calendly handoff
+TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+TWILIO_AUTH_TOKEN=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+TWILIO_FROM_NUMBER=+61XXXXXXXXXX
+
+# BookOS Stripe Price IDs (setup fee + subscription per tier)
+STRIPE_BOOKOS_SOLO_SETUP_PRICE_ID=price_xxxxx
+STRIPE_BOOKOS_SOLO_SUB_PRICE_ID=price_xxxxx
+STRIPE_BOOKOS_STUDIO_SETUP_PRICE_ID=price_xxxxx
+STRIPE_BOOKOS_STUDIO_SUB_PRICE_ID=price_xxxxx
+STRIPE_BOOKOS_MULTI_SETUP_PRICE_ID=price_xxxxx
+STRIPE_BOOKOS_MULTI_SUB_PRICE_ID=price_xxxxx
+
+# BookOS admin provisioning
+BOOKOS_VOICE_WEBHOOK_URL=https://directiveos.com.au/api/voice/incoming
+
+# BookOS domain (for Stripe success redirect)
+BOOKOS_DOMAIN=https://bookos.com.au
+```
+
+#### artifacts/bookos/.env (marketing site)
+```
+VITE_API_BASE_URL=https://directiveos.com.au/api
+VITE_BOOKOS_DEMO_NUMBER=0285504038
+VITE_BOOKOS_DEMO_DISPLAY=02 5850 4038
+```
+
+#### Staging (use these for Stripe TEST mode end-to-end testing)
+```
+VITE_API_BASE_URL=https://staging.directiveos.com.au/api
+STRIPE_KEY_ACTIVE=sk_test_xxxx
+STRIPE_WEBHOOK_SECRET=whsec_xxxx (from Stripe test webhook)
+```
+
+### BookOS Stripe Webhook Registration
+
+Register in Stripe Dashboard → Developers → Webhooks:
+- Endpoint: `https://directiveos.com.au/api/billing/webhook` (same as DOS — webhook handles both)
+- Events: `checkout.session.completed`
+- Copy signing secret → `STRIPE_WEBHOOK_SECRET`
+
+For staging, register: `https://staging.directiveos.com.au/api/billing/webhook`
+
+### How to Test (Acceptance Checklist)
+
+1. **Schema** — run `pnpm --filter @workspace/db push` with valid `DATABASE_URL`. Confirm `vertical`, `calendly_url`, `bookos_tier` columns exist on `agencies`.
+
+2. **BookOS voice call** — via BookOS Bridge in Captain's Bridge, create a test agency with `vertical=salon`, `calendlyUrl=https://calendly.com/test/demo`, then assign its `contactPhone` to any Twilio number. Call that number — Sarah should answer with the salon persona (not real estate).
+
+3. **Calendly SMS** — after the test call, the caller's number should receive an SMS with the Calendly link within 5 seconds. (Requires `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER` in env.)
+
+4. **Demo number 02 5850 4038** — create a BookOS agency in the DB with `contactPhone = '0285504038'` and `vertical = 'trades'` or `'salon'`. Calls to that number should now answer with the BookOS persona.
+
+5. **Marketing site** — `pnpm --filter @workspace/bookos dev` → opens at `localhost:5175`. All 7 pages render. "Try Sarah Now" links to the demo number.
+
+6. **Stripe Checkout (staging)** — on the signup page, choose a tier and submit with test email. Should redirect to Stripe Checkout (TEST mode) with 2 line items (setup + month 1). On success, `pending_setup` agency record created in DB.
+
+7. **BookOS Bridge admin** — go to `/admin` → Captain's Bridge → click "BOOKOS BRIDGE" toggle → click "CREATE CLIENT" → fill form → submit. Within 30 seconds: agency row inserted, Twilio number purchased (if Twilio creds set), login email sent.
+
+8. **Real estate unchanged** — call 02 5950 6382 (demo swap). Confirm real estate persona answers correctly. Call any real estate agency number — confirm `buildAgencyPersona()` (not salon/trades) is used.
+
+### Railway Deploy — BookOS Marketing Site
+
+1. Create new Railway project
+2. Connect GitHub repo
+3. Set start command: `pnpm --filter @workspace/bookos build && pnpm --filter @workspace/bookos start`
+   OR root directory: `artifacts/bookos` with `pnpm build` + `pnpm start`
+4. Set env vars: `VITE_API_BASE_URL`, `VITE_BOOKOS_DEMO_NUMBER`, `VITE_BOOKOS_DEMO_DISPLAY`, `PORT`
+5. Add custom domain: `bookos.com.au` (point Namecheap DNS → Railway)
+
+### Sprint B (NOT YET BUILT — await approval)
+- Customer dashboard / portal for BookOS clients
+- Mobile push notifications
+- Sales kit / pitch deck
+
+---
+
 ## Key Commands
 
 ```bash
@@ -578,6 +709,9 @@ pnpm --filter @workspace/api-server dev
 
 # Run frontend
 pnpm --filter @workspace/directive-os dev
+
+# Run BookOS marketing site
+pnpm --filter @workspace/bookos dev
 
 # Database push
 pnpm --filter @workspace/db push

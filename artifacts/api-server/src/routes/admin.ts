@@ -592,6 +592,129 @@ router.get("/admin/goals", adminAuth, async (_req: Request, res: Response): Prom
   });
 });
 
+// ─── BookOS Bridge ─────────────────────────────────────────────────────────
+
+const BOOKOS_VOICE_WEBHOOK_URL = process.env.BOOKOS_VOICE_WEBHOOK_URL ?? "https://directiveos.com.au/api/voice/incoming";
+
+const BOOKOS_MINUTES: Record<string, number> = {
+  solo: 200,
+  studio: 400,
+  multi: 800,
+};
+
+router.get("/admin/bookos/clients", adminAuth, async (_req: Request, res: Response): Promise<void> => {
+  const agencies = await db.select().from(agenciesTable)
+    .where(sql`${agenciesTable.vertical} != 'real_estate'`)
+    .orderBy(desc(agenciesTable.createdAt));
+  res.json(agencies);
+});
+
+router.post("/admin/bookos/provision-client", adminAuth, async (req: Request, res: Response): Promise<void> => {
+  const {
+    name, abn, address, calendlyUrl, bookosTier, contactEmail, contactPhone, vertical,
+  } = req.body as {
+    name: string; abn?: string; address?: string; calendlyUrl?: string;
+    bookosTier?: string; contactEmail: string; contactPhone?: string; vertical?: string;
+  };
+
+  if (!name || !contactEmail) {
+    res.status(400).json({ error: "name and contactEmail are required" }); return;
+  }
+
+  const tier = (bookosTier ?? "solo").toLowerCase();
+  const vert = (vertical ?? "salon").toLowerCase();
+  const aiMinutes = BOOKOS_MINUTES[tier] ?? 200;
+
+  // ── Buy a Twilio AU local number ──────────────────────────────────────────
+  const twilioAccountSid = process.env.TWILIO_ACCOUNT_SID;
+  const twilioAuthToken = process.env.TWILIO_AUTH_TOKEN;
+  let purchasedNumber: string | null = contactPhone ?? null;
+
+  if (twilioAccountSid && twilioAuthToken && !contactPhone) {
+    try {
+      const { default: twilio } = await import("twilio");
+      const twilioClient = twilio(twilioAccountSid, twilioAuthToken);
+
+      const available = await twilioClient.availablePhoneNumbers("AU").local.list({
+        areaCode: 2,    // Sydney area — AU local
+        limit: 5,
+      });
+
+      if (available.length === 0) {
+        res.status(500).json({ error: "No AU local numbers available in Twilio — try again or supply contactPhone manually" });
+        return;
+      }
+
+      const purchased = await twilioClient.incomingPhoneNumbers.create({
+        phoneNumber: available[0].phoneNumber,
+        voiceUrl: BOOKOS_VOICE_WEBHOOK_URL,
+        voiceMethod: "POST",
+        friendlyName: `BookOS — ${name}`,
+      });
+
+      purchasedNumber = purchased.phoneNumber;
+      logger.info({ phoneNumber: purchasedNumber, agencyName: name }, "Twilio AU number purchased for BookOS client");
+    } catch (err) {
+      logger.warn({ err }, "Twilio number purchase failed — proceeding without Twilio number");
+      // Non-fatal: admin can set the number manually after provisioning
+    }
+  }
+
+  // ── Insert agency row ─────────────────────────────────────────────────────
+  const tempPassword = generatePassword();
+  const hash = await bcrypt.hash(tempPassword, 10);
+
+  const [agency] = await db.insert(agenciesTable).values({
+    clerkOrgId: `bookos-${Date.now()}`,
+    name: name.trim(),
+    abn: abn?.trim() || "N/A",
+    contactEmail: contactEmail.toLowerCase().trim(),
+    contactPhone: purchasedNumber ?? null,
+    address: address?.trim() ?? null,
+    vertical: vert,
+    calendlyUrl: calendlyUrl?.trim() ?? null,
+    bookosTier: tier,
+    subscriptionStatus: "active",
+    setupFeePaid: true,
+    aiMinutesIncluded: aiMinutes,
+    aiMinutesUsed: 0,
+    seatCount: 1,
+    passwordHash: hash,
+  }).returning();
+
+  void sendPasswordEmail(contactEmail.toLowerCase().trim(), name, tempPassword, false);
+
+  logger.info({ agencyId: agency.id, name, vertical: vert, tier, purchasedNumber }, "BookOS client provisioned");
+
+  res.json({
+    ok: true,
+    agency,
+    tempPassword,
+    twilioNumber: purchasedNumber,
+    message: purchasedNumber
+      ? `BookOS client provisioned. Twilio number ${purchasedNumber} purchased and webhook set to ${BOOKOS_VOICE_WEBHOOK_URL}.`
+      : "BookOS client provisioned. No Twilio number purchased — set contactPhone manually or configure Twilio env vars.",
+  });
+});
+
+router.patch("/admin/bookos/clients/:id", adminAuth, async (req: Request, res: Response): Promise<void> => {
+  const id = parseInt(req.params.id);
+  if (isNaN(id)) { res.status(400).json({ error: "Invalid ID" }); return; }
+
+  const { name, calendlyUrl, bookosTier, vertical, contactPhone, subscriptionStatus } = req.body as Record<string, string>;
+  const updates: Record<string, unknown> = {};
+  if (name !== undefined) updates.name = name;
+  if (calendlyUrl !== undefined) updates.calendlyUrl = calendlyUrl;
+  if (bookosTier !== undefined) { updates.bookosTier = bookosTier; updates.aiMinutesIncluded = BOOKOS_MINUTES[bookosTier] ?? 200; }
+  if (vertical !== undefined) updates.vertical = vertical;
+  if (contactPhone !== undefined) updates.contactPhone = contactPhone;
+  if (subscriptionStatus !== undefined) updates.subscriptionStatus = subscriptionStatus;
+
+  const [updated] = await db.update(agenciesTable).set(updates).where(eq(agenciesTable.id, id)).returning();
+  if (!updated) { res.status(404).json({ error: "Agency not found" }); return; }
+  res.json(updated);
+});
+
 // ─── Short quote link redirect ─────────────────────────────────────────────
 router.get("/q/:code", async (req: Request, res: Response): Promise<void> => {
   const { code } = req.params;
