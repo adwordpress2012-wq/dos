@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/realestate-demo/"
+title = "Real Estate Demo — Meridian Property Group"
+version = "1.0.0"
+id = "artifacts/realestate-demo"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/realestate-demo/" ]
+localPort = 22859
+
+[services.development]
+run = "pnpm --filter @workspace/realestate-demo run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/realestate-demo", "run", "build" ]
+publicDir = "artifacts/realestate-demo/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22859"
+BASE_PATH = "/realestate-demo/"

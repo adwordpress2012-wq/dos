@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/nidus-re/"
+title = "Nidus Real Estate — AI Receptionist Landing Page"
+version = "1.0.0"
+id = "artifacts/nidus-re"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/nidus-re/" ]
+localPort = 19369
+
+[services.development]
+run = "pnpm --filter @workspace/nidus-re run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/nidus-re", "run", "build" ]
+publicDir = "artifacts/nidus-re/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "19369"
+BASE_PATH = "/nidus-re/"

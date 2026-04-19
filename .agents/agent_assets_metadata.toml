@@ -1,0 +1,109 @@
+uploads = []
+
+[[generated]]
+id = "_gBkSVjXDvT_QaPRRBeKO"
+uri = "file://artifacts/directive-os-mobile/assets/images/icon.png"
+type = "image"
+title = "generated_image"
+
+[[outputs]]
+id = "3tw4imM4GX6cmyjOI2LeF"
+uri = "file://DIRECTIVE_OS_BUILD_DOCUMENT.md"
+type = "text"
+title = "Directive OS — Full Build Document"
+
+[[outputs]]
+id = "Yk3RoQF5JcGegpKW9l_7P"
+uri = "file://directive-os-master-website.tar.gz"
+type = "unspecified"
+title = "Directive OS — Master Website Source Code"
+
+[[outputs]]
+id = "V2PAqrTnWXA6zXgBj-gPy"
+uri = "file://screenshots/gbp-cover.jpg"
+type = "image"
+title = "Google Business Profile — Cover Photo (1332×750)"
+
+[[outputs]]
+id = "6k0x5v0X4qLH5iFG3irtW"
+uri = "file://screenshots/linkedin-banner.jpg"
+type = "image"
+title = "LinkedIn Profile Banner (1584×396)"
+
+[[outputs]]
+id = "DnhZCl-cCUJILkdCv4s8q"
+uri = "file://Directive-OS-Playbook.pdf"
+type = "pdf"
+title = "Directive OS — Platform & Process Playbook"
+
+[[outputs]]
+id = "mWo-fJhYYaT6fHFsWDzBi"
+uri = "file://Directive-OS-Agreement-Email.pdf"
+type = "pdf"
+title = "Directive OS — Service Agreement Email Template"
+
+[[outputs]]
+id = "ow4QwAqMI6SaxzsbAbRZZ"
+uri = "file://screenshots/highspec-homepage-concept.jpg"
+type = "image"
+title = "HighSpec Properties — Full Homepage Redesign Concept"
+
+[[outputs]]
+id = "OTOnvWGeIc7TRdpiYP0t7"
+uri = "file://session-notes-14-april-2026.md"
+type = "text"
+title = "Session Notes — 14 April 2026"
+
+[[outputs]]
+id = "b2TGvyiRlTqqAHeuxCuev"
+uri = "file://Directive_OS_Sales_Plan.xlsx"
+type = "table"
+title = "Directive OS — Sales Plan & Scripts"
+
+[[outputs]]
+id = "6lQ0amp-n_fxpa0uJvd-f"
+uri = "file://DOS_Eastwood_Rhodes_Prospects.xlsx"
+type = "table"
+title = "DOS Prospect List — Eastwood, Epping, Rhodes & Concord West"
+
+[[outputs]]
+id = "WKnGc1M6hwUdIM2d-OHWe"
+uri = "file://Directive_OS_Demo_Pipeline.csv"
+type = "table"
+title = "Directive OS — Demo Pipeline Tracker"
+
+[[outputs]]
+id = "U3iyj5vMj1hdC10Btrl-J"
+uri = "file://exports/directive-os-website-widget-plan.pdf"
+type = "pdf"
+title = "Directive OS — Website Widget Add-On Build Plan"
+
+[[outputs]]
+id = "gRUE74oKJ_Ip39kr_dpEu"
+uri = "file://exports/directive-os-outreach-playbook.pdf"
+type = "pdf"
+title = "Directive OS — Outreach Playbook (Email · SMS · WhatsApp)"
+
+[[outputs]]
+id = "p47zYyyL1PEDo3Yu5hq6V"
+uri = "file://exports/signature/jayson-signature.png"
+type = "image"
+title = "Jayson Ocampo — Director of AI Solutions (PNG)"
+
+[[outputs]]
+id = "YwChbphFxt2zJrg8N1Aqk"
+uri = "file://exports/signature/jayson-signature.jpg"
+type = "image"
+title = "Jayson Ocampo — Director of AI Solutions (JPEG)"
+
+[[outputs]]
+id = "pRWHpIreJeILFfsm5swYm"
+uri = "file://exports/signature/jayson-signature-dark.png"
+type = "image"
+title = "Jayson Ocampo — Director of AI Solutions (Dark PNG)"
+
+[[outputs]]
+id = "OnbpUiL8qBo8SN-6tjmd2"
+uri = "file://exports/signature/jayson-signature-dark.jpg"
+type = "image"
+title = "Jayson Ocampo — Director of AI Solutions (Dark JPEG)"

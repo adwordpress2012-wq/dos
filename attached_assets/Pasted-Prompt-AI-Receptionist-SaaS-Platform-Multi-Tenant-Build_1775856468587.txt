@@ -1,0 +1,69 @@
+Prompt: AI Receptionist SaaS Platform (Multi-Tenant)
+Build a professional SaaS platform called [Your Brand Name] designed to provide AI Voice and Chat receptionists for Real Estate Agencies and other service businesses.
+
+STAGE 1: Infrastructure & Multi-Tenancy
+Framework: Use React (Vite) for the frontend and Node.js (Express) for the backend.
+
+Database: Use Replit’s PostgreSQL. Create a multi-tenant schema where an Agency is the parent entity.
+
+Authentication: Use Clerk to handle "Organizations."
+
+Principals (Admins): Can manage billing and invite staff.
+
+Agents (Users): Can view leads and property data but cannot see billing.
+
+Siloing: Ensure that data (listings, leads, transcripts) for Agency A is never accessible to Agency B.
+
+STAGE 2: The "Seat-Based" Billing Engine (Stripe)
+Setup Fee: Implement a one-time Stripe Checkout for the $1,500 AUD Onboarding & Training Fee.
+
+Subscription: Implement a monthly subscription using Stripe:
+
+Base Fee: $299/month (Includes 1st User/Seat).
+
+Per-Seat License: $89/month for every additional staff user added to the organization.
+
+Usage-Based Overage: Integrate Stripe Metered Billing.
+
+Include 100 AI minutes/month.
+
+Automatically charge $25 AUD per 10-minute block thereafter.
+
+Invoicing: Configure the system to automatically generate and email GST-compliant Tax Invoices.
+
+STAGE 3: Real Estate AI Features (VaultRE & NSW Logic)
+CRM Sync: Create a mock integration for VaultRE API. When listings are fetched, store: Address, Price, Agent Mobile, and Inspection Times.
+
+Voice/Chat Logic: Use OpenAI (GPT-4o) and Vapi/Twilio for the receptionist.
+
+Qualification: AI must ask if the user is a Buyer or Tenant.
+
+The Rental Path: If a tenant asks for a form, the AI offers to email the NSW Fair Trading Standard Tenancy Form or a custom Agency PDF.
+
+Live Handoff: Implement a "Transfer" function to the Listing Agent's mobile retrieved from the CRM data.
+
+Lead Dashboard: A "Master Inbox" for each agency showing conversation transcripts, call recordings, and form requests.
+
+STAGE 4: Professional Onboarding & Legal
+Sign-up Funnel:
+
+Step 1: Agency ABN and Contact Info.
+
+Step 2: Select number of User Seats.
+
+Step 3: MANDATORY LEGAL CHECK: A checkbox stating "I agree to the SaaS Terms of Service and Privacy Policy." The button to pay must be disabled until this is checked.
+
+Legal Pages: Create /terms and /privacy routes using the Australian-compliant text provided (incorporating AI data disclosures and APP compliance).
+
+Resources Tab: A section in the client portal to download the "AI Agency Operations Manual" and view training videos.
+
+STAGE 5: UI/UX & Branding
+Aesthetic: "Modern Enterprise." Use a palette of Slate Gray, White, and a professional accent color (e.g., Navy or Deep Emerald).
+
+Marketing Site: A high-converting homepage for your business featuring:
+
+The "Hero" section (Value prop: 24/7 coverage).
+
+A "Pricing Calculator" that adjusts based on the number of staff seats.
+
+A "Demo" button that triggers a sample AI Chat window.

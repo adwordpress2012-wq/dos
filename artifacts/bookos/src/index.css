@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --teal: #00c9a7;
+  --dark: #06111f;
+  --card: #0a1c30;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  background: var(--dark);
+  color: #e2ecf5;
+  font-family: "Inter", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Teal glow utility */
+.glow-teal {
+  box-shadow: 0 0 24px rgba(0, 201, 167, 0.18);
+}
+
+/* Smooth scroll */
+html { scroll-behavior: smooth; }
