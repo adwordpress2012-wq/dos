@@ -6,6 +6,7 @@ import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Onboard from "@/pages/onboard";
 import OnboardSubscribe from "@/pages/onboard-subscribe";
+import GetStarted from "@/pages/get-started";
 import DashboardLogin from "@/pages/dashboard/login";
 import Terms from "@/pages/terms";
 import Privacy from "@/pages/privacy";
@@ -76,6 +77,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/dashboard/login" component={DashboardLogin} />
+      <Route path="/get-started" component={GetStarted} />
       <Route path="/onboard" component={Onboard} />
       <Route path="/onboard/subscribe" component={OnboardSubscribe} />
       <Route path="/terms" component={Terms} />
