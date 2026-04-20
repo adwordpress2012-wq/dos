@@ -240,6 +240,11 @@ inspectionTimes: jsonb — array of strings "Sat 3 May, 10:00-10:30am"
 - Voice overage: $20 per 10 minutes
 - Per-seat add-on: +$25/month on Studio and Multi
 
+### Pricing rule
+- BookOS uses its own pricing.
+- New BookOS clients and BookOS rebuilds use the BookOS setup fee.
+- Existing DOS real-estate clients keep the DOS pricing model.
+
 ## Stripe (test mode)
 
 - Secret key: `STRIPE_SECRET_KEY` env var
