@@ -1,3 +1,3 @@
-i"scripts": {
-  "build": "pnpm -r --if-present run build"
+"scripts": {
+  "build": "pnpm -r --if-present run build --verbose"
 }
