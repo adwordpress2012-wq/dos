@@ -1,2 +1,3 @@
-import * as api from "./generated/api";
-export { api };
+i"scripts": {
+  "build": "pnpm -r --if-present run build"
+}
