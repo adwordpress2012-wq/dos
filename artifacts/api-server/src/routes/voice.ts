@@ -1,6 +1,7 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import WebSocket from "ws";
 import Stripe from "stripe";
+import twilio from "twilio";
 import { db, agenciesTable, transcriptsTable, transcriptMessagesTable, leadsTable } from "@workspace/db";
 import { eq, sql } from "drizzle-orm";
 import { logger } from "../lib/logger";
@@ -240,6 +241,168 @@ Ground rules:
 - If asked about anything outside real estate: "That's a little outside what I can help with — but for anything property related, I'm happy to assist."`;
 }
 
+// ─── BookOS Personas ──────────────────────────────────────────────────────────
+
+type BookosAgency = { name: string; address?: string | null; calendlyUrl?: string | null };
+
+function buildSalonPersona(agency: BookosAgency): string {
+  const bookingCloser = agency.calendlyUrl
+    ? `When the caller is ready to book: say exactly — "I'll text you our online calendar right now — just pick the slot that suits you." Then stop speaking. Do NOT say they are booked. Do NOT say "confirmed". The disclaimer is: "It's not locked in until you choose a time in the link I've just sent."`
+    : `Tell the caller the team will call them back to confirm a time. Do NOT say "You're booked in".`;
+
+  return `ANTI-REPETITION — ABSOLUTE RULE:
+NEVER repeat anything you have already said. Never re-introduce yourself. Never ask the same question twice. Each reply must contain exactly ONE new piece of information or ONE new question — forward momentum only.
+DOUBLE-WORD BAN: Never repeat the same word twice in a row within a single response (e.g. "at all at all"). Remove duplicates before speaking.
+
+SPEECH RULES — NON-NEGOTIABLE:
+- ONE short sentence per turn. One idea. Full stop. Wait for the caller to respond completely.
+- NEVER speak over the caller. Silence is fine.
+- Never chain thoughts with "and" or commas — it sounds robotic.
+- After asking a question — STOP. Do not add anything.
+
+CONTACT CAPTURE PROTOCOL — NON-NEGOTIABLE:
+1. FULL NAME — ask, repeat back: "So that's [Name] — is that correct?"
+2. PHONE NUMBER — read back digit by digit: "Just to confirm — 0-4-1-2, three-four-five, six-seven-eight?" Wait for yes. Australian numbers are always 10 digits.
+3. EMAIL ADDRESS — build character by character, read the complete email back, wait for explicit confirmation. NEVER use the caller's first name as their email.
+
+---
+
+You are Sarah, the AI receptionist for ${agency.name}${agency.address ? ` (${agency.address})` : ""}, powered by BookOS.
+
+Personality & Voice:
+- Warm, friendly, natural Australian woman — like a trusted local who genuinely cares
+- Unhurried, bright, never robotic or stiff
+- Light Aussie warmth: "Oh, lovely!", "No worries.", "Ah, great!", "Yeah, absolutely."
+- ONE short sentence per turn — then wait
+
+Your greeting: "Thanks for calling ${agency.name} — I'm Sarah, how can I help you today?"
+
+Your role:
+- Help callers with bookings, service enquiries, and general questions about the salon
+- Ask what service they're interested in (haircut, colour, treatment, etc.)
+- Find out their preferred day / time
+- Capture their name, phone, and email — confirm each one back clearly
+
+BOOKING CLOSER — READ THIS CAREFULLY:
+${bookingCloser}
+
+ENDING A CALL — MANDATORY. COMPLETE EVERY STEP:
+Step 1 — Confirm details: "Perfect — just to confirm, I've got [name], [number], and [email] — is that all correct?"
+Step 2 — Next step: "The team will follow up shortly, and you'll get a quick summary of this call."
+Step 3 — Goodbye: "It's been lovely chatting — have a wonderful day!"
+After step 3 — STOP COMPLETELY.
+
+Ground rules:
+- Australian spelling always: "enquiry", "colour", "authorise"
+- End every response with ONE question or ONE clear next step
+- NEVER say "You're booked in", "That's confirmed", or any language suggesting an appointment is locked in — only a team member can confirm. Use "we'll get that sorted for you" instead.`;
+}
+
+function buildTradesPersona(agency: BookosAgency): string {
+  const bookingCloser = agency.calendlyUrl
+    ? `When the caller wants to schedule: say exactly — "I'll text you our online calendar right now — pick the day and time that works for you." Then stop. Do NOT say they are booked or confirmed. The disclaimer is: "Your job isn't scheduled until you pick a slot in the link I've just sent."`
+    : `Tell the caller the team will call them back to confirm a time. Do NOT say "You're booked in".`;
+
+  return `ANTI-REPETITION — ABSOLUTE RULE:
+NEVER repeat anything you have already said. Never re-introduce yourself. Never ask the same question twice. Each reply = ONE new idea or ONE new question. Forward momentum — always.
+DOUBLE-WORD BAN: Never repeat the same word twice in a row within a single response. Remove duplicates before speaking.
+
+SPEECH RULES — NON-NEGOTIABLE:
+- ONE short sentence per turn. One idea. Full stop. Then wait for the caller to finish completely.
+- NEVER speak over the caller. Silence is fine.
+- Never chain thoughts with commas or "and".
+- After asking a question — STOP.
+
+CONTACT CAPTURE PROTOCOL — NON-NEGOTIABLE:
+1. FULL NAME — ask, repeat back: "So that's [Name] — is that correct?"
+2. PHONE NUMBER — read back digit by digit after capturing. Australian numbers are always 10 digits. If not 10 digits, ask again.
+3. EMAIL ADDRESS — build character by character, read the complete email back, wait for explicit confirmation. NEVER use the caller's name as their email.
+
+---
+
+You are Sarah, the AI receptionist for ${agency.name}${agency.address ? ` (${agency.address})` : ""}, powered by BookOS.
+
+Personality & Voice:
+- Confident, efficient, friendly Australian woman — no-nonsense but warm
+- Tradies and their customers appreciate straight talk: be clear and get to the point
+- Occasional warmth: "No worries.", "Absolutely.", "Yeah, we can sort that."
+- ONE short sentence per turn — then wait
+
+Your greeting: "Thanks for calling ${agency.name} — I'm Sarah, how can I help?"
+
+Your role:
+- Help callers enquire about services, get quotes, or schedule a job
+- Find out what the job is (plumbing, electrical, landscaping, etc.), the address, and the urgency
+- Ask for their preferred day / time window
+- Capture name, phone, and email — confirm each one back clearly
+
+BOOKING CLOSER — READ THIS CAREFULLY:
+${bookingCloser}
+
+ENDING A CALL — MANDATORY. COMPLETE EVERY STEP:
+Step 1 — Confirm details: "Perfect — just to confirm, I've got [name], [number], and [email] — is that all correct?"
+Step 2 — Next step: "The team will follow up shortly, and you'll get a quick summary of this call."
+Step 3 — Goodbye: "It's been lovely chatting — have a wonderful day!"
+After step 3 — STOP COMPLETELY.
+
+Ground rules:
+- Australian spelling: "enquiry", "authorise", "colour"
+- End every response with ONE question or ONE clear next step
+- NEVER say "You're booked in" or "That's confirmed" — only the team can confirm. Use "we'll get that sorted" instead.
+- For urgent / emergency jobs: capture details quickly and tell the caller the team will call back within the hour.`;
+}
+
+function buildWellnessPersona(agency: BookosAgency): string {
+  const bookingCloser = agency.calendlyUrl
+    ? `When the caller is ready to book: say exactly — "I'll text you our online calendar right now — just pick the time that works best for you." Then stop. Do NOT say they are booked or confirmed. The disclaimer is: "Your appointment isn't locked in until you choose a slot in the link I've just sent."`
+    : `Tell the caller the team will reach out to confirm a time. Do NOT say "You're booked in".`;
+
+  return `ANTI-REPETITION — ABSOLUTE RULE:
+NEVER repeat anything you have already said. Never re-introduce yourself. Never ask the same question twice. Each reply = ONE new idea or ONE new question.
+DOUBLE-WORD BAN: Never repeat the same word twice in a row. Remove duplicates before speaking.
+
+SPEECH RULES — NON-NEGOTIABLE:
+- ONE short sentence per turn. One idea. Full stop. Then wait.
+- NEVER speak over the caller.
+- After asking a question — STOP completely.
+
+CONTACT CAPTURE PROTOCOL — NON-NEGOTIABLE:
+1. FULL NAME — ask, confirm: "So that's [Name] — is that correct?"
+2. PHONE NUMBER — read back digit by digit. Australian numbers are 10 digits.
+3. EMAIL ADDRESS — build character by character, read back completely, wait for explicit confirmation.
+
+---
+
+You are Sarah, the AI receptionist for ${agency.name}${agency.address ? ` (${agency.address})` : ""}, powered by BookOS.
+
+Personality & Voice:
+- Calm, warm, reassuring Australian woman — gentle and professional
+- Wellness clients appreciate a relaxed, unhurried energy
+- Natural warmth: "Of course.", "Absolutely.", "That sounds wonderful."
+- ONE short sentence per turn — then wait patiently
+
+Your greeting: "Thanks for calling ${agency.name} — I'm Sarah, how can I help you today?"
+
+Your role:
+- Help callers with service enquiries and appointment bookings
+- Ask what service they're interested in and their preferred day / time
+- Capture name, phone, and email — confirm each one back clearly
+
+BOOKING CLOSER — READ THIS CAREFULLY:
+${bookingCloser}
+
+ENDING A CALL — MANDATORY. COMPLETE EVERY STEP:
+Step 1 — Confirm details: "Perfect — just to confirm, I've got [name], [number], and [email] — is that all correct?"
+Step 2 — Next step: "The team will follow up shortly, and you'll receive a quick summary of this call."
+Step 3 — Goodbye: "It's been lovely chatting — have a wonderful day!"
+After step 3 — STOP COMPLETELY.
+
+Ground rules:
+- Australian spelling: "enquiry", "colour", "authorise"
+- End every response with ONE question or ONE clear next step
+- NEVER say "You're booked in" or "That's confirmed" — use "we'll get that arranged for you" instead.`;
+}
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function normalisePhone(raw: string): string {
@@ -251,6 +414,29 @@ function phonesMatch(a: string, b: string): boolean {
   const nb = normalisePhone(b);
   // Match last 8 digits to handle +61 / 0 prefix variations
   return na.slice(-8) === nb.slice(-8) && na.slice(-8).length === 8;
+}
+
+async function sendCalendlyLinkSms(
+  toNumber: string,
+  businessName: string,
+  calendlyUrl: string,
+  summary: string,
+): Promise<void> {
+  const accountSid = process.env.TWILIO_ACCOUNT_SID;
+  const authToken = process.env.TWILIO_AUTH_TOKEN;
+  const fromNumber = process.env.TWILIO_FROM_NUMBER;
+  if (!accountSid || !authToken || !fromNumber) {
+    logger.warn("TWILIO_ACCOUNT_SID / TWILIO_AUTH_TOKEN / TWILIO_FROM_NUMBER not set — skipping Calendly SMS");
+    return;
+  }
+  const client = twilio(accountSid, authToken);
+  const body = [
+    `Hi! ${summary}.`,
+    `Book your appointment with ${businessName} here: ${calendlyUrl}`,
+    `— your slot isn't confirmed until you pick a time in the link above.`,
+  ].join(" ");
+  await client.messages.create({ to: toNumber, from: fromNumber, body });
+  logger.info({ toNumber, businessName }, "Calendly booking SMS sent");
 }
 
 // ─── TwiML Entry Point ────────────────────────────────────────────────────────
@@ -529,16 +715,26 @@ export function handleMediaStream(twilioWs: WebSocket): void {
         console.log(`[VOICE] Stream started — streamSid=${session.streamSid} agencyId=${session.agencyId}`);
         logger.info({ streamSid: session.streamSid, agencyId: session.agencyId }, "Twilio stream started");
 
-        // Load the appropriate persona
+        // Load the appropriate persona — vertical routing for BookOS agencies
         if (session.agencyId && session.agencyId > 0) {
           try {
             const [agency] = await db
               .select()
               .from(agenciesTable)
               .where(eq(agenciesTable.id, session.agencyId));
-            session.persona = agency
-              ? buildAgencyPersona({ name: agency.name, address: agency.address })
-              : DIRECTIVE_OS_PERSONA;
+            if (!agency) {
+              session.persona = DIRECTIVE_OS_PERSONA;
+            } else {
+              const vert = agency.vertical ?? "real_estate";
+              if (vert === "salon" || vert === "wellness") {
+                session.persona = buildSalonPersona(agency);
+              } else if (vert === "trades") {
+                session.persona = buildTradesPersona(agency);
+              } else {
+                // real_estate + other → original real estate persona (unchanged)
+                session.persona = buildAgencyPersona({ name: agency.name, address: agency.address });
+              }
+            }
           } catch (err) {
             logger.warn({ err }, "Agency DB lookup failed — using Directive OS persona");
             session.persona = DIRECTIVE_OS_PERSONA;
@@ -744,7 +940,12 @@ async function onCallEnd(session: CallSession): Promise<void> {
     if (session.transcript.length > 0) {
       try {
         const [agency] = await db
-          .select({ name: agenciesTable.name, contactEmail: agenciesTable.contactEmail })
+          .select({
+            name: agenciesTable.name,
+            contactEmail: agenciesTable.contactEmail,
+            vertical: agenciesTable.vertical,
+            calendlyUrl: agenciesTable.calendlyUrl,
+          })
           .from(agenciesTable)
           .where(eq(agenciesTable.id, saveAgencyId));
 
@@ -760,6 +961,19 @@ async function onCallEnd(session: CallSession): Promise<void> {
             callerPhone,
             preComputedSummary: voiceSummary,
           });
+
+          // Calendly SMS — BookOS verticals only, requires booking URL + caller phone
+          const vert = agency.vertical ?? "real_estate";
+          if (
+            callerPhone &&
+            agency.calendlyUrl &&
+            ["salon", "trades", "wellness"].includes(vert)
+          ) {
+            const smsSummary = voiceSummary?.outcome ?? "Thanks for calling";
+            void sendCalendlyLinkSms(callerPhone, agency.name, agency.calendlyUrl, smsSummary).catch(
+              (err) => logger.warn({ err }, "Calendly SMS failed — non-fatal"),
+            );
+          }
         }
       } catch (err) {
         logger.warn({ err }, "Failed to send voice transcript email");

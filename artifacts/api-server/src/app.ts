@@ -42,6 +42,54 @@ app.post("/api/billing/webhook", express.raw({ type: "application/json" }), asyn
     const session = event.data.object as Stripe.Checkout.Session;
     const meta = session.metadata ?? {};
 
+    // ── BookOS signup via marketing site ──────────────────────────────────
+    if (meta.source === "bookos_signup") {
+      const { businessName, contactName, phone, tier, vertical } = meta;
+      const clientEmail = session.customer_email ?? meta.email ?? "";
+
+      logger.info({ businessName, clientEmail, tier }, "BookOS signup payment received");
+
+      void sendNewClientNotification({
+        agencyName: businessName ?? "Unknown BookOS Business",
+        agencySlug: "",
+        contactName: contactName ?? "",
+        email: clientEmail,
+        phone: phone ?? "",
+        amountPaid: (session.amount_total ?? 0) / 100,
+        stripeSessionId: session.id,
+      });
+
+      if (clientEmail) {
+        void sendClientWelcomeEmail({
+          contactName: contactName ?? businessName ?? "there",
+          agencyName: businessName ?? "",
+          email: clientEmail,
+          agencySlug: "",
+        });
+      }
+
+      try {
+        const slug = `bookos-${(businessName ?? "").toLowerCase().replace(/\s+/g, "-")}-${Date.now()}`;
+        await db.insert(agenciesTable).values({
+          clerkOrgId: slug,
+          name: businessName ?? "BookOS Client",
+          abn: "N/A",
+          contactEmail: clientEmail,
+          contactPhone: phone ?? null,
+          vertical: vertical ?? "salon",
+          bookosTier: tier ?? "solo",
+          subscriptionStatus: "pending_setup",
+          setupFeePaid: true,
+          seatCount: 1,
+          aiMinutesIncluded: tier === "multi" ? 800 : tier === "studio" ? 400 : 200,
+          aiMinutesUsed: 0,
+        });
+        logger.info({ slug, clientEmail, tier }, "BookOS pending agency record created");
+      } catch (dbErr) {
+        logger.warn({ dbErr }, "Could not create BookOS pending agency record");
+      }
+    }
+
     if (meta.source === "landing_page") {
       const { agencyName, agencySlug, contactName, phone } = meta;
       const clientEmail = session.customer_email ?? meta.email ?? "";
