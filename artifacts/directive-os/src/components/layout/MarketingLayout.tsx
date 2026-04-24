@@ -66,7 +66,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             </a>
           </nav>
           <div className="flex items-center gap-3">
-            <Link href="/sign-in" className="hidden sm:inline-flex h-9 items-center justify-center rounded-md px-4 py-2 text-sm font-semibold transition-colors hover:opacity-90" style={{ color: "#00d1b2", border: "1px solid rgba(0,209,178,0.35)" }}>Client Login</Link>
             <a
               href={CALENDLY}
               target="_blank"
@@ -99,7 +98,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <a href="/#pricing" onClick={() => setMenuOpen(false)} className="px-3 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors">Pricing</a>
               <Link href="/resources" onClick={() => setMenuOpen(false)} className="px-3 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors">Resources</Link>
               <Link href="/blog" onClick={() => setMenuOpen(false)} className="px-3 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors">Blog</Link>
-              <Link href="/sign-in" onClick={() => setMenuOpen(false)} className="px-3 py-3 rounded-lg text-sm font-semibold text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors">Client Login</Link>
               <div className="pt-2 pb-1 flex flex-col gap-2">
                 <a
                   href={CALENDLY}

@@ -14,11 +14,18 @@ const SEAT_PRICE = 89;
 const SETUP_FEE = 1800;
 
 function PricingCalculator() {
-  const [seats, setSeats] = useState(1);
-  const monthly = BASE_PRICE + Math.max(0, seats - 1) * SEAT_PRICE;
+  const [missedCalls, setMissedCalls] = useState(5);
+  const [commission, setCommission] = useState(15000);
+
+  const CONVERSION_RATE = 0.05;
+  const monthlyMissed = missedCalls * 4.33;
+  const lostSales = monthlyMissed * CONVERSION_RATE;
+  const monthlyLoss = Math.round(lostSales * commission);
+  const annualLoss = monthlyLoss * 12;
 
   return (
     <div
+      id="roi-calculator"
       className="rounded-2xl p-8 max-w-2xl mx-auto relative overflow-hidden"
       style={{
         background: "rgba(255,255,255,0.04)",
@@ -31,41 +38,58 @@ function PricingCalculator() {
         style={{ background: "radial-gradient(circle, rgba(0,209,178,0.08) 0%, transparent 70%)" }} />
 
       <h3 className="text-2xl font-bold text-foreground mb-1">ROI Calculator</h3>
-      <p className="text-muted-foreground mb-8 text-sm">See the monthly opportunity loss from missed calls.</p>
+      <p className="text-muted-foreground mb-8 text-sm">See how much commission you're losing every month from missed calls.</p>
 
-      <div className="mb-8">
+      <div className="mb-6">
         <div className="flex items-center justify-between mb-3">
           <label className="text-sm font-medium text-foreground">Missed Calls per Week</label>
-          <span className="text-3xl font-bold text-primary">{seats}</span>
+          <span className="text-3xl font-bold text-primary">{missedCalls}</span>
         </div>
         <input
-          type="range" min="1" max="15" value={seats}
-          onChange={e => setSeats(Number(e.target.value))}
+          type="range" min="1" max="15" value={missedCalls}
+          onChange={e => setMissedCalls(Number(e.target.value))}
           className="w-full h-2 rounded-lg appearance-none cursor-pointer accent-primary"
-          style={{ background: `linear-gradient(to right, #00d1b2 0%, #00d1b2 ${((seats - 1) / 14) * 100}%, rgba(255,255,255,0.1) ${((seats - 1) / 14) * 100}%, rgba(255,255,255,0.1) 100%)` }}
+          style={{ background: `linear-gradient(to right, #00d1b2 0%, #00d1b2 ${((missedCalls - 1) / 14) * 100}%, rgba(255,255,255,0.1) ${((missedCalls - 1) / 14) * 100}%, rgba(255,255,255,0.1) 100%)` }}
         />
         <div className="flex justify-between text-xs text-muted-foreground mt-2">
           <span>1 call</span><span>15 calls</span>
         </div>
       </div>
 
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-3">
+          <label className="text-sm font-medium text-foreground">Average Commission per Sale</label>
+          <span className="text-3xl font-bold text-primary">${commission.toLocaleString()}</span>
+        </div>
+        <input
+          type="range" min="10000" max="60000" step="1000" value={commission}
+          onChange={e => setCommission(Number(e.target.value))}
+          className="w-full h-2 rounded-lg appearance-none cursor-pointer accent-primary"
+          style={{ background: `linear-gradient(to right, #00d1b2 0%, #00d1b2 ${((commission - 10000) / 50000) * 100}%, rgba(255,255,255,0.1) ${((commission - 10000) / 50000) * 100}%, rgba(255,255,255,0.1) 100%)` }}
+        />
+        <div className="flex justify-between text-xs text-muted-foreground mt-2">
+          <span>$10k</span><span>$60k</span>
+        </div>
+        <p className="text-xs text-muted-foreground mt-2 italic">AU industry average: ~$15,000 (2% on a $750k sale).</p>
+      </div>
+
       <div className="space-y-3 mb-6">
         <div className="flex justify-between items-center py-2.5 border-b border-white/5 text-sm">
-          <span className="text-muted-foreground">Average Commission per Sale</span>
-          <span className="font-semibold text-foreground">${BASE_PRICE}</span>
+          <span className="text-muted-foreground">Monthly missed calls</span>
+          <span className="font-semibold text-foreground">{Math.round(monthlyMissed)}</span>
         </div>
         <div className="flex justify-between items-center py-2.5 border-b border-white/5 text-sm">
-          <span className="text-muted-foreground">Estimated monthly conversion value</span>
-          <span className="font-semibold text-primary">${(seats * BASE_PRICE * 0.35).toLocaleString()}</span>
+          <span className="text-muted-foreground">Likely lost sales (5% conversion)</span>
+          <span className="font-semibold text-foreground">{lostSales.toFixed(1)}</span>
         </div>
         <div className="flex justify-between items-center py-2.5 border-b border-white/5 text-sm">
-          <span className="text-muted-foreground">Estimated monthly opportunity loss</span>
-          <span className="font-semibold text-foreground">${(seats * BASE_PRICE * 0.85).toLocaleString()}</span>
+          <span className="text-muted-foreground">Annual commission lost</span>
+          <span className="font-semibold text-foreground">${annualLoss.toLocaleString()}</span>
         </div>
         <div className="flex justify-between items-center pt-4">
           <span className="font-bold text-foreground text-lg">Total Monthly Opportunity Loss</span>
           <div className="text-right">
-            <div className="text-4xl font-bold text-primary">${(seats * BASE_PRICE * 0.85).toLocaleString()}<span className="text-xl font-normal text-muted-foreground">/mo</span></div>
+            <div className="text-4xl font-bold text-primary">${monthlyLoss.toLocaleString()}<span className="text-xl font-normal text-muted-foreground">/mo</span></div>
           </div>
         </div>
       </div>
@@ -268,13 +292,11 @@ export default function Home() {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
             <a
-              href="https://calendly.com/adwordpress2012/directive-os-agency-onboarding"
-              target="_blank"
-              rel="noopener noreferrer"
+              href="#roi-calculator"
               className="font-bold py-3.5 px-8 rounded-xl transition-all hover:scale-105 flex items-center gap-2 justify-center"
               style={{ background: "linear-gradient(135deg, #00d1b2, #00b89c)", color: "#0a0a0a", boxShadow: "0 4px 32px rgba(0,209,178,0.35)" }}>
-              <CalendarCheck className="w-4 h-4" />
-              Book Free 15-Min Strategy Call
+              <BarChart3 className="w-4 h-4" />
+              Show Me The Money
               <ArrowRight className="w-4 h-4" />
             </a>
             <a href="#voice-demo" className="font-semibold py-3.5 px-8 rounded-xl transition-all hover:scale-105 flex items-center gap-2 text-foreground justify-center"
@@ -284,7 +306,7 @@ export default function Home() {
             </a>
           </div>
 
-          <p className="text-xs text-muted-foreground mb-6">No commitment · 15 minutes · Talk directly with Jayson</p>
+          <p className="text-xs text-muted-foreground mb-6">See your real losses in 10 seconds — no signup required</p>
 
           {/* Live Voice Demo CTA */}
           <div className="mb-2 flex justify-center">
@@ -1379,46 +1401,6 @@ export default function Home() {
               </a>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* Coming Soon — App Store Trust Badges */}
-      <section className="py-16 border-t border-border">
-        <div className="container mx-auto px-4 text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold tracking-widest uppercase mb-6"
-            style={{ background: "rgba(251,146,0,0.1)", border: "1px solid rgba(251,146,0,0.3)", color: "#f59e0b" }}>
-            Coming Soon
-          </div>
-          <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3">Command Bridge — Mobile App</h2>
-          <p className="text-muted-foreground max-w-xl mx-auto mb-8 text-sm">
-            The Directive OS mobile app is in development. Track leads, listen to call recordings, and receive real-time alerts on your phone — from anywhere in Australia.
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-4">
-            <div className="flex items-center gap-2.5 px-5 py-3 rounded-xl opacity-60 cursor-not-allowed"
-              style={{ background: "#000", border: "1px solid rgba(255,255,255,0.15)" }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
-                <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
-              </svg>
-              <div className="leading-none text-left">
-                <div className="text-[9px] text-white/60 uppercase tracking-wider">Coming to the</div>
-                <div className="text-white font-semibold text-sm">App Store</div>
-              </div>
-            </div>
-            <div className="flex items-center gap-2.5 px-5 py-3 rounded-xl opacity-60 cursor-not-allowed"
-              style={{ background: "#000", border: "1px solid rgba(255,255,255,0.15)" }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                <path d="M3.18 23.76c.3.17.64.24.98.2L14.89 12 11 8.11 3.18 23.76z" fill="#EA4335"/>
-                <path d="M20.06 10.37 17.2 8.76l-3.2 3.2 3.2 3.2 2.9-1.62a1.8 1.8 0 0 0 0-3.17z" fill="#FBBC04"/>
-                <path d="M3.18.24C2.84.2 2.5.27 2.2.44L11 9.23l3.89-3.89L4.16.44a1.8 1.8 0 0 0-.98-.2z" fill="#4285F4"/>
-                <path d="M2.2.44A1.8 1.8 0 0 0 1.5 1.8v20.4c0 .54.26 1.02.7 1.36L11 12 2.2.44z" fill="#34A853"/>
-              </svg>
-              <div className="leading-none text-left">
-                <div className="text-[9px] text-white/60 uppercase tracking-wider">Coming to</div>
-                <div className="text-white font-semibold text-sm">Google Play</div>
-              </div>
-            </div>
-          </div>
-          <p className="text-xs text-muted-foreground mt-5">All DOS subscriptions will receive mobile access at no extra cost when launched.</p>
         </div>
       </section>
 
