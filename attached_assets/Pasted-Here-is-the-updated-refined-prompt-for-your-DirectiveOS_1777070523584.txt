@@ -1,0 +1,40 @@
+Here is the updated, refined prompt for your **DirectiveOS Command Centre and Client Dashboard Build**, with the Sarah Email Summary logic explicitly adjusted to your requirements.
+
+***
+
+### Development Prompt: DirectiveOS & Client Dashboard Build
+
+**Objective:**
+Build a multi-tenant SaaS dashboard (DirectiveOS) using Next.js and Supabase. The system serves two roles: 
+1. **DirectiveOS Command Centre (Founder View):** Operational health and aggregated lead performance.
+2. **Client Command Centre (Agent View):** Actionable, zero-click lead briefings.
+
+**Database Schema Requirements:**
+- **Tenants Table:** `id`, `name`, `subdomain`, `custom_domain`, `status` (active/inactive), `branding_config` (JSON for theme).
+- **Leads Table:** `id`, `tenant_id` (Foreign Key), `name`, `phone`, `property_address`, `summary` (Sarah's Note), `status` (New, Follow-up, Archived), `created_at`.
+- **System Health Table:** `id`, `service_name`, `status` (up/down/degraded), `last_checked`.
+
+**DirectiveOS Command Centre Features:**
+- **System Health Panel:** Display `Service Status` for Twilio/OpenAI/Supabase and a live `Lead Throughput` count (last 24 hours).
+- **Aggregate Lead Feed:** A master list of the latest leads across all tenants, sorted by `created_at`.
+- **Client Performance View:** A list of all tenants with their total captured leads and active status.
+- **Exclusions:** Remove all server metrics, raw technical logs, and speculative financial projections.
+
+**Client Command Centre Features:**
+- **Daily Activity Feed:** A simple list of leads with `Status Tags` (New, Follow-up Required, Archived).
+- **Lead Detail Card:** Show `Identity` (Name, Phone, Address), `Sarah’s Note` (summary), and `Next-Step Suggestion` (AI-generated).
+- **Zero-Clutter UI:** Remove all commission estimations, CRM-sync buttons, raw transcripts, and call duration data.
+
+**Sarah Lead Summary Email (Workflow Logic):**
+- **Trigger:** Send email immediately after call processing.
+- **Content Structure:** 1. **Lead Identification:** Name and Property Address.
+    2. **Conversation Summary:** The note and intelligence provided by Sarah.
+    3. **Sarah’s Recommendation:** Direct advice on the next contact step.
+- **Constraint:** NO PDF attachments, NO budget/timeline fields, NO CRM-sync status, NO rewriting of the summary—use the output as provided by the existing Sarah workflow.
+
+**Technical Constraints:**
+- **Authentication:** Use Supabase Auth for client login.
+- **Routing:** Use Next.js Middleware to handle dynamic tenant routing based on subdomains.
+- **Architecture:** Keep it lightweight. Data-driven UI, no unnecessary animations or fluff.
+
+***
