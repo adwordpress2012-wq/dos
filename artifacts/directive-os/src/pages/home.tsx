@@ -30,12 +30,12 @@ function PricingCalculator() {
       <div className="absolute top-0 right-0 w-48 h-48 rounded-full pointer-events-none"
         style={{ background: "radial-gradient(circle, rgba(0,209,178,0.08) 0%, transparent 70%)" }} />
 
-      <h3 className="text-2xl font-bold text-foreground mb-1">Calculate Your Investment</h3>
-      <p className="text-muted-foreground mb-8 text-sm">Transparent pricing. No hidden fees. Cancel anytime.</p>
+      <h3 className="text-2xl font-bold text-foreground mb-1">ROI Calculator</h3>
+      <p className="text-muted-foreground mb-8 text-sm">See the monthly opportunity loss from missed calls.</p>
 
       <div className="mb-8">
         <div className="flex items-center justify-between mb-3">
-          <label className="text-sm font-medium text-foreground">Number of Agent Seats</label>
+          <label className="text-sm font-medium text-foreground">Missed Calls per Week</label>
           <span className="text-3xl font-bold text-primary">{seats}</span>
         </div>
         <input
@@ -45,33 +45,27 @@ function PricingCalculator() {
           style={{ background: `linear-gradient(to right, #00d1b2 0%, #00d1b2 ${((seats - 1) / 14) * 100}%, rgba(255,255,255,0.1) ${((seats - 1) / 14) * 100}%, rgba(255,255,255,0.1) 100%)` }}
         />
         <div className="flex justify-between text-xs text-muted-foreground mt-2">
-          <span>1 seat</span><span>15 seats</span>
+          <span>1 call</span><span>15 calls</span>
         </div>
       </div>
 
       <div className="space-y-3 mb-6">
         <div className="flex justify-between items-center py-2.5 border-b border-white/5 text-sm">
-          <span className="text-muted-foreground">Base License (1st seat included)</span>
-          <span className="font-semibold text-foreground">${BASE_PRICE}/mo</span>
-        </div>
-        {seats > 1 && (
-          <div className="flex justify-between items-center py-2.5 border-b border-white/5 text-sm">
-            <span className="text-muted-foreground">{seats - 1} additional seat{seats > 2 ? "s" : ""} × ${SEAT_PRICE}/mo</span>
-            <span className="font-semibold text-foreground">${(seats - 1) * SEAT_PRICE}/mo</span>
-          </div>
-        )}
-        <div className="flex justify-between items-center py-2.5 border-b border-white/5 text-sm">
-          <span className="text-muted-foreground">100 AI minutes/month</span>
-          <span className="font-semibold text-primary">Included</span>
+          <span className="text-muted-foreground">Average Commission per Sale</span>
+          <span className="font-semibold text-foreground">${BASE_PRICE}</span>
         </div>
         <div className="flex justify-between items-center py-2.5 border-b border-white/5 text-sm">
-          <span className="text-muted-foreground">Excess AI usage</span>
-          <span className="font-semibold text-foreground">$25 per 10-min block</span>
+          <span className="text-muted-foreground">Estimated monthly conversion value</span>
+          <span className="font-semibold text-primary">${(seats * BASE_PRICE * 0.35).toLocaleString()}</span>
+        </div>
+        <div className="flex justify-between items-center py-2.5 border-b border-white/5 text-sm">
+          <span className="text-muted-foreground">Estimated monthly opportunity loss</span>
+          <span className="font-semibold text-foreground">${(seats * BASE_PRICE * 0.85).toLocaleString()}</span>
         </div>
         <div className="flex justify-between items-center pt-4">
-          <span className="font-bold text-foreground text-lg">Monthly Total</span>
+          <span className="font-bold text-foreground text-lg">Total Monthly Opportunity Loss</span>
           <div className="text-right">
-            <div className="text-4xl font-bold text-primary">${monthly}<span className="text-xl font-normal text-muted-foreground">/mo</span></div>
+            <div className="text-4xl font-bold text-primary">${(seats * BASE_PRICE * 0.85).toLocaleString()}<span className="text-xl font-normal text-muted-foreground">/mo</span></div>
           </div>
         </div>
       </div>
@@ -94,7 +88,7 @@ function PricingCalculator() {
       <a href="https://calendly.com/adwordpress2012/directive-os-agency-onboarding" target="_blank" rel="noopener noreferrer">
         <button className="w-full font-bold py-3.5 px-6 rounded-xl transition-all hover:scale-[1.02] hover:shadow-lg flex items-center justify-center gap-2"
           style={{ background: "linear-gradient(135deg, #00d1b2, #00b89c)", color: "#0a0a0a", boxShadow: "0 4px 24px rgba(0,209,178,0.3)" }}>
-          Get Started with {seats} Seat{seats > 1 ? "s" : ""}
+          Get Started with DOS
           <ArrowRight className="w-4 h-4" />
         </button>
       </a>
