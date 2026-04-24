@@ -29,6 +29,7 @@ import AdminActivity from "@/pages/admin/activity";
 import AdminQuote from "@/pages/admin/quote";
 import AdminGoals from "@/pages/admin/goals";
 import SetPassword from "@/pages/dashboard/set-password";
+import { SignUp } from "@/pages/auth";
 import Blog from "@/pages/blog";
 import BlogPost from "@/pages/blog-post";
 import ThankYou from "@/pages/thank-you";
@@ -76,6 +77,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/dashboard/login" component={DashboardLogin} />
+      <Route path="/sign-up" component={SignUp} />
       <Route path="/onboard" component={Onboard} />
       <Route path="/onboard/subscribe" component={OnboardSubscribe} />
       <Route path="/terms" component={Terms} />
