@@ -85,13 +85,13 @@ function PricingCalculator() {
         <p className="text-xs text-muted-foreground mt-2 ml-6 italic">Onboarding investment outlined during your free strategy call.</p>
       </div>
 
-      <a href="https://calendly.com/adwordpress2012/directive-os-agency-onboarding" target="_blank" rel="noopener noreferrer">
+      <Link href="/onboard">
         <button className="w-full font-bold py-3.5 px-6 rounded-xl transition-all hover:scale-[1.02] hover:shadow-lg flex items-center justify-center gap-2"
           style={{ background: "linear-gradient(135deg, #00d1b2, #00b89c)", color: "#0a0a0a", boxShadow: "0 4px 24px rgba(0,209,178,0.3)" }}>
-          Get Started with DOS
+          Activate &amp; Pay via Stripe
           <ArrowRight className="w-4 h-4" />
         </button>
-      </a>
+      </Link>
 
       <a
         href="https://calendly.com/adwordpress2012/directive-os-agency-onboarding"
@@ -101,7 +101,7 @@ function PricingCalculator() {
         style={{ borderColor: "rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.02)" }}
       >
         <Phone className="w-3.5 h-3.5" />
-        Book a free 15-min strategy call
+        Book a free 15-min strategy call first
       </a>
     </div>
   );
@@ -252,15 +252,15 @@ export default function Home() {
           </div>
 
           <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 leading-[1.05]">
-            <span className="text-foreground">Stop Missing Leads</span><br />
+            <span className="text-foreground">Stop Losing </span>
             <span style={{ background: "linear-gradient(135deg, #00d1b2 0%, #00e8c8 50%, #00b89c 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-              After Hours.
+              $50,000+
             </span>
+            <span className="text-foreground"> in Missed Property Leads</span>
           </h1>
 
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-3 leading-relaxed">
-            Your AI Receptionist answers every call 24/7 — qualifies buyers, books inspections,
-            syncs your VaultRE listings, and emails you a full transcript the moment contact details are captured.
+            Sarah answers every call, qualifies buyers, and emails you instantly — even after hours.
           </p>
           <p className="text-base text-muted-foreground max-w-2xl mx-auto mb-10">
             No after-hours voicemail. No missed opportunities. From <span className="font-semibold text-foreground">$299/month.</span>
@@ -277,12 +277,10 @@ export default function Home() {
               Book Free 15-Min Strategy Call
               <ArrowRight className="w-4 h-4" />
             </a>
-            <a href="https://calendly.com/adwordpress2012/directive-os-agency-onboarding" target="_blank" rel="noopener noreferrer" className="w-full">
-              <button className="font-semibold py-3.5 px-8 rounded-xl transition-all hover:scale-105 flex items-center gap-2 text-foreground w-full justify-center"
-                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.15)" }}>
-                Activate Your Agency
-                <ArrowRight className="w-4 h-4 opacity-60" />
-              </button>
+            <a href="#voice-demo" className="font-semibold py-3.5 px-8 rounded-xl transition-all hover:scale-105 flex items-center gap-2 text-foreground justify-center"
+              style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.15)" }}>
+              Try the AI Demo
+              <ArrowRight className="w-4 h-4 opacity-60" />
             </a>
           </div>
 
@@ -1384,14 +1382,54 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Coming Soon — App Store Trust Badges */}
+      <section className="py-16 border-t border-border">
+        <div className="container mx-auto px-4 text-center">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold tracking-widest uppercase mb-6"
+            style={{ background: "rgba(251,146,0,0.1)", border: "1px solid rgba(251,146,0,0.3)", color: "#f59e0b" }}>
+            Coming Soon
+          </div>
+          <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3">Command Bridge — Mobile App</h2>
+          <p className="text-muted-foreground max-w-xl mx-auto mb-8 text-sm">
+            The Directive OS mobile app is in development. Track leads, listen to call recordings, and receive real-time alerts on your phone — from anywhere in Australia.
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            <div className="flex items-center gap-2.5 px-5 py-3 rounded-xl opacity-60 cursor-not-allowed"
+              style={{ background: "#000", border: "1px solid rgba(255,255,255,0.15)" }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+                <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+              </svg>
+              <div className="leading-none text-left">
+                <div className="text-[9px] text-white/60 uppercase tracking-wider">Coming to the</div>
+                <div className="text-white font-semibold text-sm">App Store</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2.5 px-5 py-3 rounded-xl opacity-60 cursor-not-allowed"
+              style={{ background: "#000", border: "1px solid rgba(255,255,255,0.15)" }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M3.18 23.76c.3.17.64.24.98.2L14.89 12 11 8.11 3.18 23.76z" fill="#EA4335"/>
+                <path d="M20.06 10.37 17.2 8.76l-3.2 3.2 3.2 3.2 2.9-1.62a1.8 1.8 0 0 0 0-3.17z" fill="#FBBC04"/>
+                <path d="M3.18.24C2.84.2 2.5.27 2.2.44L11 9.23l3.89-3.89L4.16.44a1.8 1.8 0 0 0-.98-.2z" fill="#4285F4"/>
+                <path d="M2.2.44A1.8 1.8 0 0 0 1.5 1.8v20.4c0 .54.26 1.02.7 1.36L11 12 2.2.44z" fill="#34A853"/>
+              </svg>
+              <div className="leading-none text-left">
+                <div className="text-[9px] text-white/60 uppercase tracking-wider">Coming to</div>
+                <div className="text-white font-semibold text-sm">Google Play</div>
+              </div>
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground mt-5">All DOS subscriptions will receive mobile access at no extra cost when launched.</p>
+        </div>
+      </section>
+
       {/* Pricing */}
       <section id="pricing" className="py-20 border-t border-border">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <div className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: "#00d1b2" }}>Pricing</div>
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Seat-Based. Scalable. Transparent.</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Simple Pricing. Straight to Checkout.</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
-              One formula: base license + seat count. Scale your team, scale your coverage.
+              One formula: base licence + seat count. Activate online in minutes via Stripe — no lock-in contracts.
             </p>
           </div>
 
