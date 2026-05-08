@@ -1,0 +1,24 @@
+.git
+.claude
+.agents
+.cursor
+.local
+.vercel
+node_modules
+attached_assets
+screenshots
+exports
+demo-4
+Directive-OS-Builder
+directive-os-master-website.tar.gz
+DirectiveOS.jar
+ngrok.exe
+ngrok-v3-stable-windows-amd64 (1).zip
+ngrok-v3-stable-windows-amd64 (1)/
+answer_phone.py
+scripts/micah_fallback_flask.py
+micah-test-1.jpg
+*.log
+*.zip
+*.exe
+*.jar
