@@ -62,6 +62,10 @@ import LeaveBehind from "@/pages/marketing/leave-behind";
 import Signature from "@/pages/signature";
 import SignatureCard from "@/pages/signature-card";
 import QuoteRedirect from "@/pages/q";
+import CosPage from "@/pages/cos";
+import BosPage from "@/pages/bos";
+import MicahPage from "@/pages/micah";
+import WebsiteRebuildsPage from "@/pages/website-rebuilds";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -79,6 +83,7 @@ function Router() {
       <Route path="/dashboard/login" component={DashboardLogin} />
       <Route path="/sign-up" component={SignUp} />
       <Route path="/onboard" component={Onboard} />
+      <Route path="/onboarding" component={Onboard} />
       <Route path="/onboard/subscribe" component={OnboardSubscribe} />
       <Route path="/terms" component={Terms} />
       <Route path="/privacy" component={Privacy} />
@@ -114,6 +119,10 @@ function Router() {
       <Route path="/marketing/brochure" component={Brochure} />
       <Route path="/marketing/referral-schedule" component={ReferralSchedule} />
       <Route path="/marketing/leave-behind" component={LeaveBehind} />
+      <Route path="/cos" component={CosPage} />
+      <Route path="/bos" component={BosPage} />
+      <Route path="/micah" component={MicahPage} />
+      <Route path="/website-rebuilds" component={WebsiteRebuildsPage} />
       <Route path="/signature" component={Signature} />
       <Route path="/signature-card" component={SignatureCard} />
       <Route path="/dashboard" component={Dashboard} />
