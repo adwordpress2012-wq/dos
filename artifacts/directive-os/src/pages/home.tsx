@@ -682,7 +682,7 @@ export default function Home() {
                 icon: <CalendarCheck className="w-5 h-5" />,
                 step: "04",
                 title: "Action Dispatched",
-                desc: "Booking confirmed, tenancy form emailed, or hot-transfer executed — whichever the lead requires. Zero admin. Zero delays.",
+                desc: "Booking request sent to the team. They will confirm shortly, tenancy form emailed, or hot-transfer executed — whichever the lead requires. Zero admin. Zero delays.",
                 tag: "Auto-Execute"
               },
               {

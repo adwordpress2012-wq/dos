@@ -62,7 +62,7 @@ const DEFAULT_TIMELINE = [
   { week: "Week 2",      title: "Design Sign-Off & Build Begins", desc: "Full design approved. Development starts across all pages. Any integrations (CRM, feeds) initiated." },
   { week: "Weeks 3–4",   title: "Full Site Build",                desc: "All pages built. Live listing sync and integrations tested. Suburb SEO pages written and loaded." },
   { week: "Week 5",      title: "Testing & Client Walkthrough",   desc: "Full QA testing across all devices and browsers. Walkthrough call with your team. Revisions actioned." },
-  { week: "Week 6",      title: "Launch & Go Live",               desc: "DNS migration from current host. Zero-downtime handover. SSL, CDN, and daily backups confirmed." },
+  { week: "Week 6",      title: "Launch & Go Live",               desc: "DNS migration from current host. Zero-downtime handover. SSL, CDN, and daily backups checked." },
   { week: "Post-launch", title: "30-Day Support Period",          desc: "Priority response on all issues. Weekly check-in. Fine-tune based on real-world performance." },
 ];
 
@@ -488,7 +488,7 @@ export default function WebQuote() {
                 />
               ) : (
                 <p style={{ color: "#64748b", fontSize: 12, lineHeight: 1.7, margin: 0 }}>
-                  {notes || "All prices are in AUD. Quote is valid for 30 days from the date above. Work commences upon receipt of deposit. Timeline and scope to be confirmed during onboarding. Any additional pages or features outside the agreed scope will be quoted separately."}
+                  {notes || "All prices are in AUD. Quote is valid for 30 days from the date above. Work commences upon receipt of deposit. Timeline and scope will be finalized during onboarding. Any additional pages or features outside the agreed scope will be quoted separately."}
                 </p>
               )}
             </div>

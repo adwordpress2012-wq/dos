@@ -9,7 +9,8 @@ export default function MicahPage() {
           <h1 className="mt-3 text-4xl font-semibold md:text-5xl">Micah Receptionist Reference</h1>
           <p className="mt-4 max-w-3xl text-white/80">
             Micah is the warm, conversion-focused receptionist persona optimized for directive
-            call handling and lead qualification flows.
+            call handling and lead qualification flows. Booking request sent to the team. They will
+            confirm shortly.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link

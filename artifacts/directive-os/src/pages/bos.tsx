@@ -8,9 +8,16 @@ export default function BosPage() {
           <p className="text-xs uppercase tracking-[0.2em] text-emerald-300">BOS</p>
           <h1 className="mt-3 text-4xl font-semibold md:text-5xl">Book OS</h1>
           <p className="mt-4 max-w-3xl text-white/80">
-            BOS is the SMB booking engine built on Directive OS infrastructure with Sarah-powered
+            BOS is the SMB booking engine built on Directive OS infrastructure with Micah-powered
             voice and chat reception for service businesses.
           </p>
+          <div className="mt-6 rounded-xl border border-white/10 bg-white/5 p-4">
+            <h2 className="text-lg font-semibold">FAQ</h2>
+            <p className="mt-2 text-sm text-white/80">
+              Micah collects the booking request and sends it to the team. BOS can later support
+              confirmed booking workflows once calendar rules are connected.
+            </p>
+          </div>
           <div className="mt-8 flex flex-wrap gap-3">
             <a
               href="https://www.bookos.com.au"

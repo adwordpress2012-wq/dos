@@ -118,7 +118,7 @@ export default function ReferralSchedule() {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14 }}>
             {[
               { num: "01", title: "You make the intro", body: "Connect us with a real estate principal or director — by email, phone, or group message. That's all you need to do." },
-              { num: "02", title: "They sign & go live", body: "Once the agency pays their setup invoice and Sarah is live on their phone line, the referral is confirmed." },
+              { num: "02", title: "They sign & go live", body: "Once the agency pays their setup invoice and Micah is live on their phone line, the referral is recorded for payout." },
               { num: "03", title: "You get paid", body: "Bank transfer within 7 business days of the client going live. No forms, no chasing — we initiate it." },
             ].map(s => (
               <div key={s.num} style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 10, padding: "18px 20px" }}>

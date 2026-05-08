@@ -69,7 +69,7 @@ export default function OnboardSubscribe() {
             </div>
             <h1 className="text-xl font-bold text-white mb-2">Activating your account</h1>
             <p className="text-sm text-muted-foreground">
-              Payment confirmed — setting up your Sarah subscription now.
+              Payment received — setting up your Micah subscription now.
             </p>
           </>
         )}

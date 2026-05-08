@@ -66,6 +66,10 @@ import CosPage from "@/pages/cos";
 import BosPage from "@/pages/bos";
 import MicahPage from "@/pages/micah";
 import WebsiteRebuildsPage from "@/pages/website-rebuilds";
+import ContactPage from "@/pages/contact";
+import AcceptableUsePage from "@/pages/acceptable-use";
+import NumberPolicyPage from "@/pages/number-policy";
+import CancellationPolicyPage from "@/pages/cancellation-policy";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -80,13 +84,19 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/pricing" component={Home} />
       <Route path="/dashboard/login" component={DashboardLogin} />
+      <Route path="/command-centre" component={DashboardLogin} />
       <Route path="/sign-up" component={SignUp} />
       <Route path="/onboard" component={Onboard} />
       <Route path="/onboarding" component={Onboard} />
       <Route path="/onboard/subscribe" component={OnboardSubscribe} />
       <Route path="/terms" component={Terms} />
       <Route path="/privacy" component={Privacy} />
+      <Route path="/acceptable-use" component={AcceptableUsePage} />
+      <Route path="/number-policy" component={NumberPolicyPage} />
+      <Route path="/cancellation-policy" component={CancellationPolicyPage} />
+      <Route path="/contact" component={ContactPage} />
       <Route path="/resources" component={Resources} />
       <Route path="/book" component={BookConsultation} />
       <Route path="/blog/:slug" component={BlogPost} />
