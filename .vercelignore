@@ -5,7 +5,6 @@
 .local
 .vercel
 node_modules
-attached_assets
 screenshots
 exports
 demo-4
