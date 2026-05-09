@@ -32,7 +32,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               src="/logo.png"
               alt="Directive OS"
               className="w-14 h-14 object-contain flex-shrink-0"
-              style={{ filter: "drop-shadow(0 0 10px rgba(0,209,178,0.65))" }}
+              style={{ filter: "drop-shadow(0 0 12px rgba(168,85,247,0.55))" }}
             />
             <div className="flex flex-col leading-tight gap-0.5">
               <span className="font-extrabold text-lg text-white" style={{ letterSpacing: "0.04em" }}>Directive OS</span>
@@ -46,23 +46,23 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                   />
                 ))}
               </div>
-              <span className="text-[9px] font-semibold uppercase tracking-[0.13em]" style={{ color: "#00d1b2" }}>24/7 Business Assistant</span>
+              <span className="text-[9px] font-semibold uppercase tracking-[0.13em]" style={{ color: "#c4b5fd" }}>Done-For-You AI Business Systems</span>
             </div>
           </Link>
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
-            <a href="/#templates" className="hover:text-foreground transition-colors">Templates</a>
-            <Link href="/demos" className="hover:text-foreground transition-colors">Live Demos</Link>
+            <Link href="/website-rebuilds" className="hover:text-foreground transition-colors">Website Rebuilds</Link>
+            <Link href="/cos" className="hover:text-foreground transition-colors">Micah (COS)</Link>
+            <a href="/#instant-quote" className="hover:text-foreground transition-colors">Instant Quote</a>
             <a href="/#pricing" className="hover:text-foreground transition-colors">Pricing</a>
             <Link href="/resources" className="hover:text-foreground transition-colors">Resources</Link>
-            <Link href="/blog" className="hover:text-foreground transition-colors">Blog</Link>
             <a
               href={CALENDLY}
               target="_blank"
               rel="noopener noreferrer"
               className="font-semibold transition-colors"
-              style={{ color: "#00d1b2" }}
+              style={{ color: "#c4b5fd" }}
             >
-              Free Consultation
+              Free Demo Call
             </a>
           </nav>
           <div className="flex items-center gap-3">
@@ -71,7 +71,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               target="_blank"
               rel="noopener noreferrer"
               className="hidden md:inline-flex h-9 items-center justify-center rounded-md px-4 py-2 text-sm font-semibold transition-colors hover:opacity-90"
-              style={{ background: "rgba(0,209,178,0.1)", border: "1px solid rgba(0,209,178,0.3)", color: "#00d1b2" }}
+              style={{ background: "rgba(124,58,237,0.15)", border: "1px solid rgba(168,85,247,0.35)", color: "#e9d5ff" }}
             >
               Book a Call
             </a>
@@ -93,11 +93,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         {menuOpen && (
           <div className="md:hidden border-t border-border/50" style={{ background: "rgba(10,14,26,0.98)", backdropFilter: "blur(20px)" }}>
             <nav className="container mx-auto px-4 py-4 flex flex-col gap-1">
-              <a href="/#templates" onClick={() => setMenuOpen(false)} className="px-3 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors">Templates</a>
-              <Link href="/demos" onClick={() => setMenuOpen(false)} className="px-3 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors">Live Demos</Link>
+              <Link href="/website-rebuilds" onClick={() => setMenuOpen(false)} className="px-3 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors">Website Rebuilds</Link>
+              <Link href="/cos" onClick={() => setMenuOpen(false)} className="px-3 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors">Micah (COS)</Link>
+              <a href="/#instant-quote" onClick={() => setMenuOpen(false)} className="px-3 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors">Instant Quote</a>
               <a href="/#pricing" onClick={() => setMenuOpen(false)} className="px-3 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors">Pricing</a>
               <Link href="/resources" onClick={() => setMenuOpen(false)} className="px-3 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors">Resources</Link>
-              <Link href="/blog" onClick={() => setMenuOpen(false)} className="px-3 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors">Blog</Link>
               <div className="pt-2 pb-1 flex flex-col gap-2">
                 <a
                   href={CALENDLY}
@@ -105,9 +105,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                   rel="noopener noreferrer"
                   onClick={() => setMenuOpen(false)}
                   className="w-full text-center py-3 rounded-lg text-sm font-semibold transition-colors"
-                  style={{ background: "rgba(0,209,178,0.1)", border: "1px solid rgba(0,209,178,0.3)", color: "#00d1b2" }}
+                  style={{ background: "rgba(124,58,237,0.15)", border: "1px solid rgba(168,85,247,0.35)", color: "#e9d5ff" }}
                 >
-                  Free Consultation
+                  Free Demo Call
                 </a>
                 <Link
                   href="/sign-up"
@@ -131,10 +131,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         className="fixed bottom-0 left-0 right-0 z-[45] transition-transform duration-500"
         style={{ transform: showBar ? "translateY(0)" : "translateY(100%)" }}
       >
-        <div className="border-t" style={{ background: "rgba(10,14,26,0.97)", backdropFilter: "blur(20px)", borderColor: "rgba(0,209,178,0.25)" }}>
+        <div className="border-t" style={{ background: "rgba(10,14,26,0.97)", backdropFilter: "blur(20px)", borderColor: "rgba(168,85,247,0.25)" }}>
           <div className="container mx-auto px-4 py-3 flex items-center justify-between gap-4">
             <div className="flex items-center gap-3 min-w-0">
-              <div className="w-2 h-2 rounded-full flex-shrink-0 animate-pulse" style={{ background: "#00d1b2", boxShadow: "0 0 8px #00d1b2" }} />
+              <div className="w-2 h-2 rounded-full flex-shrink-0 animate-pulse" style={{ background: "#a855f7", boxShadow: "0 0 8px #a855f7" }} />
               <div className="min-w-0">
                 <p className="font-semibold text-foreground text-sm leading-tight">Ready to stop missing leads?</p>
                 <p className="text-xs text-muted-foreground hidden sm:block">Book a free 15-min strategy call with Jayson — no commitment</p>
@@ -146,7 +146,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 font-bold text-sm px-5 py-2.5 rounded-lg transition-all hover:scale-105"
-                style={{ background: "linear-gradient(135deg, #00d1b2, #00b89c)", color: "#0a0a0a" }}
+                style={{ background: "linear-gradient(135deg, #7c3aed, #ec4899)", color: "#fff" }}
               >
                 <Calendar className="w-4 h-4" />
                 Book Free Strategy Call
@@ -176,15 +176,15 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 <span className="font-bold tracking-tight text-lg">Directive OS</span>
               </div>
               <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
-                Mission-critical AI infrastructure for Australian Real Estate Agencies.
+                Done-for-you AI booking and communication systems for Australian small businesses — Micah, SMS, WhatsApp, voice, and web.
               </p>
               <div className="space-y-2">
                 <a href="tel:0258504038" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
-                  <Phone className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "#00d1b2" }} />
+                  <Phone className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "#a855f7" }} />
                   02 5850 4038
                 </a>
                 <a href="mailto:support@directiveos.com.au" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
-                  <Mail className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "#00d1b2" }} />
+                  <Mail className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "#a855f7" }} />
                   support@directiveos.com.au
                 </a>
               </div>
@@ -193,11 +193,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <div>
               <h4 className="font-semibold mb-4 text-sm uppercase tracking-wider text-muted-foreground">Platform</h4>
               <ul className="space-y-2.5 text-sm text-muted-foreground">
-                <li><a href="/#templates" className="hover:text-foreground transition-colors">Website Templates</a></li>
+                <li><Link href="/website-rebuilds" className="hover:text-foreground transition-colors">Website Rebuilds</Link></li>
+                <li><Link href="/cos" className="hover:text-foreground transition-colors">Micah (COS)</Link></li>
+                <li><a href="/#instant-quote" className="hover:text-foreground transition-colors">Instant Quote</a></li>
                 <li><a href="/#pricing" className="hover:text-foreground transition-colors">Pricing</a></li>
-                <li><Link href="/demos" className="hover:text-foreground transition-colors">Live Demos</Link></li>
                 <li><Link href="/resources" className="hover:text-foreground transition-colors">Resources</Link></li>
-                <li><Link href="/blog" className="hover:text-foreground transition-colors">Blog</Link></li>
               </ul>
             </div>
 
@@ -214,17 +214,17 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <div>
               <h4 className="font-semibold mb-4 text-sm uppercase tracking-wider text-muted-foreground">Get Started</h4>
               <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
-                Book a free 15-minute strategy call. No commitment — just a conversation about what's costing your agency leads.
+                Book a free AI system demo. No commitment — we’ll map bookings, SMS, WhatsApp, and voice to your business.
               </p>
               <a
                 href={CALENDLY}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 font-semibold text-sm px-5 py-2.5 rounded-lg transition-all hover:opacity-90 w-full justify-center"
-                style={{ background: "linear-gradient(135deg, #00d1b2, #00b89c)", color: "#0a0a0a" }}
+                style={{ background: "linear-gradient(135deg, #7c3aed, #ec4899)", color: "#fff" }}
               >
                 <Calendar className="w-4 h-4" />
-                Book Free Strategy Call
+                Book Free AI System Demo
               </a>
               <div className="mt-3 text-center">
                 <a href="tel:0258504038" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
@@ -236,7 +236,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
           <div className="pt-6 border-t border-border/50 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
             <p>© {new Date().getFullYear()} Directive OS Pty Ltd. ABN 87 754 544 171. All rights reserved. Australian owned &amp; operated.</p>
-            <p>NSW Compliance &amp; Industrial Market Integration · Built for Australian Real Estate Agencies</p>
+            <p>Australian-owned · DFY AI systems for SMBs · Built on Directive OS infrastructure</p>
           </div>
         </div>
       </footer>

@@ -1,133 +1,221 @@
 import { useState, useRef } from "react";
 import { Link } from "wouter";
 import { AppLayout } from "@/components/layout/MarketingLayout";
-import { useAiChat } from "@workspace/api-client-react";
 import {
   Phone, MessageSquare, Zap, Shield, Building2, FileText,
-  ArrowRight, Check, X, Send, Star, BarChart3,
+  ArrowRight, Check, X, Send, Star,
   Workflow, BrainCircuit, CalendarCheck, Bell, Lock, ChevronRight,
   Bed, Bath, Mail, Inbox, Smartphone, Globe
 } from "lucide-react";
 
-const BASE_PRICE = 299;
-const SEAT_PRICE = 89;
-const SETUP_FEE = 1800;
+const API_WIDGET = import.meta.env.VITE_API_BASE_URL ?? "";
 
-function PricingCalculator() {
-  const [missedCalls, setMissedCalls] = useState(5);
-  const [commission, setCommission] = useState(15000);
+const CALENDLY_DEMO = "https://calendly.com/adwordpress2012/directive-os-agency-onboarding";
+const MICAH_PHONE_DISPLAY = "02 5950 6382";
+const MICAH_PHONE_LINK = "tel:0259506382";
 
-  const CONVERSION_RATE = 0.05;
-  const monthlyMissed = missedCalls * 4.33;
-  const lostSales = monthlyMissed * CONVERSION_RATE;
-  const monthlyLoss = Math.round(lostSales * commission);
-  const annualLoss = monthlyLoss * 12;
+/** Instant quote estimates — DFY positioning */
+function estimateQuote(answers: {
+  website_rebuild: boolean;
+  ai_receptionist: boolean;
+  sms: boolean;
+  whatsapp: boolean;
+  ai_voice: boolean;
+  booking_system: boolean;
+  hosting: boolean;
+}) {
+  let setup = 800;
+  let monthly = 197;
+  if (answers.ai_receptionist || answers.sms || answers.whatsapp || answers.booking_system) monthly = 297;
+  if (answers.ai_voice) monthly = 497;
+  if (answers.website_rebuild) setup += 1000;
+  if (answers.hosting) setup += 200;
+  if (answers.ai_voice) setup += 400;
+  if (answers.booking_system) setup += 350;
+  return { setup, monthly };
+}
+
+function InstantAiQuote() {
+  const [businessType, setBusinessType] = useState("");
+  const [websiteRebuild, setWebsiteRebuild] = useState(false);
+  const [aiReceptionist, setAiReceptionist] = useState(true);
+  const [sms, setSms] = useState(false);
+  const [whatsapp, setWhatsapp] = useState(false);
+  const [aiVoice, setAiVoice] = useState(false);
+  const [booking, setBooking] = useState(true);
+  const [hosting, setHosting] = useState(false);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [bizName, setBizName] = useState("");
+  const [sent, setSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const { setup, monthly } = estimateQuote({
+    website_rebuild: websiteRebuild,
+    ai_receptionist: aiReceptionist,
+    sms,
+    whatsapp,
+    ai_voice: aiVoice,
+    booking_system: booking,
+    hosting,
+  });
+
+  const submit = async () => {
+    setLoading(true);
+    try {
+      await fetch(`${API_WIDGET}/api/widget/instant-quote`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          business_type: businessType,
+          website_rebuild: websiteRebuild,
+          ai_receptionist: aiReceptionist,
+          sms,
+          whatsapp,
+          ai_voice: aiVoice,
+          booking_system: booking,
+          hosting,
+          name,
+          email,
+          phone,
+          business_name: bizName,
+          estimated_setup_aud: setup,
+          estimated_monthly_aud: monthly,
+        }),
+      });
+      setSent(true);
+    } catch {
+      setSent(true);
+    }
+    setLoading(false);
+  };
 
   return (
-    <div
-      id="roi-calculator"
-      className="rounded-2xl p-8 max-w-2xl mx-auto relative overflow-hidden"
-      style={{
-        background: "rgba(255,255,255,0.04)",
-        border: "1px solid rgba(0,209,178,0.2)",
-        backdropFilter: "blur(20px)",
-        boxShadow: "0 0 60px rgba(0,209,178,0.06)",
-      }}
-    >
-      <div className="absolute top-0 right-0 w-48 h-48 rounded-full pointer-events-none"
-        style={{ background: "radial-gradient(circle, rgba(0,209,178,0.08) 0%, transparent 70%)" }} />
-
-      <h3 className="text-2xl font-bold text-foreground mb-1">ROI Calculator</h3>
-      <p className="text-muted-foreground mb-8 text-sm">See how much commission you're losing every month from missed calls.</p>
-
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-3">
-          <label className="text-sm font-medium text-foreground">Missed Calls per Week</label>
-          <span className="text-3xl font-bold text-primary">{missedCalls}</span>
-        </div>
-        <input
-          type="range" min="1" max="15" value={missedCalls}
-          onChange={e => setMissedCalls(Number(e.target.value))}
-          className="w-full h-2 rounded-lg appearance-none cursor-pointer accent-primary"
-          style={{ background: `linear-gradient(to right, #00d1b2 0%, #00d1b2 ${((missedCalls - 1) / 14) * 100}%, rgba(255,255,255,0.1) ${((missedCalls - 1) / 14) * 100}%, rgba(255,255,255,0.1) 100%)` }}
-        />
-        <div className="flex justify-between text-xs text-muted-foreground mt-2">
-          <span>1 call</span><span>15 calls</span>
-        </div>
-      </div>
-
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-3">
-          <label className="text-sm font-medium text-foreground">Average Commission per Sale</label>
-          <span className="text-3xl font-bold text-primary">${commission.toLocaleString()}</span>
-        </div>
-        <input
-          type="range" min="10000" max="60000" step="1000" value={commission}
-          onChange={e => setCommission(Number(e.target.value))}
-          className="w-full h-2 rounded-lg appearance-none cursor-pointer accent-primary"
-          style={{ background: `linear-gradient(to right, #00d1b2 0%, #00d1b2 ${((commission - 10000) / 50000) * 100}%, rgba(255,255,255,0.1) ${((commission - 10000) / 50000) * 100}%, rgba(255,255,255,0.1) 100%)` }}
-        />
-        <div className="flex justify-between text-xs text-muted-foreground mt-2">
-          <span>$10k</span><span>$60k</span>
-        </div>
-        <p className="text-xs text-muted-foreground mt-2 italic">AU industry average: ~$15,000 (2% on a $750k sale).</p>
-      </div>
-
-      <div className="space-y-3 mb-6">
-        <div className="flex justify-between items-center py-2.5 border-b border-white/5 text-sm">
-          <span className="text-muted-foreground">Monthly missed calls</span>
-          <span className="font-semibold text-foreground">{Math.round(monthlyMissed)}</span>
-        </div>
-        <div className="flex justify-between items-center py-2.5 border-b border-white/5 text-sm">
-          <span className="text-muted-foreground">Likely lost sales (5% conversion)</span>
-          <span className="font-semibold text-foreground">{lostSales.toFixed(1)}</span>
-        </div>
-        <div className="flex justify-between items-center py-2.5 border-b border-white/5 text-sm">
-          <span className="text-muted-foreground">Annual commission lost</span>
-          <span className="font-semibold text-foreground">${annualLoss.toLocaleString()}</span>
-        </div>
-        <div className="flex justify-between items-center pt-4">
-          <span className="font-bold text-foreground text-lg">Total Monthly Opportunity Loss</span>
-          <div className="text-right">
-            <div className="text-4xl font-bold text-primary">${monthlyLoss.toLocaleString()}<span className="text-xl font-normal text-muted-foreground">/mo</span></div>
+    <section id="instant-quote" className="py-20 border-t border-border">
+      <div className="container mx-auto px-4 max-w-4xl">
+        <div className="text-center mb-12">
+          <div className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: "#a855f7" }}>
+            Instant AI Business Quote
           </div>
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Scope your system in two minutes</h2>
+          <p className="text-muted-foreground text-lg">
+            Tick what you need — we show a ballpark setup fee and monthly plan before you talk to us.
+          </p>
+        </div>
+
+        <div
+          className="rounded-2xl p-8 space-y-6"
+          style={{
+            background: "rgba(124,58,237,0.06)",
+            border: "1px solid rgba(168,85,247,0.25)",
+            backdropFilter: "blur(16px)",
+          }}
+        >
+          <div>
+            <label className="text-sm font-medium text-foreground block mb-2">Business type</label>
+            <input
+              value={businessType}
+              onChange={(e) => setBusinessType(e.target.value)}
+              placeholder="e.g. Hair salon, plumber, clinic"
+              className="w-full rounded-xl px-4 py-3 text-sm bg-white/5 border border-white/10 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-purple-500"
+            />
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-4">
+            <label className="flex items-center gap-3 rounded-xl px-4 py-3 cursor-pointer border border-white/10 bg-white/[0.03]">
+              <input type="checkbox" checked={websiteRebuild} onChange={(e) => setWebsiteRebuild(e.target.checked)} className="accent-purple-600" />
+              <span className="text-sm text-foreground">Website rebuild</span>
+            </label>
+            <label className="flex items-center gap-3 rounded-xl px-4 py-3 cursor-pointer border border-white/10 bg-white/[0.03]">
+              <input type="checkbox" checked={aiReceptionist} onChange={(e) => setAiReceptionist(e.target.checked)} className="accent-purple-600" />
+              <span className="text-sm text-foreground">AI receptionist (chat)</span>
+            </label>
+            <label className="flex items-center gap-3 rounded-xl px-4 py-3 cursor-pointer border border-white/10 bg-white/[0.03]">
+              <input type="checkbox" checked={sms} onChange={(e) => setSms(e.target.checked)} className="accent-purple-600" />
+              <span className="text-sm text-foreground">SMS automation</span>
+            </label>
+            <label className="flex items-center gap-3 rounded-xl px-4 py-3 cursor-pointer border border-white/10 bg-white/[0.03]">
+              <input type="checkbox" checked={whatsapp} onChange={(e) => setWhatsapp(e.target.checked)} className="accent-purple-600" />
+              <span className="text-sm text-foreground">WhatsApp</span>
+            </label>
+            <label className="flex items-center gap-3 rounded-xl px-4 py-3 cursor-pointer border border-white/10 bg-white/[0.03]">
+              <input type="checkbox" checked={aiVoice} onChange={(e) => setAiVoice(e.target.checked)} className="accent-purple-600" />
+              <span className="text-sm text-foreground">AI voice receptionist</span>
+            </label>
+            <label className="flex items-center gap-3 rounded-xl px-4 py-3 cursor-pointer border border-white/10 bg-white/[0.03]">
+              <input type="checkbox" checked={booking} onChange={(e) => setBooking(e.target.checked)} className="accent-purple-600" />
+              <span className="text-sm text-foreground">Booking system</span>
+            </label>
+            <label className="flex items-center gap-3 rounded-xl px-4 py-3 cursor-pointer border border-white/10 bg-white/[0.03]">
+              <input type="checkbox" checked={hosting} onChange={(e) => setHosting(e.target.checked)} className="accent-purple-600" />
+              <span className="text-sm text-foreground">Hosting</span>
+            </label>
+          </div>
+
+          <div className="rounded-xl p-6 grid md:grid-cols-2 gap-6" style={{ background: "rgba(20,184,166,0.08)", border: "1px solid rgba(20,184,166,0.2)" }}>
+            <div>
+              <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Estimated setup fee</div>
+              <div className="text-3xl font-bold text-foreground">From ${setup.toLocaleString()} AUD</div>
+            </div>
+            <div>
+              <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Estimated monthly plan</div>
+              <div className="text-3xl font-bold" style={{ color: "#a855f7" }}>
+                From ${monthly}/mo
+              </div>
+            </div>
+            <p className="md:col-span-2 text-xs text-muted-foreground">
+              Website rebuilds typically from $1,000+ depending on scope. Final numbers confirmed on your free demo call.
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-4">
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Your name"
+              className="rounded-xl px-4 py-3 text-sm bg-white/5 border border-white/10"
+            />
+            <input
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email"
+              type="email"
+              className="rounded-xl px-4 py-3 text-sm bg-white/5 border border-white/10"
+            />
+            <input
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="Phone"
+              className="rounded-xl px-4 py-3 text-sm bg-white/5 border border-white/10"
+            />
+            <input
+              value={bizName}
+              onChange={(e) => setBizName(e.target.value)}
+              placeholder="Business name"
+              className="rounded-xl px-4 py-3 text-sm bg-white/5 border border-white/10"
+            />
+          </div>
+
+          {sent ? (
+            <p className="text-center text-emerald-400 font-medium">Thanks — your quote request is saved and our team will follow up shortly.</p>
+          ) : (
+            <button
+              type="button"
+              disabled={loading || !email.trim()}
+              onClick={() => void submit()}
+              className="w-full font-bold py-3.5 rounded-xl transition-all hover:opacity-95 disabled:opacity-40"
+              style={{
+                background: "linear-gradient(135deg, #7c3aed, #ec4899)",
+                color: "#fff",
+              }}
+            >
+              {loading ? "Sending…" : "Submit quote request"}
+            </button>
+          )}
         </div>
       </div>
-
-      <div className="rounded-xl p-4 mb-6 text-sm"
-        style={{ background: "rgba(0,209,178,0.06)", border: "1px solid rgba(0,209,178,0.15)" }}>
-        <div className="flex items-center gap-2 mb-2">
-          <Shield className="w-4 h-4 text-primary flex-shrink-0" />
-          <span className="font-semibold text-foreground text-sm">Done-for-you onboarding included</span>
-        </div>
-        <ul className="space-y-1 text-muted-foreground text-xs ml-6">
-          <li className="flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-primary flex-shrink-0" />Full platform configuration &amp; custom setup</li>
-          <li className="flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-primary flex-shrink-0" />VaultRE CRM mapping &amp; live sync</li>
-          <li className="flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-primary flex-shrink-0" />AI receptionist training for your listings</li>
-          <li className="flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-primary flex-shrink-0" />Live walkthrough &amp; staff onboarding session</li>
-        </ul>
-        <p className="text-xs text-muted-foreground mt-2 ml-6 italic">Onboarding investment outlined during your free strategy call.</p>
-      </div>
-
-      <Link href="/onboard">
-        <button className="w-full font-bold py-3.5 px-6 rounded-xl transition-all hover:scale-[1.02] hover:shadow-lg flex items-center justify-center gap-2"
-          style={{ background: "linear-gradient(135deg, #00d1b2, #00b89c)", color: "#0a0a0a", boxShadow: "0 4px 24px rgba(0,209,178,0.3)" }}>
-          Activate &amp; Pay via Stripe
-          <ArrowRight className="w-4 h-4" />
-        </button>
-      </Link>
-
-      <a
-        href="https://calendly.com/adwordpress2012/directive-os-agency-onboarding"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="flex items-center justify-center gap-2 w-full py-2.5 px-6 rounded-xl border transition-all hover:border-primary/40 hover:text-primary text-sm font-medium text-muted-foreground"
-        style={{ borderColor: "rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.02)" }}
-      >
-        <Phone className="w-3.5 h-3.5" />
-        Book a free 15-min strategy call first
-      </a>
-    </div>
+    </section>
   );
 }
 
@@ -136,30 +224,49 @@ interface Message { role: "assistant" | "user"; content: string; }
 function DemoChatWidget() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
-    { role: "assistant", content: "Hey! Running an agency is full-on, yeah? I'm Sarah from Directive OS. Quick one to kick things off — when a call comes in after hours or while your agents are out on inspections, what happens to it? Voicemail, or does someone always have to be on call?" }
+    {
+      role: "assistant",
+      content:
+        "G'day — I'm Micah from Directive OS. We install done-for-you AI booking and communication systems for small businesses. What kind of business are you running?",
+    },
   ]);
   const [input, setInput] = useState("");
   const [typing, setTyping] = useState(false);
-  const [sessionId] = useState(`dos_${Date.now()}`);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const chat = useAiChat();
 
   const send = async () => {
-    if (!input.trim() || chat.isPending || typing) return;
+    if (!input.trim() || typing) return;
     const userMsg = input.trim();
+    const prior = messages;
     setInput("");
-    setMessages(prev => [...prev, { role: "user", content: userMsg }]);
+    setMessages((prev) => [...prev, { role: "user", content: userMsg }]);
     setTyping(true);
     try {
-      const result = await chat.mutateAsync({ data: { sessionId, message: userMsg, agencyId: null } });
-      const reply = result.reply;
+      const res = await fetch(`${API_WIDGET}/api/widget/message`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          client_id: "dos-hub",
+          message: userMsg,
+          messages: prior.map((m) => ({ role: m.role, content: m.content })),
+        }),
+      });
+      const data = await res.json();
+      const reply = typeof data.reply === "string" ? data.reply : "Let me connect you — book a free call at directiveos.com.au/contact.";
       const words = reply.trim().split(/\s+/).length;
-      await new Promise(r => setTimeout(r, Math.min(2500, Math.max(900, words * 35))));
-      setMessages(prev => [...prev, { role: "assistant", content: reply }]);
+      await new Promise((r) => setTimeout(r, Math.min(2200, Math.max(600, words * 28))));
+      setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
       setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
     } catch {
-      await new Promise(r => setTimeout(r, 900));
-      setMessages(prev => [...prev, { role: "assistant", content: "Thank you for your message. One of our agents will be in touch shortly." }]);
+      await new Promise((r) => setTimeout(r, 600));
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content:
+            `I'm having a moment — please email support@directiveos.com.au or call ${MICAH_PHONE_DISPLAY} and we'll help right away.`,
+        },
+      ]);
     }
     setTyping(false);
   };
@@ -167,26 +274,28 @@ function DemoChatWidget() {
   return (
     <>
       <button
+        type="button"
+        id="dos-micah-chat-launcher"
         onClick={() => setOpen(o => !o)}
         className="fixed bottom-24 right-6 z-[60] w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-all hover:scale-110"
-        style={{ background: "linear-gradient(135deg, #00d1b2, #00b89c)", boxShadow: "0 4px 24px rgba(0,209,178,0.4)" }}
+        style={{ background: "linear-gradient(135deg, #7c3aed, #ec4899)", boxShadow: "0 4px 24px rgba(124,58,237,0.45)" }}
       >
-        {open ? <X className="w-5 h-5 text-black" /> : <MessageSquare className="w-6 h-6 text-black" />}
+        {open ? <X className="w-5 h-5 text-white" /> : <MessageSquare className="w-6 h-6 text-white" />}
       </button>
 
       {open && (
         <div className="fixed bottom-44 right-6 z-[60] w-[340px] sm:w-[380px] rounded-2xl shadow-2xl flex flex-col overflow-hidden"
-          style={{ background: "rgba(13,17,23,0.97)", border: "1px solid rgba(0,209,178,0.25)", backdropFilter: "blur(20px)" }}>
+          style={{ background: "rgba(13,17,23,0.97)", border: "1px solid rgba(168,85,247,0.35)", backdropFilter: "blur(20px)" }}>
           <div className="px-4 py-3 flex items-center justify-between"
-            style={{ background: "linear-gradient(135deg, rgba(0,209,178,0.15), rgba(0,209,178,0.05))", borderBottom: "1px solid rgba(0,209,178,0.15)" }}>
+            style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.2), rgba(236,72,153,0.08))", borderBottom: "1px solid rgba(168,85,247,0.2)" }}>
             <div className="flex items-center gap-2.5">
-              <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: "#00d1b2", boxShadow: "0 0 8px #00d1b2" }} />
+              <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: "#a855f7", boxShadow: "0 0 8px #a855f7" }} />
               <div>
-                <div className="text-sm font-semibold text-foreground">Sarah · Directive OS</div>
-                <div className="text-xs text-muted-foreground">AI Receptionist · Available 24/7</div>
+                <div className="text-sm font-semibold text-foreground">Micah · Directive OS</div>
+                <div className="text-xs text-muted-foreground">DFY AI Business Systems · Chat</div>
                 <div className="flex items-center gap-1 mt-1 flex-wrap">
                   {[["🇦🇺","EN"],["🇨🇳","中文"],["🇵🇭","FIL"],["🇷🇺","РУС"],["🇸🇦","عربي"],["🇰🇷","한국어"],["🇻🇳","Việt"],["🇮🇳","हिंदी"],["🇪🇸","ESP"]].map(([flag, lang]) => (
-                    <span key={lang} style={{ fontSize: 9, background: "rgba(0,209,178,0.12)", border: "1px solid rgba(0,209,178,0.25)", color: "#00d1b2", borderRadius: 4, padding: "1px 5px", fontWeight: 600, letterSpacing: 0.3, whiteSpace: "nowrap" }}>{flag} {lang}</span>
+                    <span key={lang} style={{ fontSize: 9, background: "rgba(124,58,237,0.15)", border: "1px solid rgba(168,85,247,0.35)", color: "#c4b5fd", borderRadius: 4, padding: "1px 5px", fontWeight: 600, letterSpacing: 0.3, whiteSpace: "nowrap" }}>{flag} {lang}</span>
                   ))}
                 </div>
               </div>
@@ -201,11 +310,11 @@ function DemoChatWidget() {
               <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                 <div className={`max-w-[85%] rounded-xl px-3 py-2 text-sm leading-relaxed ${
                   msg.role === "user"
-                    ? "text-black font-medium"
+                    ? "text-white font-medium"
                     : "text-foreground"
                 }`}
                   style={msg.role === "user"
-                    ? { background: "linear-gradient(135deg, #00d1b2, #00b89c)" }
+                    ? { background: "linear-gradient(135deg, #7c3aed, #9333ea)" }
                     : { background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }
                   }>
                   {msg.content}
@@ -216,9 +325,9 @@ function DemoChatWidget() {
               <div className="flex justify-start">
                 <div className="rounded-xl px-3 py-2 text-sm text-muted-foreground flex items-center gap-1.5"
                   style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce" style={{ animationDelay: "0ms" }} />
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce" style={{ animationDelay: "150ms" }} />
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce" style={{ animationDelay: "300ms" }} />
+                  <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ animationDelay: "0ms", background: "#a855f7" }} />
+                  <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ animationDelay: "150ms", background: "#a855f7" }} />
+                  <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ animationDelay: "300ms", background: "#a855f7" }} />
                 </div>
               </div>
             )}
@@ -230,14 +339,14 @@ function DemoChatWidget() {
               type="text" value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key === "Enter" && send()}
-              placeholder="Ask about Directive OS..."
+              placeholder="Ask how DOS can run your bookings…"
               className="flex-1 rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1"
-              style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", focusRingColor: "#00d1b2" } as React.CSSProperties}
+              style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", focusRingColor: "#a855f7" } as React.CSSProperties}
             />
             <button onClick={send} disabled={typing || !input.trim()}
               className="rounded-lg p-2 transition-all hover:scale-105 disabled:opacity-40"
-              style={{ background: "linear-gradient(135deg, #00d1b2, #00b89c)" }}>
-              <Send className="w-4 h-4 text-black" />
+              style={{ background: "linear-gradient(135deg, #7c3aed, #ec4899)" }}>
+              <Send className="w-4 h-4 text-white" />
             </button>
           </div>
         </div>
@@ -253,170 +362,264 @@ export default function Home() {
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute inset-0" style={{
-            backgroundImage: `radial-gradient(circle at 1px 1px, rgba(0,209,178,0.08) 1px, transparent 0)`,
+            backgroundImage: `radial-gradient(circle at 1px 1px, rgba(124,58,237,0.09) 1px, transparent 0)`,
             backgroundSize: "40px 40px"
           }} />
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] rounded-full opacity-20 blur-3xl"
-            style={{ background: "radial-gradient(ellipse, rgba(0,209,178,0.3) 0%, transparent 70%)" }} />
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[520px] rounded-full opacity-25 blur-3xl"
+            style={{ background: "radial-gradient(ellipse, rgba(168,85,247,0.35) 0%, rgba(236,72,153,0.12) 45%, transparent 70%)" }} />
         </div>
 
-        <div className="container mx-auto px-4 py-28 md:py-40 text-center relative">
-          {/* Urgency badge */}
+        <div className="container mx-auto px-4 py-24 md:py-36 text-center relative">
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-8">
             <div className="inline-flex items-center gap-2 rounded-full text-sm px-4 py-1.5 font-medium"
-              style={{ background: "rgba(0,209,178,0.08)", border: "1px solid rgba(0,209,178,0.2)", color: "#00d1b2" }}>
-              <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: "#00d1b2", boxShadow: "0 0 8px #00d1b2" }} />
-              Now live for Australian Real Estate Agencies
-            </div>
-            <div className="inline-flex items-center gap-1.5 rounded-full text-xs px-3 py-1.5 font-bold"
-              style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)", color: "#f87171" }}>
-              <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
-              Limited — 5 spots left in NSW this quarter
+              style={{ background: "rgba(124,58,237,0.12)", border: "1px solid rgba(168,85,247,0.35)", color: "#e9d5ff" }}>
+              <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: "#a855f7", boxShadow: "0 0 12px #a855f7" }} />
+              Done-For-You AI Business Systems
             </div>
           </div>
 
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 leading-[1.05]">
-            <span className="text-foreground">Stop Losing </span>
-            <span style={{ background: "linear-gradient(135deg, #00d1b2 0%, #00e8c8 50%, #00b89c 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-              $50,000+
-            </span>
-            <span className="text-foreground"> in Missed Property Leads</span>
+          <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 leading-[1.08] text-foreground">
+            Never Miss Another Booking Again.
           </h1>
 
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-3 leading-relaxed">
-            Sarah answers every call, qualifies buyers, and emails you instantly — even after hours.
-          </p>
-          <p className="text-base text-muted-foreground max-w-2xl mx-auto mb-10">
-            No after-hours voicemail. No missed opportunities. From <span className="font-semibold text-foreground">$299/month.</span>
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8 leading-relaxed">
+            Experience Micah live — call our AI receptionist and see how DOS captures enquiries for your business.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
+          <div className="relative max-w-3xl mx-auto mb-8">
+            <div
+              className="absolute -inset-1 rounded-[2rem] opacity-60 blur-xl animate-pulse pointer-events-none"
+              style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.75), rgba(20,184,166,0.65), rgba(34,197,94,0.55))" }}
+            />
             <a
-              href="#roi-calculator"
-              className="font-bold py-3.5 px-8 rounded-xl transition-all hover:scale-105 flex items-center gap-2 justify-center"
-              style={{ background: "linear-gradient(135deg, #00d1b2, #00b89c)", color: "#0a0a0a", boxShadow: "0 4px 32px rgba(0,209,178,0.35)" }}>
-              <BarChart3 className="w-4 h-4" />
-              Show Me The Money
-              <ArrowRight className="w-4 h-4" />
-            </a>
-            <a href="#voice-demo" className="font-semibold py-3.5 px-8 rounded-xl transition-all hover:scale-105 flex items-center gap-2 text-foreground justify-center"
-              style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.15)" }}>
-              Try the AI Demo
-              <ArrowRight className="w-4 h-4 opacity-60" />
+              href={MICAH_PHONE_LINK}
+              className="relative block rounded-[1.75rem] p-[1px] transition-all hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-emerald-300/70"
+              style={{
+                background: "linear-gradient(135deg, rgba(168,85,247,0.95), rgba(20,184,166,0.9), rgba(34,197,94,0.85))",
+                boxShadow: "0 0 42px rgba(124,58,237,0.35), 0 0 70px rgba(20,184,166,0.18)",
+              }}
+            >
+              <div
+                className="relative overflow-hidden rounded-[1.7rem] px-5 py-5 sm:px-8 sm:py-6"
+                style={{ background: "linear-gradient(135deg, rgba(10,14,26,0.96), rgba(15,23,42,0.92))" }}
+              >
+                <div
+                  className="absolute -right-16 -top-16 h-36 w-36 rounded-full blur-3xl opacity-50 pointer-events-none"
+                  style={{ background: "rgba(20,184,166,0.45)" }}
+                />
+                <div className="relative flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+                  <div className="text-center md:text-left">
+                    <div
+                      className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.22em] mb-3"
+                      style={{ background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.35)", color: "#bbf7d0" }}
+                    >
+                      <span className="relative flex h-2 w-2">
+                        <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-300 opacity-75 animate-ping" />
+                        <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+                      </span>
+                      LIVE AI VOICE DEMO
+                    </div>
+                    <div className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">Call Micah Now</div>
+                    <p className="mt-2 text-sm sm:text-base text-muted-foreground leading-relaxed max-w-2xl">
+                      Talk to Micah, our AI receptionist, for bookings, enquiries, website rebuilds, and AI business system demos.
+                    </p>
+                  </div>
+                  <div className="flex items-center justify-center gap-3 rounded-2xl px-5 py-4 shrink-0"
+                    style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)" }}>
+                    <div className="relative">
+                      <span className="absolute inset-0 rounded-full animate-ping" style={{ background: "rgba(20,184,166,0.35)" }} />
+                      <span className="relative flex h-11 w-11 items-center justify-center rounded-full"
+                        style={{ background: "linear-gradient(135deg, #7c3aed, #14b8a6, #22c55e)" }}>
+                        <Phone className="h-5 w-5 text-white" />
+                      </span>
+                    </div>
+                    <div className="text-left">
+                      <div className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">Tap to call</div>
+                      <div className="text-lg sm:text-xl font-bold text-foreground">{MICAH_PHONE_DISPLAY}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </a>
           </div>
 
-          <p className="text-xs text-muted-foreground mb-6">See your real losses in 10 seconds — no signup required</p>
-
-          {/* Live Voice Demo CTA */}
-          <div className="mb-2 flex justify-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-14">
             <a
-              href="tel:0258504038"
-              className="inline-flex items-center gap-3 px-6 py-3 rounded-2xl transition-all hover:scale-105 group"
-              style={{ background: "rgba(0,209,178,0.08)", border: "1px solid rgba(0,209,178,0.25)", backdropFilter: "blur(10px)" }}
+              href={CALENDLY_DEMO}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-bold py-3.5 px-8 rounded-xl transition-all hover:scale-[1.02] flex items-center gap-2 justify-center"
+              style={{ background: "linear-gradient(135deg, #7c3aed, #ec4899)", color: "#fff", boxShadow: "0 8px 40px rgba(124,58,237,0.35)" }}>
+              Book Your Free AI System Demo
+              <ArrowRight className="w-4 h-4" />
+            </a>
+            <Link href="/cos" className="font-semibold py-3.5 px-8 rounded-xl transition-all hover:scale-[1.02] flex items-center gap-2 text-foreground justify-center"
+              style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(168,85,247,0.35)" }}>
+              See Micah In Action
+              <ArrowRight className="w-4 h-4 opacity-70" />
+            </Link>
+          </div>
+
+          {/* Flow visual */}
+          <div className="max-w-4xl mx-auto rounded-2xl p-8 md:p-10 text-left"
+            style={{
+              background: "rgba(124,58,237,0.06)",
+              border: "1px solid rgba(168,85,247,0.25)",
+              backdropFilter: "blur(18px)",
+              boxShadow: "0 0 80px rgba(124,58,237,0.12)",
+            }}>
+            <div className="text-xs font-semibold uppercase tracking-[0.2em] mb-6 text-center" style={{ color: "#c4b5fd" }}>How DOS captures every enquiry</div>
+            <div className="flex flex-col items-stretch gap-2 md:flex-row md:flex-wrap md:justify-center md:items-center md:gap-2">
+              {[
+                { t: "Customer Enquiry", d: "Web, SMS, WhatsApp, or voice" },
+                { t: "Micah AI Receptionist", d: "Answers, qualifies, routes 24/7" },
+                { t: "Website Chat / SMS / WhatsApp / Voice", d: "One brain across every channel" },
+                { t: "Booking Captured", d: "Structured requests & transcripts" },
+                { t: "Business Owner Notified", d: "Instant alerts & follow-ups" },
+              ].flatMap((step, i, arr) => {
+                const card = (
+                  <div
+                    key={step.t}
+                    className="rounded-xl px-4 py-4 min-h-[100px] flex flex-col justify-center md:min-w-[140px] md:flex-1 md:max-w-[200px]"
+                    style={{
+                      background: "rgba(15,23,42,0.65)",
+                      border: "1px solid rgba(168,85,247,0.35)",
+                      boxShadow: "inset 0 0 28px rgba(124,58,237,0.1)",
+                    }}
+                  >
+                    <div className="text-sm font-semibold text-foreground leading-snug text-center">{step.t}</div>
+                    <div className="text-[11px] text-muted-foreground mt-1.5 leading-snug text-center">{step.d}</div>
+                  </div>
+                );
+                if (i === arr.length - 1) return [card];
+                const arrow = (
+                  <div
+                    key={`${step.t}-arrow`}
+                    className="flex items-center justify-center py-1 md:py-0 md:px-1 text-lg shrink-0"
+                    style={{ color: "#14b8a6" }}
+                  >
+                    <span className="md:hidden">↓</span>
+                    <span className="hidden md:inline">→</span>
+                  </div>
+                );
+                return [card, arrow];
+              })}
+            </div>
+          </div>
+
+          <div className="mt-12 flex justify-center">
+            <a
+              href={MICAH_PHONE_LINK}
+              className="inline-flex items-center gap-3 px-6 py-3 rounded-2xl transition-all hover:scale-[1.02] group"
+              style={{ background: "rgba(20,184,166,0.08)", border: "1px solid rgba(20,184,166,0.35)", backdropFilter: "blur(10px)" }}
             >
-              <div className="relative flex items-center justify-center w-8 h-8">
-                <span className="absolute w-8 h-8 rounded-full opacity-40 animate-ping" style={{ background: "rgba(0,209,178,0.4)" }} />
-                <Phone className="w-4 h-4 relative z-10" style={{ color: "#00d1b2" }} />
-              </div>
+              <Phone className="w-4 h-4 relative z-10" style={{ color: "#14b8a6" }} />
               <div className="text-left">
-                <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Or test the AI right now — call Sarah</div>
-                <div className="font-bold text-foreground tracking-wide">02 5850 4038</div>
-                <div className="flex items-center gap-1 mt-1 flex-wrap">
-                  {[["🇦🇺","EN"],["🇨🇳","中文"],["🇵🇭","FIL"],["🇷🇺","РУС"],["🇸🇦","عربي"],["🇰🇷","한국어"],["🇻🇳","Việt"],["🇮🇳","हिंदी"],["🇪🇸","ESP"]].map(([flag, lang]) => (
-                    <span key={lang} style={{ fontSize: 9, background: "rgba(0,209,178,0.12)", border: "1px solid rgba(0,209,178,0.25)", color: "#00d1b2", borderRadius: 4, padding: "1px 5px", fontWeight: 600, letterSpacing: 0.3, whiteSpace: "nowrap" }}>{flag} {lang}</span>
-                  ))}
-                </div>
+                <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Live AI voice demo — call Micah</div>
+                <div className="font-bold text-foreground tracking-wide">{MICAH_PHONE_DISPLAY}</div>
               </div>
               <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />
             </a>
           </div>
-          <p className="text-xs text-muted-foreground mt-2 mb-16">This is a live AI — not a recording</p>
+        </div>
+      </section>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
-            {[
-              { value: "24/7", label: "Lead Coverage" },
-              { value: "< 3s", label: "Response Time" },
-              { value: "< 48h", label: "Go-Live Time" },
-              { value: "100%", label: "Calls Answered" },
-            ].map(stat => (
-              <div key={stat.label} className="rounded-xl p-4 text-center"
-                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", backdropFilter: "blur(10px)" }}>
-                <div className="text-2xl font-bold mb-1" style={{ color: "#00d1b2" }}>{stat.value}</div>
-                <div className="text-xs text-muted-foreground">{stat.label}</div>
-              </div>
-            ))}
+      {/* Try Micah Voice */}
+      <section className="py-16 border-t border-border relative overflow-hidden" style={{ background: "rgba(20,184,166,0.025)" }}>
+        <div className="absolute inset-0 pointer-events-none">
+          <div
+            className="absolute left-1/2 top-0 h-56 w-[720px] -translate-x-1/2 rounded-full blur-3xl opacity-20"
+            style={{ background: "linear-gradient(135deg, #7c3aed, #14b8a6, #22c55e)" }}
+          />
+        </div>
+        <div className="container mx-auto px-4 relative">
+          <div
+            className="max-w-4xl mx-auto rounded-3xl p-8 md:p-10 text-center"
+            style={{
+              background: "rgba(255,255,255,0.035)",
+              border: "1px solid rgba(20,184,166,0.22)",
+              backdropFilter: "blur(18px)",
+              boxShadow: "0 0 70px rgba(20,184,166,0.08)",
+            }}
+          >
+            <div
+              className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-bold uppercase tracking-widest mb-5"
+              style={{ background: "rgba(124,58,237,0.14)", border: "1px solid rgba(168,85,247,0.35)", color: "#e9d5ff" }}
+            >
+              <Phone className="w-3.5 h-3.5" />
+              Micah Voice
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Try Micah Voice</h2>
+            <p className="text-muted-foreground text-lg leading-relaxed max-w-2xl mx-auto mb-8">
+              Call Micah to experience how an AI receptionist can answer enquiries, collect details, and help businesses respond faster.
+            </p>
+            <a
+              href={MICAH_PHONE_LINK}
+              className="inline-flex items-center justify-center gap-3 rounded-2xl px-7 py-4 font-bold text-white transition-all hover:scale-[1.03]"
+              style={{
+                background: "linear-gradient(135deg, #7c3aed, #14b8a6, #22c55e)",
+                boxShadow: "0 10px 44px rgba(20,184,166,0.25), 0 0 38px rgba(124,58,237,0.22)",
+              }}
+            >
+              <Phone className="w-5 h-5" />
+              Call {MICAH_PHONE_DISPLAY}
+            </a>
           </div>
         </div>
       </section>
 
-      {/* Core Products */}
+      {/* Core services */}
       <section className="py-20 border-t border-border">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <div className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: "#00d1b2" }}>Core Platform</div>
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Mission-Critical Infrastructure</h2>
+            <div className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: "#a855f7" }}>What DOS Handles For You</div>
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Done-For-You AI Business Systems</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
-              Every module engineered for the specific demands of Australian real estate operations.
+              More bookings, fewer missed customers, faster replies — we build and run the stack so you can run the business.
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
             {[
               {
-                icon: <Phone className="w-5 h-5" />,
-                title: "AI Voice Receptionist",
-                desc: "Handles inbound calls 24/7. Qualifies buyers and tenants, books inspections, and executes live hot-transfers to your listing agent's mobile."
+                icon: <Globe className="w-5 h-5" />,
+                title: "Website Rebuilds",
+                desc: "Modern conversion-focused business websites.",
               },
               {
                 icon: <MessageSquare className="w-5 h-5" />,
-                title: "AI Chat Receptionist",
-                desc: "Embedded on your website. Engages every visitor, captures leads, answers property questions, and hands off to your team — all without human input."
+                title: "AI Receptionist",
+                desc: "Micah answers enquiries 24/7.",
               },
               {
-                icon: <Building2 className="w-5 h-5" />,
-                title: "VaultRE CRM Sync",
-                desc: "Bi-directional sync with your VaultRE account. Listings, agent contacts, and inspection times are always live — the AI never gives outdated info."
+                icon: <Smartphone className="w-5 h-5" />,
+                title: "SMS Automation",
+                desc: "Instant customer replies and follow-ups.",
               },
               {
-                icon: <FileText className="w-5 h-5" />,
-                title: "NSW Tenancy Automation",
-                desc: "When a tenant asks to apply, the AI instantly emails the NSW Fair Trading Standard Tenancy Form. No manual follow-up. Zero admin time."
+                icon: <Phone className="w-5 h-5" />,
+                title: "WhatsApp Integration",
+                desc: "Capture leads and bookings automatically.",
               },
               {
-                icon: <Zap className="w-5 h-5" />,
-                title: "Hot Lead Routing",
-                desc: "High-intent signals trigger an immediate call transfer to the listing agent's mobile — number pulled directly from your CRM, in real time."
+                icon: <CalendarCheck className="w-5 h-5" />,
+                title: "Booking Automation",
+                desc: "Automate enquiries and booking requests.",
               },
               {
-                icon: <BarChart3 className="w-5 h-5" />,
-                title: "Command Bridge Dashboard",
-                desc: "All call recordings, chat transcripts, and lead data in one intelligence centre. Full visibility over every interaction, from anywhere."
-              },
-              {
-                icon: <Globe className="w-5 h-5" />,
-                title: "9 Languages — No Extra Charge",
-                desc: "Sarah speaks English, Mandarin, Arabic, Korean, Vietnamese, Hindi, Filipino, Russian, and Spanish. Auto-detects and switches instantly — voice or chat.",
-                badge: "Included"
+                icon: <Workflow className="w-5 h-5" />,
+                title: "Done-For-You Setup",
+                desc: "We build and manage the system for you.",
               },
             ].map(f => (
               <div key={f.title}
                 className="rounded-xl p-6 group transition-all hover:border-primary/30 hover:shadow-lg relative"
                 style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", backdropFilter: "blur(10px)" }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.boxShadow = "0 0 30px rgba(0,209,178,0.08)"; }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.boxShadow = "0 0 30px rgba(168,85,247,0.15)"; }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow = "none"; }}
               >
-                {(f as any).badge && (
-                  <span className="absolute top-4 right-4 text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full"
-                    style={(f as any).badge === "Included"
-                      ? { background: "rgba(0,209,178,0.15)", color: "#00d1b2", border: "1px solid rgba(0,209,178,0.3)" }
-                      : { background: "rgba(251,146,0,0.12)", color: "#f59e0b", border: "1px solid rgba(251,146,0,0.3)" }
-                    }>
-                    {(f as any).badge}
-                  </span>
-                )}
                 <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-4 transition-all group-hover:scale-110"
-                  style={{ background: "rgba(0,209,178,0.1)", color: "#00d1b2" }}>
+                  style={{ background: "rgba(124,58,237,0.15)", color: "#c4b5fd" }}>
                   {f.icon}
                 </div>
                 <h3 className="font-semibold text-foreground mb-2">{f.title}</h3>
@@ -427,62 +630,65 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── Multilingual Feature Section ────────────────────────────────── */}
-      <section className="py-24 border-t border-border" style={{ background: "rgba(0,209,178,0.02)" }}>
-        <div className="container mx-auto px-4">
-          <div className="max-w-5xl mx-auto text-center mb-12">
+      {/* AI Voice Receptionist */}
+      <section className="py-24 border-t border-border" style={{ background: "rgba(124,58,237,0.04)" }}>
+        <div className="container mx-auto px-4 max-w-5xl">
+          <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold tracking-widest uppercase mb-6"
-              style={{ background: "rgba(0,209,178,0.1)", border: "1px solid rgba(0,209,178,0.2)", color: "#00d1b2" }}>
-              <Globe className="w-3.5 h-3.5" />
-              Multilingual AI — Included in Every Plan
+              style={{ background: "rgba(168,85,247,0.12)", border: "1px solid rgba(168,85,247,0.35)", color: "#e9d5ff" }}>
+              <Phone className="w-3.5 h-3.5" />
+              AI Voice Receptionist
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Sarah speaks your buyer's language.<br />
-              <span style={{ color: "#00d1b2" }}>No extra charge. No setup.</span>
+              Never miss the call — Micah answers the phone.
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Over 40% of property buyers in Greater Sydney speak a language other than English at home. Sarah detects their language instantly and switches — on voice calls and live chat — so your agency never loses a lead to a language barrier.
+            <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+              Micah can answer customer phone calls using conversational AI voice technology powered by our integrated voice system.
+              Same Micah persona across chat, SMS, WhatsApp, and voice — so every caller gets a consistent, professional experience.
             </p>
           </div>
 
-          {/* Language flags grid */}
-          <div className="max-w-3xl mx-auto">
-            <div className="grid grid-cols-3 md:grid-cols-9 gap-3 mb-10">
-              {[
-                { flag: "🇦🇺", lang: "English", note: "AU" },
-                { flag: "🇨🇳", lang: "Mandarin", note: "普通话" },
-                { flag: "🇸🇦", lang: "Arabic", note: "العربية" },
-                { flag: "🇰🇷", lang: "Korean", note: "한국어" },
-                { flag: "🇻🇳", lang: "Vietnamese", note: "Tiếng Việt" },
-                { flag: "🇮🇳", lang: "Hindi", note: "हिंदी" },
-                { flag: "🇵🇭", lang: "Filipino", note: "Tagalog" },
-                { flag: "🇷🇺", lang: "Russian", note: "Русский" },
-                { flag: "🇪🇸", lang: "Spanish", note: "Español" },
-              ].map(l => (
-                <div key={l.lang} className="flex flex-col items-center gap-1 p-3 rounded-xl text-center"
-                  style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
-                  <span style={{ fontSize: 26 }}>{l.flag}</span>
-                  <span className="text-[10px] font-bold text-foreground">{l.lang}</span>
-                  <span className="text-[9px] text-muted-foreground">{l.note}</span>
-                </div>
-              ))}
-            </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[
+              "Missed call capture",
+              "AI receptionist",
+              "Call answering",
+              "Booking requests",
+              "Lead qualification",
+              "Business notifications",
+            ].map((label) => (
+              <div
+                key={label}
+                className="rounded-xl px-5 py-4 flex items-center gap-3"
+                style={{
+                  background: "rgba(15,23,42,0.55)",
+                  border: "1px solid rgba(20,184,166,0.25)",
+                  backdropFilter: "blur(12px)",
+                }}
+              >
+                <Check className="w-4 h-4 shrink-0" style={{ color: "#14b8a6" }} />
+                <span className="text-sm text-foreground font-medium">{label}</span>
+              </div>
+            ))}
+          </div>
 
-            {/* Key differentiator points */}
-            <div className="grid md:grid-cols-3 gap-4">
-              {[
-                { icon: "🎙️", title: "Voice auto-switches", desc: "Sarah detects the caller's language in the first sentence and responds natively — no menu prompts, no transfers." },
-                { icon: "💬", title: "Chat auto-switches", desc: "Web chat widget detects typed language and switches immediately. Arabic, Korean, Vietnamese — all handled in real time." },
-                { icon: "🆓", title: "Included at no charge", desc: "All 9 languages are built-in and included in every plan. Not an add-on. Not a premium tier. Just part of what Sarah does." },
-              ].map(p => (
-                <div key={p.title} className="rounded-xl p-5"
-                  style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
-                  <div style={{ fontSize: 24, marginBottom: 8 }}>{p.icon}</div>
-                  <div className="font-semibold text-foreground text-sm mb-1">{p.title}</div>
-                  <div className="text-xs text-muted-foreground leading-relaxed">{p.desc}</div>
-                </div>
-              ))}
-            </div>
+          <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
+            <a
+              href={MICAH_PHONE_LINK}
+              className="inline-flex items-center justify-center gap-2 font-semibold py-3 px-8 rounded-xl transition-all hover:scale-[1.02]"
+              style={{ background: "linear-gradient(135deg, #14b8a6, #0d9488)", color: "#042f2e" }}
+            >
+              <Phone className="w-4 h-4" />
+              Call the live voice demo
+            </a>
+            <Link
+              href="/cos"
+              className="inline-flex items-center justify-center gap-2 font-semibold py-3 px-8 rounded-xl border transition-all hover:scale-[1.02] text-foreground"
+              style={{ borderColor: "rgba(168,85,247,0.4)", background: "rgba(124,58,237,0.08)" }}
+            >
+              Open Micah chat demo
+              <ArrowRight className="w-4 h-4" />
+            </Link>
           </div>
         </div>
       </section>
@@ -1233,81 +1439,129 @@ export default function Home() {
         </div>
       </section>
 
+      <InstantAiQuote />
+
       {/* Pricing */}
       <section id="pricing" className="py-20 border-t border-border">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <div className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: "#00d1b2" }}>Pricing</div>
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Simple Pricing. Straight to Checkout.</h2>
+            <div className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: "#a855f7" }}>Pricing</div>
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Plans that scale with your business</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
-              One formula: base licence + seat count. Activate online in minutes via Stripe — no lock-in contracts.
+              DFY setup on every tier. Optional website rebuilds from $1,000+ depending on scope.
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-8 max-w-5xl mx-auto items-start">
-            <PricingCalculator />
-
-            <div className="space-y-4">
-              <div className="rounded-xl p-6"
-                style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
-                <h4 className="font-semibold text-foreground mb-4 flex items-center gap-2">
-                  <Check className="w-4 h-4" style={{ color: "#00d1b2" }} />
-                  Everything included in every plan
-                </h4>
-                <div className="space-y-3">
-                  {[
-                    "AI Voice Receptionist (24/7)",
-                    "AI Chat Receptionist",
-                    "Agency website (Enterprise, Voyager or Discovery)",
-                    "Automatic transcript emails after every call & chat",
-                    "VaultRE CRM live sync",
-                    "100 AI minutes/month included",
-                    "NSW Tenancy Form automation",
-                    "Hot lead call transfers",
-                    "Command Bridge dashboard",
-                    "Full call recordings & transcripts",
-                    "Automated tax invoices via Stripe",
-                    "Australian-hosted infrastructure",
-                    "NSW Privacy Act compliant",
-                  ].map(f => (
-                    <div key={f} className="flex items-center gap-2.5 text-sm text-muted-foreground">
-                      <ChevronRight className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "#00d1b2" }} />
-                      {f}
-                    </div>
+          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto items-stretch">
+            {[
+              {
+                name: "Founding Member",
+                price: "$197",
+                period: "/month",
+                items: ["Website Chat Widget", "FAQ Automation", "Booking Requests", "Email Notifications", "DFY Setup"],
+                accent: "rgba(124,58,237,0.35)",
+              },
+              {
+                name: "Starter",
+                price: "$297",
+                period: "/month",
+                items: ["AI Receptionist", "SMS Automation", "WhatsApp Ready", "Booking Automation", "DFY Setup"],
+                accent: "rgba(236,72,153,0.35)",
+                featured: true,
+              },
+              {
+                name: "Growth",
+                price: "$497",
+                period: "/month",
+                items: ["AI Voice Receptionist", "SMS + WhatsApp", "Booking System", "Lead Capture", "Priority Support", "DFY Setup"],
+                accent: "rgba(20,184,166,0.35)",
+              },
+            ].map((tier) => (
+              <div
+                key={tier.name}
+                className="rounded-2xl p-8 flex flex-col relative overflow-hidden"
+                style={{
+                  background: tier.featured ? "rgba(124,58,237,0.1)" : "rgba(255,255,255,0.03)",
+                  border: `1px solid ${tier.accent}`,
+                  backdropFilter: "blur(14px)",
+                  boxShadow: tier.featured ? "0 0 50px rgba(168,85,247,0.15)" : undefined,
+                }}
+              >
+                {tier.featured && (
+                  <span
+                    className="absolute top-4 right-4 text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full"
+                    style={{ background: "rgba(236,72,153,0.2)", color: "#fbcfe8", border: "1px solid rgba(236,72,153,0.4)" }}
+                  >
+                    Popular
+                  </span>
+                )}
+                <h3 className="text-lg font-bold text-foreground mb-1">{tier.name}</h3>
+                <div className="flex items-baseline gap-1 mb-6">
+                  <span className="text-4xl font-black" style={{ color: "#f5f3ff" }}>{tier.price}</span>
+                  <span className="text-muted-foreground text-sm">{tier.period}</span>
+                </div>
+                <ul className="space-y-3 mb-8 flex-1">
+                  {tier.items.map((item) => (
+                    <li key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <Check className="w-4 h-4 shrink-0 mt-0.5" style={{ color: "#14b8a6" }} />
+                      {item}
+                    </li>
                   ))}
-                </div>
+                </ul>
+                <a
+                  href={CALENDLY_DEMO}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block text-center font-bold py-3 rounded-xl transition-all hover:scale-[1.02]"
+                  style={{
+                    background: tier.featured ? "linear-gradient(135deg, #7c3aed, #ec4899)" : "rgba(255,255,255,0.08)",
+                    color: "#fff",
+                    border: tier.featured ? undefined : "1px solid rgba(255,255,255,0.12)",
+                  }}
+                >
+                  Book Your Free AI System Demo
+                </a>
               </div>
+            ))}
+          </div>
 
-              <div className="rounded-xl p-5 flex items-start gap-3"
-                style={{ background: "rgba(0,209,178,0.05)", border: "1px solid rgba(0,209,178,0.15)" }}>
-                <Lock className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: "#00d1b2" }} />
-                <div className="text-sm text-muted-foreground">
-                  <strong className="text-foreground block mb-1">No lock-in contracts</strong>
-                  Cancel at any time. Your data is always yours — export everything from your Command Bridge with one click.
-                </div>
-              </div>
+          <p className="text-center text-sm text-muted-foreground mt-10 max-w-2xl mx-auto">
+            Website rebuilds quoted separately from <span className="text-foreground font-medium">$1,000+</span>. Enterprise agencies with VaultRE and advanced workflows — talk to us for a tailored package.
+          </p>
+
+          <div className="max-w-xl mx-auto mt-10 rounded-xl p-5 flex items-start gap-3"
+            style={{ background: "rgba(20,184,166,0.06)", border: "1px solid rgba(20,184,166,0.2)" }}>
+            <Lock className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: "#14b8a6" }} />
+            <div className="text-sm text-muted-foreground">
+              <strong className="text-foreground block mb-1">No lock-in contracts</strong>
+              Cancel when you like. Australian-hosted infrastructure and full transcript history in your Command Bridge.
             </div>
           </div>
         </div>
       </section>
 
       {/* Demo Section */}
-      <section id="demo-section" className="py-20 border-t border-border" style={{ background: "rgba(0,209,178,0.02)" }}>
+      <section id="demo-section" className="py-20 border-t border-border" style={{ background: "rgba(124,58,237,0.04)" }}>
         <div className="container mx-auto px-4 text-center">
-          <div className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: "#00d1b2" }}>Live Demo</div>
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Talk to the AI Receptionist</h2>
+          <div className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: "#c4b5fd" }}>Live Demo</div>
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Chat with Micah on this page</h2>
           <p className="text-muted-foreground max-w-2xl mx-auto text-lg mb-10">
-            Experience exactly what your buyers and tenants experience. Ask about a property, request an inspection, or apply for a rental.
+            Ask how DOS would handle bookings, SMS, WhatsApp, and voice for your business — or open the full conversational showcase on COS.
           </p>
           <div className="inline-flex items-center gap-3 rounded-full px-5 py-3 text-sm font-medium cursor-pointer transition-all hover:scale-105"
-            style={{ background: "rgba(0,209,178,0.08)", border: "1px solid rgba(0,209,178,0.2)", color: "#00d1b2" }}
-            onClick={() => document.querySelector<HTMLButtonElement>(".fixed.bottom-6.right-6")?.click()}>
-            <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: "#00d1b2" }} />
-            Click to open the AI Receptionist demo
+            style={{ background: "rgba(168,85,247,0.12)", border: "1px solid rgba(168,85,247,0.35)", color: "#e9d5ff" }}
+            onClick={() => document.getElementById("dos-micah-chat-launcher")?.click()}
+            onKeyDown={(e) => e.key === "Enter" && document.getElementById("dos-micah-chat-launcher")?.click()}
+            role="button"
+            tabIndex={0}
+          >
+            <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: "#a855f7" }} />
+            Open Micah chat
             <ChevronRight className="w-4 h-4" />
           </div>
-          <div className="mt-8 text-xs text-muted-foreground">
-            Try asking: "I'm interested in a 2-bedroom rental in Surry Hills" or "I want to book an inspection for 14 Marine Parade"
+          <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center text-xs text-muted-foreground">
+            <span>Try: &quot;I run a salon — how does booking work?&quot;</span>
+            <Link href="/cos" className="text-purple-300 hover:text-purple-200 underline-offset-2 hover:underline">See full Micah demo (COS)</Link>
           </div>
         </div>
       </section>
@@ -1340,7 +1594,7 @@ export default function Home() {
             </button>
           </a>
           <p className="text-muted-foreground text-sm mt-6">
-            From $299/mo — no lock-in contracts — Australian-hosted infrastructure
+            From $197/mo founding tier — no lock-in — Australian-hosted infrastructure
           </p>
         </div>
       </section>
@@ -1348,40 +1602,40 @@ export default function Home() {
       {/* ── Voice Demo Section ───────────────────────────────────────────── */}
       <section className="py-20 relative overflow-hidden" id="voice-demo">
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] blur-3xl opacity-10"
-            style={{ background: "radial-gradient(ellipse, rgba(0,209,178,0.6) 0%, transparent 70%)" }} />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] blur-3xl opacity-15"
+            style={{ background: "radial-gradient(ellipse, rgba(124,58,237,0.5) 0%, transparent 70%)" }} />
         </div>
         <div className="container mx-auto px-4 relative">
           <div className="max-w-4xl mx-auto rounded-3xl overflow-hidden"
-            style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(0,209,178,0.2)", backdropFilter: "blur(20px)" }}>
+            style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(168,85,247,0.25)", backdropFilter: "blur(20px)" }}>
             <div className="grid md:grid-cols-2 gap-0">
 
               {/* Left — description */}
               <div className="p-10 flex flex-col justify-center">
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mb-5 w-fit"
-                  style={{ background: "rgba(0,209,178,0.12)", color: "#00d1b2", border: "1px solid rgba(0,209,178,0.2)" }}>
-                  <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#00d1b2" }} />
+                  style={{ background: "rgba(124,58,237,0.15)", color: "#e9d5ff", border: "1px solid rgba(168,85,247,0.35)" }}>
+                  <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#a855f7" }} />
                   LIVE AI VOICE DEMO
                 </div>
                 <h2 className="text-3xl font-bold text-foreground mb-4 leading-tight">
-                  Call Sarah.<br />
-                  <span style={{ background: "linear-gradient(135deg, #00d1b2, #00e8c8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-                    Your AI Receptionist.
+                  Call Micah.<br />
+                  <span style={{ background: "linear-gradient(135deg, #a855f7, #14b8a6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+                    Your AI Voice Receptionist.
                   </span>
                 </h2>
                 <p className="text-muted-foreground leading-relaxed mb-6">
-                  Sarah answers 24/7, qualifies buyers and tenants, books inspections, and logs every lead to your dashboard automatically.
-                  This is the same AI that will answer calls for your agency.
+                  Micah answers on voice with the same behaviour as chat — qualifying enquiries, capturing bookings, and notifying your team.
+                  Full transcripts land in your Command Bridge.
                 </p>
                 <div className="space-y-2.5">
                   {[
-                    "Natural Australian female voice",
-                    "Qualifies buyer intent in real time",
-                    "Captures lead details automatically",
-                    "Full transcript saved to your dashboard",
+                    "Natural conversational voice",
+                    "Missed-call capture and callbacks",
+                    "Booking requests & lead qualification",
+                    "Business notifications and summaries",
                   ].map(point => (
                     <div key={point} className="flex items-center gap-2.5 text-sm text-muted-foreground">
-                      <Check className="w-4 h-4 flex-shrink-0" style={{ color: "#00d1b2" }} />
+                      <Check className="w-4 h-4 flex-shrink-0" style={{ color: "#14b8a6" }} />
                       {point}
                     </div>
                   ))}
@@ -1390,30 +1644,30 @@ export default function Home() {
 
               {/* Right — call CTA */}
               <div className="p-10 flex flex-col items-center justify-center text-center"
-                style={{ background: "rgba(0,209,178,0.04)", borderLeft: "1px solid rgba(0,209,178,0.15)" }}>
+                style={{ background: "rgba(20,184,166,0.06)", borderLeft: "1px solid rgba(168,85,247,0.2)" }}>
                 <div className="relative mb-6">
                   <div className="w-24 h-24 rounded-full flex items-center justify-center mx-auto"
-                    style={{ background: "linear-gradient(135deg, rgba(0,209,178,0.2), rgba(0,209,178,0.05))", border: "2px solid rgba(0,209,178,0.3)" }}>
-                    <Phone className="w-10 h-10" style={{ color: "#00d1b2" }} />
+                    style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.25), rgba(20,184,166,0.15))", border: "2px solid rgba(168,85,247,0.35)" }}>
+                    <Phone className="w-10 h-10" style={{ color: "#c4b5fd" }} />
                   </div>
                   <span className="absolute top-0 right-0 w-5 h-5 rounded-full border-2 border-background flex items-center justify-center"
                     style={{ background: "#22c55e" }}>
                     <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
                   </span>
                 </div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest mb-2">AI Receptionist — Live Now</p>
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest mb-2">Micah voice — Live Now</p>
                 <a
-                  href="tel:0258504038"
+                  href={MICAH_PHONE_LINK}
                   className="text-4xl font-bold tracking-wider mb-2 hover:opacity-80 transition-opacity block"
-                  style={{ color: "#00d1b2" }}
+                  style={{ color: "#14b8a6" }}
                 >
-                  02 5850 4038
+                  {MICAH_PHONE_DISPLAY}
                 </a>
                 <p className="text-xs text-muted-foreground mb-6">Australian number · tap to call on mobile</p>
                 <a
-                  href="tel:0258504038"
+                  href={MICAH_PHONE_LINK}
                   className="w-full font-bold py-4 px-6 rounded-xl transition-all hover:scale-105 flex items-center justify-center gap-2.5"
-                  style={{ background: "linear-gradient(135deg, #00d1b2, #00b89c)", color: "#0a0a0a", boxShadow: "0 4px 24px rgba(0,209,178,0.35)" }}
+                  style={{ background: "linear-gradient(135deg, #7c3aed, #14b8a6)", color: "#fff", boxShadow: "0 4px 24px rgba(124,58,237,0.35)" }}
                 >
                   <Phone className="w-4 h-4" />
                   Call Now — It's Free

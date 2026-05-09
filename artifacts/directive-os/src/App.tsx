@@ -1,4 +1,4 @@
-import { Switch, Route, Router as WouterRouter } from "wouter";
+import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,7 +11,6 @@ import Terms from "@/pages/terms";
 import Privacy from "@/pages/privacy";
 import Resources from "@/pages/resources";
 import BookConsultation from "@/pages/book";
-import Dashboard from "@/pages/dashboard/index";
 import Leads from "@/pages/dashboard/leads";
 import Transcripts from "@/pages/dashboard/transcripts";
 import Listings from "@/pages/dashboard/listings";
@@ -33,7 +32,6 @@ import { SignUp } from "@/pages/auth";
 import Blog from "@/pages/blog";
 import BlogPost from "@/pages/blog-post";
 import ThankYou from "@/pages/thank-you";
-import Demo from "@/pages/demo";
 import Pay from "@/pages/pay";
 import Welcome from "@/pages/welcome";
 import BoulevardGroup from "@/pages/boulevard-group";
@@ -48,7 +46,6 @@ import DemoTwo from "@/pages/demo-two";
 import DemoThree from "@/pages/demo-three";
 import Partners from "@/pages/partners";
 import Launch from "@/pages/launch";
-import MarketingHub from "@/pages/marketing/index";
 import BusinessCard from "@/pages/marketing/business-card";
 import OnePager from "@/pages/marketing/one-pager";
 import EmailCampaign from "@/pages/marketing/email-campaign";
@@ -102,7 +99,6 @@ function Router() {
       <Route path="/blog/:slug" component={BlogPost} />
       <Route path="/blog" component={Blog} />
       <Route path="/thank-you" component={ThankYou} />
-      <Route path="/demo" component={Demo} />
       <Route path="/pay/:slug" component={Pay} />
       <Route path="/pay" component={Pay} />
       <Route path="/welcome" component={Welcome} />
@@ -118,7 +114,6 @@ function Router() {
       <Route path="/demos" component={Demos} />
       <Route path="/proposals/elite" component={EliteProposal} />
       <Route path="/video-ad" component={VideoAd} />
-      <Route path="/marketing" component={MarketingHub} />
       <Route path="/marketing/business-card" component={BusinessCard} />
       <Route path="/marketing/one-pager" component={OnePager} />
       <Route path="/marketing/email-campaign" component={EmailCampaign} />
@@ -129,20 +124,22 @@ function Router() {
       <Route path="/marketing/brochure" component={Brochure} />
       <Route path="/marketing/referral-schedule" component={ReferralSchedule} />
       <Route path="/marketing/leave-behind" component={LeaveBehind} />
+      <Route path="/marketing">{() => <Redirect to="/website-rebuilds" />}</Route>
       <Route path="/cos" component={CosPage} />
       <Route path="/bos" component={BosPage} />
       <Route path="/micah" component={MicahPage} />
       <Route path="/website-rebuilds" component={WebsiteRebuildsPage} />
       <Route path="/signature" component={Signature} />
       <Route path="/signature-card" component={SignatureCard} />
-      <Route path="/dashboard" component={Dashboard} />
       <Route path="/dashboard/leads" component={Leads} />
       <Route path="/dashboard/transcripts" component={Transcripts} />
       <Route path="/dashboard/listings" component={Listings} />
       <Route path="/dashboard/staff" component={Staff} />
-      <Route path="/dashboard/billing" component={Billing} />
       <Route path="/dashboard/billing/success" component={BillingSuccess} />
+      <Route path="/dashboard/billing" component={Billing} />
       <Route path="/dashboard/settings" component={Settings} />
+      <Route path="/dashboard/set-password" component={SetPassword} />
+      <Route path="/dashboard">{() => <Redirect to="/command-centre" />}</Route>
       <Route path="/admin" component={AdminLogin} />
       <Route path="/admin/bridge" component={AdminBridge} />
       <Route path="/admin/clients" component={AdminClients} />
@@ -152,7 +149,6 @@ function Router() {
       <Route path="/admin/activity" component={AdminActivity} />
       <Route path="/admin/quote" component={AdminQuote} />
       <Route path="/admin/goals" component={AdminGoals} />
-      <Route path="/dashboard/set-password" component={SetPassword} />
       <Route path="/q/:code" component={QuoteRedirect} />
       <Route component={NotFound} />
     </Switch>

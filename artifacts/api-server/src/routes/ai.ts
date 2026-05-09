@@ -6,6 +6,7 @@ import { logger } from "../lib/logger";
 import { sendChatTranscriptEmail, generateEnglishSummary, OWNER_EMAILS } from "../lib/email";
 import Stripe from "stripe";
 import OpenAI from "openai";
+import { handleInstantQuote, handleWidgetMessage } from "../lib/micah-widget";
 
 const openai = new OpenAI({ apiKey: process.env.DOS_API_KEY || process.env.OPENAI_API_KEY });
 
@@ -449,6 +450,26 @@ router.post("/ai/send-form", async (req, res): Promise<void> => {
     success: true,
     message: `NSW Fair Trading Standard Tenancy Form sent to ${email}. The applicant will receive it within a few minutes.`,
   });
+});
+
+router.post("/widget/message", async (req, res): Promise<void> => {
+  try {
+    const out = await handleWidgetMessage(req.body ?? {});
+    res.json({ reply: out.reply });
+  } catch (err) {
+    logger.error({ err }, "widget/message failed");
+    res.status(500).json({ reply: "Sorry — something went wrong. Please try again shortly." });
+  }
+});
+
+router.post("/widget/instant-quote", async (req, res): Promise<void> => {
+  try {
+    await handleInstantQuote((req.body ?? {}) as Record<string, unknown>);
+    res.json({ ok: true });
+  } catch (err) {
+    logger.error({ err }, "instant-quote failed");
+    res.status(500).json({ ok: false });
+  }
 });
 
 export default router;

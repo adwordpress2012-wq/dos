@@ -14,8 +14,7 @@ export default function BosPage() {
           <div className="mt-6 rounded-xl border border-white/10 bg-white/5 p-4">
             <h2 className="text-lg font-semibold">FAQ</h2>
             <p className="mt-2 text-sm text-white/80">
-              Micah collects the booking request and sends it to the team. BOS can later support
-              confirmed booking workflows once calendar rules are connected.
+              Micah walks through date, time, party size, and contact details; once complete, the request is passed to your team to confirm — same flow as DOS deployments.
             </p>
           </div>
           <div className="mt-8 flex flex-wrap gap-3">
